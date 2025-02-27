@@ -21,14 +21,14 @@ export class AppExceptionFilter implements ExceptionFilter {
       const res = exception.getResponse() as {
         statusCode: number;
         message: string;
+        error: string;
       };
-      error = res.message;
+      error = res.error ?? res.message;
       message = res.message;
     } else {
       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
       error = 'Internal Server Error';
-      const res = exception as { message: string };
-      message = res.message;
+      message = error;
     }
 
     const responseBody = {

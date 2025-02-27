@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
+import { IsInt, IsString } from 'class-validator';
 import { CatsService } from './cats.service';
 
 export interface Cat {
@@ -7,9 +8,14 @@ export interface Cat {
   breed: string;
 }
 
-interface CreateCatDto {
+class CreateCatDto {
+  @IsString()
   name: string;
+
+  @IsInt()
   age: number;
+
+  @IsString()
   breed: string;
 }
 
