@@ -29,14 +29,14 @@ export class CatsController {
   constructor(private catsService: CatsService) {}
 
   @Post()
-  create(@Body() createCatDto: CreateCatDto): AppResponse<Cat> {
-    const data = this.catsService.create(createCatDto);
+  async create(@Body() createCatDto: CreateCatDto): Promise<AppResponse<Cat>> {
+    const data = await this.catsService.create(createCatDto);
     return { data };
   }
 
   @Get()
-  findAll(): AppResponse<Cat[]> {
-    const data = this.catsService.findAll();
-    return { data, total: 1 };
+  async findAll(): Promise<AppResponse<Cat[]>> {
+    const data = await this.catsService.findAll();
+    return { data };
   }
 }
