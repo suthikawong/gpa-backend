@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { CreateCatRequest } from 'dtos/cats/cats-request.dto';
+import { Cat } from 'dtos/cats/cats-response.dto';
 import { db } from 'src/db';
 import { catsTable } from 'src/db/schema/cat';
-import { Cat } from './cats.controller';
 
 @Injectable()
 export class CatsService {
   private readonly cats: Cat[] = [];
 
-  async create(cat: Cat): Promise<Cat> {
+  async create(cat: CreateCatRequest): Promise<Cat> {
     this.cats.push(cat);
     const data: typeof catsTable.$inferInsert = {
       name: cat.name,

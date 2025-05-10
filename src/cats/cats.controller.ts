@@ -19,7 +19,6 @@ export class CatsController {
   @Get()
   async findAll(): Promise<AppResponse<GetCatResponse[]>> {
     const data = await this.catsService.findAll();
-    console.log('first');
     return { data };
   }
 }
