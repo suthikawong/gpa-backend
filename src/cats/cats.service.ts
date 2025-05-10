@@ -19,7 +19,7 @@ export class CatsService {
     return result?.[0] ?? null;
   }
 
-  async findAll(): Promise<GetCatResponse[]> {
+  async findAll(): Promise<GetCatResponse> {
     return await db.select().from(catsTable);
   }
 }

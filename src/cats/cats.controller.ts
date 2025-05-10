@@ -20,7 +20,7 @@ export class CatsController {
   }
 
   @Get()
-  async findAll(): Promise<AppResponse<GetCatResponse[]>> {
+  async findAll(): Promise<AppResponse<GetCatResponse>> {
     const data = await this.catsService.findAll();
     return { data };
   }
