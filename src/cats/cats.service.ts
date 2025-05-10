@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCatRequest } from 'dtos/cats/cats-request.dto';
-import { Cat } from 'dtos/cats/cats-response.dto';
+import { CreateCatRequest } from '../../dtos/cats/cats-request.dto';
+import { Cat } from '../../dtos/cats/cats-response.dto';
 import { db } from '../db';
 import { catsTable } from '../db/schema/cat';
 
