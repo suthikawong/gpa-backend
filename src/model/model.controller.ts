@@ -9,10 +9,28 @@ export class ModelController {
   @Post('system-q')
   calcualteGroupMarkBySystemQ(
     @Body() data: { peerRating: (number | null)[][]; groupScore: number },
-  ): number[] | undefined {
-    return this.modelService.calcualteMarkBySystemQ(
+  ): number[] | null {
+    return this.modelService.calcualteMarksBySystemQ(
       data.peerRating,
       data.groupScore,
+    );
+  }
+
+  @Post('webavalia')
+  calcualteGroupMarkByWebavalia(
+    @Body()
+    data: {
+      peerRating: (number | null)[][];
+      groupScore: number;
+      saWeight: number;
+      paWeight: number;
+    },
+  ): number[] | null {
+    return this.modelService.calcualteMarksByWebavalia(
+      data.peerRating,
+      data.groupScore,
+      data.saWeight,
+      data.paWeight,
     );
   }
 }
