@@ -1,6 +1,6 @@
-import { catsTable } from '../../db/schema/cat';
+import { cats } from '../../drizzle/schema';
 
-type Cat = typeof catsTable.$inferSelect;
+type Cat = typeof cats.$inferSelect;
 
 export interface GetCatResponse extends Array<Cat> {}
 
