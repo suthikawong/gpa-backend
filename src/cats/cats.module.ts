@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CatsController } from './cats.controller';
 import { CatsService } from './cats.service';
-import { DrizzleModule } from 'src/drizzle/drizzle.module';
+import { DrizzleModule } from '../drizzle/drizzle.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
