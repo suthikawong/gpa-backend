@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateUserRequest {
   @IsString()
@@ -18,8 +18,10 @@ export class UpdateUserRequest {
   id: string;
 
   @IsString()
-  email: string;
+  @IsOptional()
+  email?: string;
 
   @IsString()
-  password: string;
+  @IsOptional()
+  password?: string;
 }

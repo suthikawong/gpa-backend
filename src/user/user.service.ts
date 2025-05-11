@@ -34,13 +34,13 @@ export class UserService {
       },
       where: eq(schema.users.id, data.id),
     });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
+    return user || null;
   }
 
   async updateUser(data: UpdateUserRequest) {
+    const result = await this.getUserById(data);
+    if (!result) throw new NotFoundException('User not found');
+
     const [user] = await this.db
       .update(schema.users)
       .set(data)

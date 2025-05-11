@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { AppResponse } from '../app.response';
 import {
   CreateUserRequest,
@@ -16,9 +16,9 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Get()
+  @Get(':id')
   async getUserById(
-    @Query() data: GetUserByIdRequest,
+    @Param() data: GetUserByIdRequest,
   ): Promise<AppResponse<GetUserByIdResponse>> {
     const user = await this.userService.getUserById(data);
     return { data: user };
