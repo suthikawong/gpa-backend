@@ -1,9 +1,10 @@
-import { users } from '../../drizzle/schema';
+import { User } from '../../drizzle/schema';
 
-type User = typeof users.$inferSelect;
 type UserOmit = Omit<User, 'password' | 'refreshToken'>;
 
-export type GetUserByIdResponse = UserOmit | null;
+export interface GetUserByIdResponse extends User {}
+
+export interface GetUserByEmailResponse extends User {}
 
 export interface CreateUserResponse extends UserOmit {}
 

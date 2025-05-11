@@ -8,5 +8,6 @@ import { UserService } from './user.service';
   imports: [DrizzleModule, ConfigModule.forRoot({ isGlobal: true })],
   controllers: [UserController],
   providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule {}

@@ -13,6 +13,11 @@ export class GetUserByIdRequest {
   id: string;
 }
 
+export class GetUserByEmailRequest {
+  @IsString()
+  email: string;
+}
+
 export class UpdateUserRequest {
   @IsString()
   id: string;

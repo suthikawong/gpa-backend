@@ -1,15 +1,20 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { hash } from 'bcryptjs';
+import { eq } from 'drizzle-orm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
+import * as schema from '../drizzle/schema';
 import {
   CreateUserRequest,
+  GetUserByEmailRequest,
   GetUserByIdRequest,
   UpdateUserRequest,
 } from './dto/user.request';
-import { CreateUserResponse, GetUserByIdResponse } from './dto/user.response';
-import { hash } from 'bcryptjs';
-import * as schema from '../drizzle/schema';
-import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq } from 'drizzle-orm';
+import {
+  CreateUserResponse,
+  GetUserByEmailResponse,
+  GetUserByIdResponse,
+} from './dto/user.response';
 
 @Injectable()
 export class UserService {
@@ -28,18 +33,24 @@ export class UserService {
 
   async getUserById(data: GetUserByIdRequest): Promise<GetUserByIdResponse> {
     const user = await this.db.query.users.findFirst({
-      columns: {
-        password: false,
-        refreshToken: false,
-      },
       where: eq(schema.users.id, data.id),
     });
-    return user || null;
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async getUserByEmail(
+    data: GetUserByEmailRequest,
+  ): Promise<GetUserByEmailResponse> {
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.email, data.email),
+    });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
   }
 
   async updateUser(data: UpdateUserRequest) {
-    const result = await this.getUserById(data);
-    if (!result) throw new NotFoundException('User not found');
+    await this.getUserById(data);
 
     const [user] = await this.db
       .update(schema.users)
