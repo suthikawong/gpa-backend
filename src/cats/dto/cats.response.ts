@@ -1,4 +1,4 @@
-import { catsTable } from '../../src/db/schema/cat';
+import { catsTable } from '../../db/schema/cat';
 
 type Cat = typeof catsTable.$inferSelect;
 

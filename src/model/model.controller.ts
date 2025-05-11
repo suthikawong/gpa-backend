@@ -1,5 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { AppResponse } from '../../dtos/app';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ModelService } from './model.service';
 
 @Controller('model')
