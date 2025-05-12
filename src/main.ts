@@ -1,8 +1,8 @@
 import { ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+// import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AppExceptionFilter } from './exception.filter';
-const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,7 +11,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AppExceptionFilter(httpAdapter));
 
   app.useGlobalPipes(new ValidationPipe());
-  app.use(cookieParser());
+  // app.use(cookieParser());
 
   app.enableCors({
     origin: process.env.FRONTEND_APP_URL,
