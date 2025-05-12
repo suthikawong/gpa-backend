@@ -7,7 +7,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { User } from 'src/drizzle/schema';
+import { User } from '../drizzle/schema';
 import { AppResponse } from '../app.response';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { LoggedInUser } from '../auth/logged-in-user.decorator';

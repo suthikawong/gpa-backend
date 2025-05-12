@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { LoggedInUser } from 'src/auth/logged-in-user.decorator';
-import { User } from 'src/drizzle/schema';
+import { LoggedInUser } from '../auth/logged-in-user.decorator';
+import { User } from '../drizzle/schema';
 import { AppResponse } from '../app.response';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CatsService } from './cats.service';
