@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/auth.guard';
 import { LoggedInUser } from './logged-in-user.decorator';
 import { LoginResponse } from './dto/auth.response';
-import { AppResponse } from 'src/app.response';
+import { AppResponse } from '../app.response';
 
 @Controller('auth')
 export class AuthController {
