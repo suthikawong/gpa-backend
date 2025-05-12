@@ -41,7 +41,8 @@ export class UserController {
   async getLoggedInUser(
     @LoggedInUser() user: User,
   ): Promise<AppResponse<GetLoggedInUserResponse>> {
-    return { data: user };
+    const data = { ...user, password: undefined, refreshToken: undefined };
+    return { data };
   }
 
   @Post()

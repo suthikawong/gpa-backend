@@ -3,7 +3,7 @@ import { UserProtected } from '../user.interface';
 
 export interface GetUserByIdResponse extends User {}
 
-export interface GetLoggedInUserResponse extends User {}
+export interface GetLoggedInUserResponse extends UserProtected {}
 
 export interface GetUserByEmailResponse extends User {}
 
