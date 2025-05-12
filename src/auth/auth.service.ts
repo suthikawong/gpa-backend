@@ -6,6 +6,7 @@ import { Response } from 'express';
 import { User } from '../drizzle/schema';
 import { UserService } from '../user/user.service';
 import { TokenPayload } from './token-payload.interface';
+import { LoginResponse } from './dto/auth.response';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(user: User, response: Response) {
+  async login(user: User, response: Response): Promise<LoginResponse> {
     const expireAccessToken = new Date(
       Date.now() +
         parseInt(this.configService.getOrThrow<string>('JWT_EXPIRATION_MS')),
@@ -33,6 +34,8 @@ export class AuthService {
       secure: this.configService.get('NODE_ENV') === 'production',
       expires: expireAccessToken,
     });
+    const result = { ...user, password: undefined, refreshToken: undefined };
+    return result;
   }
 
   async validateUser(email: string, password: string): Promise<any> {

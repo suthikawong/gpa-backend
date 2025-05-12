@@ -4,6 +4,8 @@ import { User } from '../drizzle/schema';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/auth.guard';
 import { LoggedInUser } from './logged-in-user.decorator';
+import { LoginResponse } from './dto/auth.response';
+import { AppResponse } from 'src/app.response';
 
 @Controller('auth')
 export class AuthController {
@@ -14,7 +16,8 @@ export class AuthController {
   async login(
     @LoggedInUser() user: User,
     @Res({ passthrough: true }) response: Response,
-  ) {
-    await this.authService.login(user, response);
+  ): Promise<AppResponse<LoginResponse>> {
+    const data = await this.authService.login(user, response);
+    return { data };
   }
 }
