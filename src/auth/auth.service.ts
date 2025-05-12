@@ -50,4 +50,8 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect email or password.');
     }
   }
+
+  async logout(response: Response) {
+    response.clearCookie('Authentication');
+  }
 }

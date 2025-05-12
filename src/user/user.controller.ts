@@ -1,5 +1,16 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
+import { User } from 'src/drizzle/schema';
 import { AppResponse } from '../app.response';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { LoggedInUser } from '../auth/logged-in-user.decorator';
 import {
   CreateUserRequest,
   GetUserByIdRequest,
@@ -7,6 +18,7 @@ import {
 } from './dto/user.request';
 import {
   CreateUserResponse,
+  GetLoggedInUserResponse,
   GetUserByIdResponse,
   UpdateUserResponse,
 } from './dto/user.response';
@@ -21,6 +33,14 @@ export class UserController {
     @Param() data: GetUserByIdRequest,
   ): Promise<AppResponse<GetUserByIdResponse>> {
     const user = await this.userService.getUserById(data);
+    return { data: user };
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async getLoggedInUser(
+    @LoggedInUser() user: User,
+  ): Promise<AppResponse<GetLoggedInUserResponse>> {
     return { data: user };
   }
 
