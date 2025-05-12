@@ -13,7 +13,10 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.use(cookieParser());
 
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.FRONTEND_APP_URL,
+    credentials: true,
+  });
   app.setGlobalPrefix('api');
   await app.listen(process.env.PORT ?? 3000);
 }
