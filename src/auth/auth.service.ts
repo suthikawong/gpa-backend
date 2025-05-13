@@ -32,6 +32,7 @@ export class AuthService {
     response.cookie('Authentication', accessToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite: 'none',
       expires: expireAccessToken,
     });
     const result = { ...user, password: undefined, refreshToken: undefined };
