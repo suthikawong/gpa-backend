@@ -1,6 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
-// import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AppExceptionFilter } from './exception.filter';
 
@@ -11,12 +11,12 @@ async function bootstrap() {
   app.useGlobalFilters(new AppExceptionFilter(httpAdapter));
 
   app.useGlobalPipes(new ValidationPipe());
-  // app.use(cookieParser());
+  app.use(cookieParser());
 
-  // app.enableCors({
-  //   origin: process.env.FRONTEND_APP_URL,
-  //   credentials: true,
-  // });
+  app.enableCors({
+    origin: process.env.FRONTEND_APP_URL,
+    credentials: true,
+  });
   app.setGlobalPrefix('api');
   await app.listen(process.env.PORT ?? 3000);
 }
