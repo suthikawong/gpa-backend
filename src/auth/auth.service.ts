@@ -34,6 +34,7 @@ export class AuthService {
       secure: this.configService.get('NODE_ENV') === 'production',
       sameSite: 'none',
       expires: expireAccessToken,
+      path: '/',
     });
     const result = { ...user, password: undefined, refreshToken: undefined };
     return result;
@@ -53,6 +54,11 @@ export class AuthService {
   }
 
   async logout(response: Response) {
-    response.clearCookie('Authentication');
+    response.clearCookie('Authentication', {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite: 'none',
+      path: '/',
+    });
   }
 }
