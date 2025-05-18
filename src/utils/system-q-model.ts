@@ -1,10 +1,10 @@
 export const systemQ = (
   peerRating: (number | null)[][],
   groupScore: number,
+  impact: number = 1,
+  tolerance: number = 2,
 ): number[] | null => {
   const groupSize = peerRating.length;
-  const impact = 1;
-  const tolerance = 2;
 
   if (groupSize !== peerRating[0].length) {
     console.log('Invalid peer rating matrix');
@@ -48,7 +48,7 @@ const getStudentRating = (
   const containRatingIndex: number[] = [];
 
   for (let i = 0; i < groupSize; i++) {
-    const allNull = peerRating[0].every((rating) => rating === null);
+    const allNull = peerRating[i].every((rating) => rating === null);
     if (!allNull) containRatingIndex.push(i);
   }
 
