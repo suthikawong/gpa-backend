@@ -27,7 +27,7 @@ export class AuthController {
     this.authService.logout(response);
   }
 
-  @Get()
+  @Get('me')
   @UseGuards(JwtAuthGuard)
   async getLoggedInUser(
     @LoggedInUser() user: User,
