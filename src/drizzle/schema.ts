@@ -219,10 +219,10 @@ export const peerAssessment = pgTable('peer_assessment', {
   assignmentId: integer('assignment_id')
     .references(() => assignments.assignmentId)
     .notNull(),
-  assessToStudentId: integer('assess_to_student_id')
+  assessedStudentUserId: integer('assessed_student_user_id')
     .references(() => students.userId)
     .notNull(),
-  assessByStudentId: integer('assess_by_student_id')
+  assessorStudentUserId: integer('assessor_student_user_id')
     .references(() => students.userId)
     .notNull(),
   questionId: integer('question_id')
