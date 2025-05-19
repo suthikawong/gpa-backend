@@ -1,11 +1,12 @@
-import { Controller, Post, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
+import { AppResponse } from '../app.response';
 import { User } from '../drizzle/schema';
 import { AuthService } from './auth.service';
+import { GetLoggedInUserResponse, LoginResponse } from './dto/auth.response';
 import { LocalAuthGuard } from './guards/auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LoggedInUser } from './logged-in-user.decorator';
-import { LoginResponse } from './dto/auth.response';
-import { AppResponse } from '../app.response';
 
 @Controller('auth')
 export class AuthController {
@@ -24,5 +25,14 @@ export class AuthController {
   @Post('logout')
   async logout(@Res({ passthrough: true }) response: Response) {
     this.authService.logout(response);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async getLoggedInUser(
+    @LoggedInUser() user: User,
+  ): Promise<AppResponse<GetLoggedInUserResponse>> {
+    const data = { ...user, password: undefined, refreshToken: undefined };
+    return { data };
   }
 }

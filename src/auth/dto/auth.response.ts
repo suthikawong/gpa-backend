@@ -1,3 +1,5 @@
 import { UserProtected } from '../../user/user.interface';
 
 export interface LoginResponse extends UserProtected {}
+
+export interface GetLoggedInUserResponse extends UserProtected {}
