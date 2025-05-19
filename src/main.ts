@@ -10,7 +10,7 @@ async function bootstrap() {
   const httpAdapter = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AppExceptionFilter(httpAdapter));
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(cookieParser());
 
   app.enableCors({

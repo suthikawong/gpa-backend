@@ -27,13 +27,19 @@ export class UserService {
     const [user] = await this.db
       .insert(schema.users)
       .values({ ...data, password: await hash(data.password, 10) })
-      .returning({ id: schema.users.id, email: schema.users.email });
-    return user;
+      .returning();
+
+    const result = {
+      ...user,
+      password: undefined,
+      refreshToken: undefined,
+    };
+    return result;
   }
 
   async getUserById(data: GetUserByIdRequest): Promise<GetUserByIdResponse> {
     const user = await this.db.query.users.findFirst({
-      where: eq(schema.users.id, data.id),
+      where: eq(schema.users.userId, data.userId),
     });
     if (!user) throw new NotFoundException('User not found');
     return user;
@@ -51,12 +57,19 @@ export class UserService {
 
   async updateUser(data: UpdateUserRequest) {
     await this.getUserById(data);
+    if (data.password) data.password = await hash(data.password, 10);
 
     const [user] = await this.db
       .update(schema.users)
       .set(data)
-      .where(eq(schema.users.id, data.id))
-      .returning({ id: schema.users.id, email: schema.users.email });
-    return user;
+      .where(eq(schema.users.userId, data.userId))
+      .returning();
+
+    const result = {
+      ...user,
+      password: undefined,
+      refreshToken: undefined,
+    };
+    return result;
   }
 }

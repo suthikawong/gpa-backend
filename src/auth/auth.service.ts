@@ -22,7 +22,7 @@ export class AuthService {
         parseInt(this.configService.getOrThrow<string>('JWT_EXPIRATION_MS')),
     );
     const tokenPayload: TokenPayload = {
-      userId: user.id,
+      userId: user.userId,
     };
     const accessToken = this.jwtService.sign(tokenPayload, {
       secret: this.configService.getOrThrow('JWT_SECRET'),

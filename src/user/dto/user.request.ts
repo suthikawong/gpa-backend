@@ -1,32 +1,49 @@
-import { IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { User } from 'src/drizzle/schema';
 
 export class CreateUserRequest {
   @IsString()
-  email: string;
+  name: User['name'];
 
   @IsString()
-  password: string;
+  email: User['email'];
+
+  @IsString()
+  password: User['password'];
+
+  @IsNumber()
+  roleId: User['roleId'];
 }
 
 export class GetUserByIdRequest {
-  @IsString()
-  id: string;
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  userId: User['userId'];
 }
 
 export class GetUserByEmailRequest {
   @IsString()
-  email: string;
+  email: User['email'];
 }
 
 export class UpdateUserRequest {
-  @IsString()
-  id: string;
+  @IsNumber()
+  userId: User['userId'];
 
   @IsString()
   @IsOptional()
-  email?: string;
+  name: User['name'];
 
   @IsString()
   @IsOptional()
-  password?: string;
+  email?: User['email'];
+
+  @IsString()
+  @IsOptional()
+  password?: User['password'];
+
+  @IsNumber()
+  @IsOptional()
+  roleId: User['roleId'];
 }
