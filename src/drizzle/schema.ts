@@ -109,7 +109,6 @@ export const assignments = pgTable('assignments', {
   dueDate: timestamp('due_date').notNull(),
   assessStartDate: timestamp('assess_start_date').notNull(),
   assessEndDate: timestamp('assess_end_date').notNull(),
-  questionCollectionId: integer('question_collection_id').notNull(),
   classroomId: integer('classroom_id')
     .references(() => classrooms.classroomId)
     .notNull(),
@@ -184,20 +183,12 @@ export const finalMarks = pgTable(
   ],
 );
 
-// ========== QUESTION_COLLECTION ==========
-export const questionCollections = pgTable('question_collections', {
-  questionCollectionId: serial('question_collection_id').primaryKey(),
-  questionCollectionName: varchar('question_collection_name', {
-    length: 255,
-  }).notNull(),
-});
-
 // ========== QUESTION ==========
 export const questions = pgTable('questions', {
   questionId: serial('question_id').primaryKey(),
   question: text('question').notNull(),
-  questionCollectionId: integer('question_collection_id')
-    .references(() => questionCollections.questionCollectionId)
+  assignmentId: integer('assignment_id')
+    .references(() => assignments.assignmentId)
     .notNull(),
   displayOrder: integer('display_order').notNull(),
 });
