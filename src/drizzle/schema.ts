@@ -54,18 +54,6 @@ export const users = pgTable('users', {
 
 export type User = typeof users.$inferSelect;
 
-// ========== STUDENT ==========
-export const students = pgTable('students', {
-  userId: integer('user_id')
-    .primaryKey()
-    .references(() => users.userId)
-    .notNull(),
-  studentNumber: varchar('student_number', { length: 100 }).notNull(),
-  instituteId: integer('institute_id')
-    .references(() => institutes.instituteId)
-    .notNull(),
-});
-
 // ========== CLASSROOM ==========
 export const classrooms = pgTable('classrooms', {
   classroomId: serial('classroom_id').primaryKey(),
@@ -84,7 +72,7 @@ export const joinClassroom = pgTable(
   'join_classroom',
   {
     studentUserId: integer('student_user_id')
-      .references(() => students.userId)
+      .references(() => users.userId)
       .notNull(),
     classroomId: integer('classroom_id')
       .references(() => classrooms.classroomId)
@@ -114,8 +102,8 @@ export const modelConfiguration = pgTable('model_configuration', {
 export const assignments = pgTable('assignments', {
   assignmentId: serial('assignment_id').primaryKey(),
   assignmentName: varchar('assignment_name', { length: 255 }).notNull(),
-  modelId: integer('model_id')
-    .references(() => models.modelId)
+  modelConfigurationId: integer('model_configuration_id')
+    .references(() => modelConfiguration.modelConfigurationId)
     .notNull(),
   isPublished: boolean('is_published').notNull(),
   dueDate: timestamp('due_date').notNull(),
@@ -133,6 +121,7 @@ export const assignments = pgTable('assignments', {
 export const groups = pgTable('groups', {
   groupId: serial('group_id').primaryKey(),
   groupName: varchar('group_name', { length: 255 }).notNull(),
+  groupCode: varchar('group_code', { length: 100 }).notNull(),
   assignmentId: integer('assignment_id')
     .references(() => assignments.assignmentId)
     .notNull(),
@@ -146,7 +135,7 @@ export const groupMember = pgTable(
       .references(() => groups.groupId)
       .notNull(),
     studentUserId: integer('student_user_id')
-      .references(() => students.userId)
+      .references(() => users.userId)
       .notNull(),
   },
   (table) => [primaryKey({ columns: [table.groupId, table.studentUserId] })],
@@ -186,7 +175,7 @@ export const finalMarks = pgTable(
       .references(() => assignments.assignmentId)
       .notNull(),
     studentUserId: integer('student_user_id')
-      .references(() => students.userId)
+      .references(() => users.userId)
       .notNull(),
     mark: integer('mark').notNull(),
   },
@@ -220,10 +209,10 @@ export const peerAssessment = pgTable('peer_assessment', {
     .references(() => assignments.assignmentId)
     .notNull(),
   assessedStudentUserId: integer('assessed_student_user_id')
-    .references(() => students.userId)
+    .references(() => users.userId)
     .notNull(),
   assessorStudentUserId: integer('assessor_student_user_id')
-    .references(() => students.userId)
+    .references(() => users.userId)
     .notNull(),
   questionId: integer('question_id')
     .references(() => questions.questionId)
