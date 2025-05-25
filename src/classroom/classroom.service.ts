@@ -9,6 +9,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { UserService } from '../user/user.service';
+import { generateCode } from '../utils/generate-code';
 import {
   CreateClassroomRequest,
   UpdateClassroomRequest,
@@ -219,31 +220,17 @@ export class ClassroomService {
     return { classroomId: classroom.classroomId };
   }
 
-  generateCode(length = 8): string {
-    const chars =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    const array = new Uint8Array(length);
-    crypto.getRandomValues(array);
-    for (let i = 0; i < length; i++) {
-      result += chars[array[i] % chars.length];
-    }
-    return result;
-  }
-
   async generateUniqueCode(length = 8): Promise<string> {
     const maxRetries = 5;
 
     for (let i = 0; i < maxRetries; i++) {
-      const code = this.generateCode(length);
+      const code = generateCode(length);
 
-      const exists = await this.db
-        .select()
-        .from(schema.classrooms)
-        .where(eq(schema.classrooms.classroomCode, code))
-        .limit(1);
+      const classroom = await this.db.query.classrooms.findFirst({
+        where: eq(schema.classrooms.classroomCode, code),
+      });
 
-      if (exists.length === 0) {
+      if (!classroom) {
         return code;
       }
     }
