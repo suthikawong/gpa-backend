@@ -84,7 +84,7 @@ export const enrollments = pgTable(
       .references(() => users.userId)
       .notNull(),
     classroomId: integer('classroom_id')
-      .references(() => classrooms.classroomId)
+      .references(() => classrooms.classroomId, { onDelete: 'cascade' })
       .notNull(),
   },
   (table) => [
@@ -123,7 +123,7 @@ export const assignments = pgTable('assignments', {
   isPublished: boolean('is_published').notNull(),
   dueDate: timestamp('due_date').notNull(),
   classroomId: integer('classroom_id')
-    .references(() => classrooms.classroomId)
+    .references(() => classrooms.classroomId, { onDelete: 'cascade' })
     .notNull(),
   createdDate: timestamp('created_date').notNull(),
   updatedDate: timestamp('updated_date'),
@@ -137,7 +137,7 @@ export const groups = pgTable('groups', {
   groupName: varchar('group_name', { length: 255 }).notNull(),
   groupCode: varchar('group_code', { length: 100 }).notNull(),
   assignmentId: integer('assignment_id')
-    .references(() => assignments.assignmentId)
+    .references(() => assignments.assignmentId, { onDelete: 'cascade' })
     .notNull(),
 });
 
@@ -164,7 +164,7 @@ export const criteria = pgTable('criteria', {
   criteriaId: serial('criteria_id').primaryKey(),
   criteriaName: varchar('criteria_name', { length: 255 }).notNull(),
   assignmentId: integer('assignment_id')
-    .references(() => assignments.assignmentId)
+    .references(() => assignments.assignmentId, { onDelete: 'cascade' })
     .notNull(),
   percentage: integer('percentage').notNull(),
   displayOrder: integer('display_order').notNull(),
@@ -179,7 +179,7 @@ export const assessmentPeriods = pgTable('assessment_periods', {
   assessEndDate: timestamp('assess_end_date').notNull(),
   weight: integer('weight').notNull(),
   assignmentId: integer('assignment_id')
-    .references(() => assignments.assignmentId)
+    .references(() => assignments.assignmentId, { onDelete: 'cascade' })
     .notNull(),
 });
 
@@ -207,7 +207,7 @@ export const studentMarks = pgTable(
   'student_marks',
   {
     assignmentId: integer('assignment_id')
-      .references(() => assignments.assignmentId)
+      .references(() => assignments.assignmentId, { onDelete: 'cascade' })
       .notNull(),
     studentUserId: integer('student_user_id')
       .references(() => users.userId)
@@ -226,7 +226,9 @@ export const questions = pgTable('questions', {
   questionId: serial('question_id').primaryKey(),
   question: text('question').notNull(),
   assessmentPeriodId: integer('assessment_period_id')
-    .references(() => assessmentPeriods.assessmentPeriodId)
+    .references(() => assessmentPeriods.assessmentPeriodId, {
+      onDelete: 'cascade',
+    })
     .notNull(),
   displayOrder: integer('display_order').notNull(),
 });
@@ -237,7 +239,7 @@ export type Question = typeof questions.$inferSelect;
 export const peerAssessments = pgTable('peer_assessments', {
   peerAssessmentId: serial('peer_assessment_id').primaryKey(),
   assignmentId: integer('assignment_id')
-    .references(() => assignments.assignmentId)
+    .references(() => assignments.assignmentId, { onDelete: 'cascade' })
     .notNull(),
   assessedStudentUserId: integer('assessed_student_user_id')
     .references(() => users.userId)
