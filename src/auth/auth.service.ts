@@ -10,7 +10,7 @@ import { compare } from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Response } from 'express';
-import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
+import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { User } from '../drizzle/schema';
 import { UserService } from '../user/user.service';
