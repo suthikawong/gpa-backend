@@ -148,7 +148,7 @@ export const groupMembers = pgTable(
   'group_members',
   {
     groupId: integer('group_id')
-      .references(() => groups.groupId)
+      .references(() => groups.groupId, { onDelete: 'cascade' })
       .notNull(),
     studentUserId: integer('student_user_id')
       .references(() => users.userId)
@@ -193,7 +193,7 @@ export const groupMarks = pgTable(
       .references(() => criteria.criteriaId)
       .notNull(),
     groupId: integer('group_id')
-      .references(() => groups.groupId)
+      .references(() => groups.groupId, { onDelete: 'cascade' })
       .notNull(),
     mark: integer('mark').notNull(),
   },
