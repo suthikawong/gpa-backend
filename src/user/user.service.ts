@@ -7,7 +7,6 @@ import * as schema from '../drizzle/schema';
 import {
   CreateUserRequest,
   GetUserByEmailRequest,
-  GetUserByIdRequest,
   UpdateUserRequest,
 } from './dto/user.request';
 import {
@@ -37,9 +36,11 @@ export class UserService {
     return result;
   }
 
-  async getUserById(data: GetUserByIdRequest): Promise<GetUserByIdResponse> {
+  async getUserById(
+    userId: schema.User['userId'],
+  ): Promise<GetUserByIdResponse> {
     const user = await this.db.query.users.findFirst({
-      where: eq(schema.users.userId, data.userId),
+      where: eq(schema.users.userId, userId),
     });
     if (!user) throw new NotFoundException('User not found');
     return user;
@@ -56,7 +57,7 @@ export class UserService {
   }
 
   async updateUser(data: UpdateUserRequest) {
-    await this.getUserById(data);
+    await this.getUserById(data.userId);
     if (data.password) data.password = await hash(data.password, 10);
 
     const [user] = await this.db

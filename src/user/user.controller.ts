@@ -20,7 +20,7 @@ export class UserController {
   async getUserById(
     @Param() data: GetUserByIdRequest,
   ): Promise<AppResponse<GetUserByIdResponse>> {
-    const user = await this.userService.getUserById(data);
+    const user = await this.userService.getUserById(data.userId);
     return { data: user };
   }
 
