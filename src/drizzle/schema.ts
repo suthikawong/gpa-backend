@@ -34,11 +34,15 @@ export const institutes = pgTable('institutes', {
   updatedDate: timestamp('updated_date'),
 });
 
+export type Institute = typeof institutes.$inferSelect;
+
 // ========== ROLE ==========
 export const roles = pgTable('roles', {
   roleId: serial('role_id').primaryKey(),
   roleName: varchar('role_name', { length: 100 }).notNull(),
 });
+
+export type Role = typeof roles.$inferSelect;
 
 // ========== USER ==========
 export const users = pgTable('users', {
@@ -70,6 +74,8 @@ export const classrooms = pgTable('classrooms', {
   updatedDate: timestamp('updated_date'),
 });
 
+export type Classroom = typeof classrooms.$inferSelect;
+
 // ========== ENROLLMENTS ==========
 export const enrollments = pgTable(
   'enrollments',
@@ -86,11 +92,15 @@ export const enrollments = pgTable(
   ],
 );
 
+export type Enrollment = typeof enrollments.$inferSelect;
+
 // ========== MODEL ==========
 export const models = pgTable('models', {
   modelId: serial('model_id').primaryKey(),
   modelName: varchar('model_name', { length: 255 }).notNull(),
 });
+
+export type Model = typeof models.$inferSelect;
 
 // ========== MODEL_CONFIGURATION ==========
 export const modelConfigurations = pgTable('model_configurations', {
@@ -100,6 +110,8 @@ export const modelConfigurations = pgTable('model_configurations', {
     .notNull(),
   config: jsonb('config'),
 });
+
+export type ModelConfiguration = typeof modelConfigurations.$inferSelect;
 
 // ========== ASSIGNMENT ==========
 export const assignments = pgTable('assignments', {
@@ -117,6 +129,8 @@ export const assignments = pgTable('assignments', {
   updatedDate: timestamp('updated_date'),
 });
 
+export type Assignment = typeof assignments.$inferSelect;
+
 // ========== GROUP ==========
 export const groups = pgTable('groups', {
   groupId: serial('group_id').primaryKey(),
@@ -126,6 +140,8 @@ export const groups = pgTable('groups', {
     .references(() => assignments.assignmentId)
     .notNull(),
 });
+
+export type Group = typeof groups.$inferSelect;
 
 // ========== GROUP_MEMBER ==========
 export const groupMembers = pgTable(
@@ -141,6 +157,8 @@ export const groupMembers = pgTable(
   (table) => [primaryKey({ columns: [table.groupId, table.studentUserId] })],
 );
 
+export type GroupMember = typeof groupMembers.$inferSelect;
+
 // ========== CRITERIA ==========
 export const criteria = pgTable('criteria', {
   criteriaId: serial('criteria_id').primaryKey(),
@@ -152,6 +170,8 @@ export const criteria = pgTable('criteria', {
   displayOrder: integer('display_order').notNull(),
 });
 
+export type Criterion = typeof criteria.$inferSelect;
+
 // ========== ASSESSMENT PERIOD ==========
 export const assessmentPeriods = pgTable('assessment_periods', {
   assessmentPeriodId: serial('assessment_period_id').primaryKey(),
@@ -162,6 +182,8 @@ export const assessmentPeriods = pgTable('assessment_periods', {
     .references(() => assignments.assignmentId)
     .notNull(),
 });
+
+export type AssessmentPeriod = typeof assessmentPeriods.$inferSelect;
 
 // ========== GROUP_MARK ==========
 export const groupMarks = pgTable(
@@ -177,6 +199,8 @@ export const groupMarks = pgTable(
   },
   (table) => [primaryKey({ columns: [table.criteriaId, table.groupId] })],
 );
+
+export type GroupMark = typeof groupMarks.$inferSelect;
 
 // ========== STUDENT_MARK ==========
 export const studentMarks = pgTable(
@@ -195,6 +219,8 @@ export const studentMarks = pgTable(
   ],
 );
 
+export type StudentMark = typeof studentMarks.$inferSelect;
+
 // ========== QUESTION ==========
 export const questions = pgTable('questions', {
   questionId: serial('question_id').primaryKey(),
@@ -204,6 +230,8 @@ export const questions = pgTable('questions', {
     .notNull(),
   displayOrder: integer('display_order').notNull(),
 });
+
+export type Question = typeof questions.$inferSelect;
 
 // ========== PEER_ASSESSMENT ==========
 export const peerAssessments = pgTable('peer_assessments', {
@@ -223,3 +251,5 @@ export const peerAssessments = pgTable('peer_assessments', {
   score: integer('score').notNull(),
   createdDate: timestamp('created_date').notNull(),
 });
+
+export type PeerAssessment = typeof peerAssessments.$inferSelect;
