@@ -1,16 +1,29 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
+import { eq } from 'drizzle-orm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Response } from 'express';
+import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
+import * as schema from '../drizzle/schema';
 import { User } from '../drizzle/schema';
 import { UserService } from '../user/user.service';
-import { TokenPayload } from './token-payload.interface';
+import { RegisterRequest } from './dto/auth.request';
 import { LoginResponse } from './dto/auth.response';
+import { TokenPayload } from './token-payload.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(DrizzleAsyncProvider)
+    private db: NodePgDatabase<typeof schema>,
+
     private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
@@ -60,5 +73,18 @@ export class AuthService {
       sameSite: 'none',
       path: '/',
     });
+  }
+
+  async register(data: RegisterRequest) {
+    const existing = await this.db.query.users.findFirst({
+      where: eq(schema.users.email, data.email),
+    });
+
+    if (existing) {
+      throw new ConflictException('Email already in use');
+    }
+
+    const user = await this.userService.createUser(data);
+    return { userId: user.userId };
   }
 }
