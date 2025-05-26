@@ -95,7 +95,7 @@ export class AssignmentService {
     const markedGroups = marks.length;
 
     const response: GetAssignmentByIdResponse = {
-      assignment,
+      ...assignment,
       model,
       modelConfiguration,
       groups: groupList,

@@ -7,8 +7,7 @@ import {
   ModelConfiguration,
 } from '../../drizzle/schema';
 
-export interface GetAssignmentByIdResponse {
-  assignment: Assignment;
+export interface GetAssignmentByIdResponse extends Assignment {
   model: Model | null;
   modelConfiguration: ModelConfiguration | null;
   groups: Group[];
