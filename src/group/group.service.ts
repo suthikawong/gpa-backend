@@ -91,8 +91,8 @@ export class GroupService {
       assignmentId = group.assignmentId;
     } else {
       assignmentId = data.assignmentId!;
-      await this.assignmentService.getAssignmentById(assignmentId);
     }
+    await this.assignmentService.getAssignmentById(assignmentId);
     await this.validateGroupName(assignmentId, data.groupName, data?.groupId);
   }
 
