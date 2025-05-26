@@ -6,6 +6,7 @@ import { ClassroomModule } from './classroom/classroom.module';
 import { GroupModule } from './group/group.module';
 import { ModelModule } from './model/model.module';
 import { UserModule } from './user/user.module';
+import { CriterionModule } from './criterion/criterion.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UserModule } from './user/user.module';
     ClassroomModule,
     AssignmentModule,
     GroupModule,
+    CriterionModule,
   ],
   providers: [],
   controllers: [],

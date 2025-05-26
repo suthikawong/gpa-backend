@@ -161,8 +161,8 @@ export type GroupMember = typeof groupMembers.$inferSelect;
 
 // ========== CRITERIA ==========
 export const criteria = pgTable('criteria', {
-  criteriaId: serial('criteria_id').primaryKey(),
-  criteriaName: varchar('criteria_name', { length: 255 }).notNull(),
+  criterionId: serial('criterion_id').primaryKey(),
+  criterionName: varchar('criterion_name', { length: 255 }).notNull(),
   assignmentId: integer('assignment_id')
     .references(() => assignments.assignmentId, { onDelete: 'cascade' })
     .notNull(),
@@ -190,7 +190,7 @@ export const groupMarks = pgTable(
   'group_marks',
   {
     criteriaId: integer('criteria_id')
-      .references(() => criteria.criteriaId)
+      .references(() => criteria.criterionId)
       .notNull(),
     groupId: integer('group_id')
       .references(() => groups.groupId, { onDelete: 'cascade' })
