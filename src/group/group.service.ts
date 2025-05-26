@@ -16,6 +16,7 @@ import {
   GetGroupByIdResponse,
   UpdateGroupResponse,
 } from './dto/group.response';
+import { AssignmentService } from 'src/assignment/assignment.service';
 
 interface ValidateGroupInterface {
   groupId?: schema.Group['groupId'];
@@ -28,6 +29,7 @@ export class GroupService {
   constructor(
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof schema>,
+    private readonly assignmentService: AssignmentService,
   ) {}
 
   async getGroupById(
@@ -89,6 +91,7 @@ export class GroupService {
       assignmentId = group.assignmentId;
     } else {
       assignmentId = data.assignmentId!;
+      await this.assignmentService.getAssignmentById(assignmentId);
     }
     await this.validateGroupName(assignmentId, data.groupName, data?.groupId);
   }
@@ -104,7 +107,7 @@ export class GroupService {
     ];
 
     if (excludeGroupId) {
-      conditions.push(ne(schema.groups.assignmentId, excludeGroupId));
+      conditions.push(ne(schema.groups.groupId, excludeGroupId));
     }
 
     const [existing] = await this.db
