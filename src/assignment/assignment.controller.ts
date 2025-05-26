@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -12,11 +13,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AssignmentService } from './assignment.service';
 import {
   CreateAssignmentRequest,
+  DeleteAssignmentRequest,
   GetAssignmentByIdRequest,
   UpdateAssignmentRequest,
 } from './dto/assignment.request';
 import {
   CreateAssignmentResponse,
+  DeleteAssignmentResponse,
   GetAssignmentByIdResponse,
   UpdateAssignmentResponse,
 } from './dto/assignment.response';
@@ -52,5 +55,14 @@ export class AssignmentController {
   ): Promise<AppResponse<UpdateAssignmentResponse>> {
     const assignment = await this.assignmentService.update(data);
     return { data: assignment };
+  }
+
+  @Delete(':assignmentId')
+  @UseGuards(JwtAuthGuard)
+  async delete(
+    @Param() params: DeleteAssignmentRequest,
+  ): Promise<AppResponse<DeleteAssignmentResponse>> {
+    const data = await this.assignmentService.delete(params.assignmentId);
+    return { data };
   }
 }

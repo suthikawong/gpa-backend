@@ -79,7 +79,19 @@ export class AssignmentService {
     const periods = await this.db
       .select()
       .from(schema.assessmentPeriods)
+      .leftJoin(
+        schema.questions,
+        eq(
+          schema.assessmentPeriods.assessmentPeriodId,
+          schema.questions.assessmentPeriodId,
+        ),
+      )
       .where(eq(schema.assessmentPeriods.assignmentId, assignmentId));
+
+    const assessmentPeriods = periods.map((item) => ({
+      ...item.assessment_periods,
+      questions: item.questions ?? [],
+    }));
 
     const marks = await this.db
       .select()
@@ -100,7 +112,7 @@ export class AssignmentService {
       modelConfiguration,
       groups: groupList,
       criteria: criteriaList,
-      assessmentPeriods: periods,
+      assessmentPeriods,
       isEnded: new Date(assignment.dueDate) < new Date(),
       markingProgress: (markedGroups / totalGroups) * 100,
     };
