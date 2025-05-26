@@ -44,20 +44,27 @@ export class AssignmentService {
       throw new NotFoundException('Assignment not found');
     }
 
-    const [modelConfiguration] = await this.db
-      .select()
-      .from(schema.modelConfigurations)
-      .where(
-        eq(
-          schema.modelConfigurations.modelConfigurationId,
-          assignment.modelConfigurationId,
-        ),
-      );
+    let modelConfiguration: schema.ModelConfiguration | null = null;
+    let model: schema.Model | null = null;
 
-    const [model] = await this.db
-      .select()
-      .from(schema.models)
-      .where(eq(schema.models.modelId, modelConfiguration.modelId));
+    if (assignment?.modelConfigurationId) {
+      const [config] = await this.db
+        .select()
+        .from(schema.modelConfigurations)
+        .where(
+          eq(
+            schema.modelConfigurations.modelConfigurationId,
+            assignment.modelConfigurationId,
+          ),
+        );
+      modelConfiguration = config;
+
+      const [mod] = await this.db
+        .select()
+        .from(schema.models)
+        .where(eq(schema.models.modelId, modelConfiguration.modelId));
+      model = mod;
+    }
 
     const groupList = await this.db
       .select()
@@ -110,8 +117,7 @@ export class AssignmentService {
       .insert(schema.assignments)
       .values({
         assignmentName: data.assignmentName,
-        modelConfigurationId: data.modelConfigurationId,
-        isPublished: data.isPublished,
+        isPublished: false,
         dueDate: new Date(data.dueDate),
         classroomId: data.classroomId,
         createdDate: new Date(),

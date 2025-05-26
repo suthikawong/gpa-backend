@@ -117,9 +117,9 @@ export type ModelConfiguration = typeof modelConfigurations.$inferSelect;
 export const assignments = pgTable('assignments', {
   assignmentId: serial('assignment_id').primaryKey(),
   assignmentName: varchar('assignment_name', { length: 255 }).notNull(),
-  modelConfigurationId: integer('model_configuration_id')
-    .references(() => modelConfigurations.modelConfigurationId)
-    .notNull(),
+  modelConfigurationId: integer('model_configuration_id').references(
+    () => modelConfigurations.modelConfigurationId,
+  ),
   isPublished: boolean('is_published').notNull(),
   dueDate: timestamp('due_date').notNull(),
   classroomId: integer('classroom_id')

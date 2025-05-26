@@ -9,8 +9,8 @@ import {
 
 export interface GetAssignmentByIdResponse {
   assignment: Assignment;
-  model: Model;
-  modelConfiguration: ModelConfiguration;
+  model: Model | null;
+  modelConfiguration: ModelConfiguration | null;
   groups: Group[];
   criteria: Criterion[];
   assessmentPeriods: AssessmentPeriod[];

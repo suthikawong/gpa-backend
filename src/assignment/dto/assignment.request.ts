@@ -18,9 +18,6 @@ export class CreateAssignmentRequest {
   @IsString()
   assignmentName: Assignment['assignmentName'];
 
-  @IsInt()
-  modelConfigurationId: Assignment['modelConfigurationId'];
-
   @IsBoolean()
   isPublished: Assignment['isPublished'];
 
