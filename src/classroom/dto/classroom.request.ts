@@ -57,10 +57,22 @@ export class GetClassroomsByStudentRequest {
   studentUserId: User['userId'];
 }
 
-export class GetStudentsInClassroomRequest {
+export class SearchStudentsInClassroomRequest {
   @Transform(({ value }) => parseInt(value))
   @IsNumber()
   classroomId: Classroom['classroomId'];
+
+  @IsOptional()
+  @IsString()
+  name?: User['name'];
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  limit?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  offset?: number;
 }
 
 export class RemoveStudentFromClassroomRequest {

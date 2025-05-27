@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, ilike } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
@@ -12,6 +12,7 @@ import { UserService } from '../user/user.service';
 import { generateCode } from '../utils/generate-code';
 import {
   CreateClassroomRequest,
+  SearchStudentsInClassroomRequest,
   UpdateClassroomRequest,
 } from './dto/classroom.request';
 import {
@@ -20,7 +21,7 @@ import {
   GetClassroomByIdResponse,
   GetClassroomsByInstructorResponse,
   GetClassroomsByStudentResponse,
-  GetStudentsInClassroomResponse,
+  SearchStudentsInClassroomResponse,
   UpdateClassroomResponse,
 } from './dto/classroom.response';
 
@@ -139,27 +140,38 @@ export class ClassroomService {
     return result.map((row) => row.classrooms);
   }
 
-  async getStudentsInClassroom(
-    classroomId: schema.Classroom['classroomId'],
-  ): Promise<GetStudentsInClassroomResponse> {
-    await this.getClassroomById(classroomId);
+  async searchStudentsInClassroom(
+    data: SearchStudentsInClassroomRequest,
+  ): Promise<SearchStudentsInClassroomResponse> {
+    await this.getClassroomById(data.classroomId);
 
-    const result = await this.db
-      .select()
+    const condition = [eq(schema.enrollments.classroomId, data.classroomId)];
+
+    if (data.name) {
+      condition.push(ilike(schema.users.name, `%${data.name}%`));
+    }
+
+    const query = this.db
+      .select({
+        userId: schema.users.userId,
+        name: schema.users.name,
+        email: schema.users.email,
+        roleId: schema.users.roleId,
+      })
       .from(schema.enrollments)
       .innerJoin(
         schema.users,
         eq(schema.enrollments.studentUserId, schema.users.userId),
       )
-      .where(eq(schema.enrollments.classroomId, classroomId));
+      .where(and(...condition));
 
-    const student = result.map((row) => ({
-      ...row.users,
-      password: undefined,
-      refreshToken: undefined,
-    }));
+    if (data.limit !== undefined && data.offset !== undefined) {
+      query.limit(data.limit).offset(data.offset);
+    }
 
-    return student;
+    const students = await query;
+
+    return students;
   }
 
   async removeStudentFromClassroom(

@@ -9,6 +9,9 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { LoggedInUser } from 'src/auth/logged-in-user.decorator';
+import { User } from 'src/drizzle/schema';
 import { AppResponse } from '../app.response';
 import { ClassroomService } from './classroom.service';
 import {
@@ -18,9 +21,9 @@ import {
   GetClassroomByIdRequest,
   GetClassroomsByInstructorRequest,
   GetClassroomsByStudentRequest,
-  GetStudentsInClassroomRequest,
   JoinClassroomRequest,
   RemoveStudentFromClassroomRequest,
+  SearchStudentsInClassroomRequest,
   UpdateClassroomRequest,
 } from './dto/classroom.request';
 import {
@@ -30,14 +33,11 @@ import {
   GetClassroomByIdResponse,
   GetClassroomsByInstructorResponse,
   GetClassroomsByStudentResponse,
-  GetStudentsInClassroomResponse,
   JoinClassroomResponse,
   RemoveStudentFromClassroomResponse,
+  SearchStudentsInClassroomResponse,
   UpdateClassroomResponse,
 } from './dto/classroom.response';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { LoggedInUser } from 'src/auth/logged-in-user.decorator';
-import { User } from 'src/drizzle/schema';
 
 @Controller('classroom')
 export class ClassroomController {
@@ -82,6 +82,16 @@ export class ClassroomController {
     return { data: result };
   }
 
+  @Get('student/search')
+  @UseGuards(JwtAuthGuard)
+  async searchStudentsInClassroom(
+    @Query() query: SearchStudentsInClassroomRequest,
+  ): Promise<AppResponse<SearchStudentsInClassroomResponse>> {
+    const students =
+      await this.classroomService.searchStudentsInClassroom(query);
+    return { data: students };
+  }
+
   @Get('instructor/:instructorUserId')
   @UseGuards(JwtAuthGuard)
   async getByInstructor(
@@ -102,17 +112,6 @@ export class ClassroomController {
       params.studentUserId,
     );
     return { data: classrooms };
-  }
-
-  @Get(':classroomId/student')
-  @UseGuards(JwtAuthGuard)
-  async getStudentsInClassroom(
-    @Param() params: GetStudentsInClassroomRequest,
-  ): Promise<AppResponse<GetStudentsInClassroomResponse>> {
-    const students = await this.classroomService.getStudentsInClassroom(
-      params.classroomId,
-    );
-    return { data: students };
   }
 
   @Delete(':classroomId/student/:studentUserId')

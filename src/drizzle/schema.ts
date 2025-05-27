@@ -3,7 +3,6 @@ import {
   integer,
   jsonb,
   pgTable,
-  primaryKey,
   serial,
   text,
   timestamp,
@@ -16,13 +15,6 @@ export const cats = pgTable('cats', {
   age: integer().notNull(),
   breed: varchar({ length: 255 }).notNull(),
 });
-
-// export const users = pgTable('users', {
-//   id: uuid().primaryKey().defaultRandom(),
-//   email: varchar({ length: 255 }).notNull(),
-//   password: varchar({ length: 255 }).notNull(),
-//   refreshToken: text(),
-// });
 
 // ========== INSTITUTE ==========
 export const institutes = pgTable('institutes', {

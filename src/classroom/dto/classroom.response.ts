@@ -15,7 +15,8 @@ export interface GetClassroomsByInstructorResponse extends Array<Classroom> {}
 
 export interface GetClassroomsByStudentResponse extends Array<Classroom> {}
 
-export interface GetStudentsInClassroomResponse extends Array<UserProtected> {}
+export interface SearchStudentsInClassroomResponse
+  extends Array<UserProtected> {}
 
 export interface RemoveStudentFromClassroomResponse {
   studentUserId: User['userId'];
