@@ -15,7 +15,11 @@ import {
 import {
   CreateAssignmentResponse,
   DeleteAssignmentResponse,
+  GetAssessmentPeriodsByAssignmentIdResponse,
   GetAssignmentByIdResponse,
+  GetCriteriaByAssignmentIdResponse,
+  GetGroupsByAssignmentIdResponse,
+  GetMarkingProgressByAssignmentIdResponse,
   UpdateAssignmentResponse,
 } from './dto/assignment.response';
 
@@ -44,38 +48,36 @@ export class AssignmentService {
       throw new NotFoundException('Assignment not found');
     }
 
-    let modelConfiguration: schema.ModelConfiguration | null = null;
-    let model: schema.Model | null = null;
+    const response: GetAssignmentByIdResponse = {
+      ...assignment,
+      isEnded: new Date(assignment.dueDate) < new Date(),
+    };
+    return response;
+  }
 
-    if (assignment?.modelConfigurationId) {
-      const [config] = await this.db
-        .select()
-        .from(schema.modelConfigurations)
-        .where(
-          eq(
-            schema.modelConfigurations.modelConfigurationId,
-            assignment.modelConfigurationId,
-          ),
-        );
-      modelConfiguration = config;
-
-      const [mod] = await this.db
-        .select()
-        .from(schema.models)
-        .where(eq(schema.models.modelId, modelConfiguration.modelId));
-      model = mod;
-    }
-
-    const groupList = await this.db
+  async getGroupsByAssignmentId(
+    assignmentId: schema.Assignment['assignmentId'],
+  ): Promise<GetGroupsByAssignmentIdResponse> {
+    const groups = await this.db
       .select()
       .from(schema.groups)
       .where(eq(schema.groups.assignmentId, assignmentId));
+    return groups;
+  }
 
-    const criteriaList = await this.db
+  async getCriteriaByAssignmentId(
+    assignmentId: schema.Assignment['assignmentId'],
+  ): Promise<GetCriteriaByAssignmentIdResponse> {
+    const criteria = await this.db
       .select()
       .from(schema.criteria)
       .where(eq(schema.criteria.assignmentId, assignmentId));
+    return criteria;
+  }
 
+  async getAssessmentPeriodsByAssignmentId(
+    assignmentId: schema.Assignment['assignmentId'],
+  ): Promise<GetAssessmentPeriodsByAssignmentIdResponse> {
     const periods = await this.db
       .select()
       .from(schema.assessmentPeriods)
@@ -86,12 +88,42 @@ export class AssignmentService {
           schema.questions.assessmentPeriodId,
         ),
       )
-      .where(eq(schema.assessmentPeriods.assignmentId, assignmentId));
+      .where(eq(schema.assessmentPeriods.assignmentId, assignmentId))
+      .orderBy(schema.assessmentPeriods.assessmentPeriodId);
 
-    const assessmentPeriods = periods.map((item) => ({
-      ...item.assessment_periods,
-      questions: item.questions ?? [],
-    }));
+    const assessmentPeriods: GetAssessmentPeriodsByAssignmentIdResponse = [];
+
+    periods.forEach((item) => {
+      if (
+        assessmentPeriods.length === 0 ||
+        assessmentPeriods[assessmentPeriods.length - 1].assessmentPeriodId !==
+          item.assessment_periods.assessmentPeriodId
+      ) {
+        assessmentPeriods.push({
+          ...item.assessment_periods,
+          questions: item.questions
+            ? Array.isArray(item.questions)
+              ? item.questions
+              : [item.questions]
+            : [],
+        });
+      } else if (item.questions) {
+        assessmentPeriods[assessmentPeriods.length - 1].questions.push(
+          item.questions,
+        );
+      }
+    });
+
+    return assessmentPeriods;
+  }
+
+  async getMarkingProgressByAssignmentId(
+    assignmentId: schema.Assignment['assignmentId'],
+  ): Promise<GetMarkingProgressByAssignmentIdResponse> {
+    const groupList = await this.db
+      .select()
+      .from(schema.groups)
+      .where(eq(schema.groups.assignmentId, assignmentId));
 
     const marks = await this.db
       .select()
@@ -106,18 +138,9 @@ export class AssignmentService {
     const totalGroups = groupList.length;
     const markedGroups = marks.length;
 
-    const response: GetAssignmentByIdResponse = {
-      ...assignment,
-      model,
-      modelConfiguration,
-      groups: groupList,
-      criteria: criteriaList,
-      assessmentPeriods,
-      isEnded: new Date(assignment.dueDate) < new Date(),
+    return {
       markingProgress: (markedGroups / totalGroups) * 100,
     };
-
-    return response;
   }
 
   async create(

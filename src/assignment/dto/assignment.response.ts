@@ -3,17 +3,25 @@ import {
   Assignment,
   Criterion,
   Group,
-  Model,
-  ModelConfiguration,
+  Question,
 } from '../../drizzle/schema';
 
 export interface GetAssignmentByIdResponse extends Assignment {
-  model: Model | null;
-  modelConfiguration: ModelConfiguration | null;
-  groups: Group[];
-  criteria: Criterion[];
-  assessmentPeriods: AssessmentPeriod[];
   isEnded: boolean;
+}
+
+export interface GetGroupsByAssignmentIdResponse extends Array<Group> {}
+
+export interface GetCriteriaByAssignmentIdResponse extends Array<Criterion> {}
+
+interface TempPeriod extends AssessmentPeriod {
+  questions: Question[];
+}
+
+export interface GetAssessmentPeriodsByAssignmentIdResponse
+  extends Array<TempPeriod> {}
+
+export interface GetMarkingProgressByAssignmentIdResponse {
   markingProgress: number;
 }
 

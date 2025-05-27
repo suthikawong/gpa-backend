@@ -14,6 +14,30 @@ export class GetAssignmentByIdRequest {
   assignmentId: Assignment['assignmentId'];
 }
 
+export class GetGroupsByAssignmentIdRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  assignmentId: Assignment['assignmentId'];
+}
+
+export class GetCriteriaByAssignmentIdRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  assignmentId: Assignment['assignmentId'];
+}
+
+export class GetAssessmentPeriodsByAssignmentIdRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  assignmentId: Assignment['assignmentId'];
+}
+
+export class GetMarkingProgressByAssignmentIdRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  assignmentId: Assignment['assignmentId'];
+}
+
 export class CreateAssignmentRequest {
   @IsString()
   assignmentName: Assignment['assignmentName'];

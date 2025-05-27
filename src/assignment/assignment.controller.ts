@@ -14,13 +14,21 @@ import { AssignmentService } from './assignment.service';
 import {
   CreateAssignmentRequest,
   DeleteAssignmentRequest,
+  GetAssessmentPeriodsByAssignmentIdRequest,
   GetAssignmentByIdRequest,
+  GetCriteriaByAssignmentIdRequest,
+  GetGroupsByAssignmentIdRequest,
+  GetMarkingProgressByAssignmentIdRequest,
   UpdateAssignmentRequest,
 } from './dto/assignment.request';
 import {
   CreateAssignmentResponse,
   DeleteAssignmentResponse,
+  GetAssessmentPeriodsByAssignmentIdResponse,
   GetAssignmentByIdResponse,
+  GetCriteriaByAssignmentIdResponse,
+  GetGroupsByAssignmentIdResponse,
+  GetMarkingProgressByAssignmentIdResponse,
   UpdateAssignmentResponse,
 } from './dto/assignment.response';
 
@@ -30,10 +38,55 @@ export class AssignmentController {
 
   @Get(':assignmentId')
   @UseGuards(JwtAuthGuard)
-  async getById(
+  async getAssignmentById(
     @Param() params: GetAssignmentByIdRequest,
   ): Promise<AppResponse<GetAssignmentByIdResponse>> {
     const data = await this.assignmentService.getAssignmentById(
+      params.assignmentId,
+    );
+    return { data };
+  }
+
+  @Get(':assignmentId/groups')
+  @UseGuards(JwtAuthGuard)
+  async getGroupsByAssignmentId(
+    @Param() params: GetGroupsByAssignmentIdRequest,
+  ): Promise<AppResponse<GetGroupsByAssignmentIdResponse>> {
+    const data = await this.assignmentService.getGroupsByAssignmentId(
+      params.assignmentId,
+    );
+    return { data };
+  }
+
+  @Get(':assignmentId/criteria')
+  @UseGuards(JwtAuthGuard)
+  async getCriteriaByAssignmentId(
+    @Param() params: GetCriteriaByAssignmentIdRequest,
+  ): Promise<AppResponse<GetCriteriaByAssignmentIdResponse>> {
+    const data = await this.assignmentService.getCriteriaByAssignmentId(
+      params.assignmentId,
+    );
+    return { data };
+  }
+
+  @Get(':assignmentId/assessment-periods')
+  @UseGuards(JwtAuthGuard)
+  async getAssessmentPeriodsByAssignmentId(
+    @Param() params: GetAssessmentPeriodsByAssignmentIdRequest,
+  ): Promise<AppResponse<GetAssessmentPeriodsByAssignmentIdResponse>> {
+    const data =
+      await this.assignmentService.getAssessmentPeriodsByAssignmentId(
+        params.assignmentId,
+      );
+    return { data };
+  }
+
+  @Get(':assignmentId/marking-progress')
+  @UseGuards(JwtAuthGuard)
+  async getMarkingProgressByAssignmentId(
+    @Param() params: GetMarkingProgressByAssignmentIdRequest,
+  ): Promise<AppResponse<GetMarkingProgressByAssignmentIdResponse>> {
+    const data = await this.assignmentService.getMarkingProgressByAssignmentId(
       params.assignmentId,
     );
     return { data };

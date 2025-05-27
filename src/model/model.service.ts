@@ -6,6 +6,7 @@ import * as schema from '../drizzle/schema';
 import { systemQ } from '../utils/system-q-model';
 import { webavalia } from '../utils/webavalia-model';
 import { UpsertModelConfigurationRequest } from './dto/model.request';
+import { GetModelConfigurationByIdResponse } from './dto/model.response';
 
 @Injectable()
 export class ModelService {
@@ -16,17 +17,27 @@ export class ModelService {
 
   async getModelConfigurationById(
     modelConfigurationId: schema.ModelConfiguration['modelConfigurationId'],
-  ) {
-    const config = await this.db.query.modelConfigurations.findFirst({
-      where: eq(
-        schema.modelConfigurations.modelConfigurationId,
-        modelConfigurationId,
-      ),
-    });
-    if (!config) {
+  ): Promise<GetModelConfigurationByIdResponse> {
+    const [result] = await this.db
+      .select()
+      .from(schema.modelConfigurations)
+      .innerJoin(
+        schema.models,
+        eq(schema.modelConfigurations.modelId, schema.models.modelId),
+      )
+      .where(
+        eq(
+          schema.modelConfigurations.modelConfigurationId,
+          modelConfigurationId,
+        ),
+      );
+    if (!result) {
       throw new NotFoundException(`Model configuration not found`);
     }
-    return config;
+    return {
+      ...result.model_configurations,
+      model: result.models,
+    };
   }
 
   async upsert(data: UpsertModelConfigurationRequest) {
