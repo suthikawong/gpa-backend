@@ -4,8 +4,9 @@ import {
   Assignment,
   Criterion,
   Group,
+  GroupMark,
   Question,
-  User,
+  StudentMark,
 } from '../../drizzle/schema';
 
 export interface GetAssignmentByIdResponse extends Assignment {
@@ -45,3 +46,29 @@ interface GroupWithMembers extends Group {
 }
 
 export type GetJoinedGroupResponse = GroupWithMembers | null;
+
+interface CriterionWithGroupMark extends Criterion {
+  mark: GroupMark;
+}
+
+export interface GetGroupMarkByGroupIdResponse
+  extends Array<CriterionWithGroupMark> {}
+
+export interface MarkGroupResponse {
+  groupId: Group['groupId'];
+}
+
+interface UserWithStudentMark extends UserProtected {
+  mark: StudentMark | null;
+}
+
+export interface GetStudentMarksByGroupIdResponse
+  extends Array<UserWithStudentMark> {}
+
+export interface UpsertStudentMarksResponse {
+  assignmentId: Assignment['assignmentId'];
+}
+
+export interface GetMyMarkResponse {
+  mark: number | null;
+}

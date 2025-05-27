@@ -19,10 +19,15 @@ import {
   GetAssessmentPeriodsByAssignmentIdRequest,
   GetAssignmentByIdRequest,
   GetCriteriaByAssignmentIdRequest,
+  GetGroupMarkByGroupIdRequest,
   GetGroupsByAssignmentIdRequest,
   GetJoinedGroupRequest,
   GetMarkingProgressByAssignmentIdRequest,
+  GetMyMarkRequest,
+  GetStudentMarksByGroupIdRequest,
+  MarkGroupRequest,
   UpdateAssignmentRequest,
+  UpsertStudentMarksRequest,
 } from './dto/assignment.request';
 import {
   CreateAssignmentResponse,
@@ -30,10 +35,15 @@ import {
   GetAssessmentPeriodsByAssignmentIdResponse,
   GetAssignmentByIdResponse,
   GetCriteriaByAssignmentIdResponse,
+  GetGroupMarkByGroupIdResponse,
   GetGroupsByAssignmentIdResponse,
   GetJoinedGroupResponse,
   GetMarkingProgressByAssignmentIdResponse,
+  GetMyMarkResponse,
+  GetStudentMarksByGroupIdResponse,
+  MarkGroupResponse,
   UpdateAssignmentResponse,
+  UpsertStudentMarksResponse,
 } from './dto/assignment.response';
 
 @Controller('assignment')
@@ -132,6 +142,55 @@ export class AssignmentController {
     const result = await this.assignmentService.getJoinedGroup(
       user.userId,
       params.assignmentId,
+    );
+    return { data: result };
+  }
+
+  @Get('group/:groupId/group-mark')
+  @UseGuards(JwtAuthGuard)
+  async getGroupMark(
+    @Param() data: GetGroupMarkByGroupIdRequest,
+  ): Promise<AppResponse<GetGroupMarkByGroupIdResponse>> {
+    const result = await this.assignmentService.getGroupMark(data.groupId);
+    return { data: result };
+  }
+
+  @Post('group/group-mark')
+  @UseGuards(JwtAuthGuard)
+  async markGroup(
+    @Body() data: MarkGroupRequest,
+  ): Promise<AppResponse<MarkGroupResponse>> {
+    const result = await this.assignmentService.markGroup(data);
+    return { data: result };
+  }
+
+  @Get('group/:groupId/student-marks')
+  @UseGuards(JwtAuthGuard)
+  async getStudnetMark(
+    @Param() params: GetStudentMarksByGroupIdRequest,
+  ): Promise<AppResponse<GetStudentMarksByGroupIdResponse>> {
+    const result = await this.assignmentService.getStudnetMark(params.groupId);
+    return { data: result };
+  }
+
+  @Post('group/student-marks')
+  @UseGuards(JwtAuthGuard)
+  async upsertStudentMarks(
+    @Body() data: UpsertStudentMarksRequest,
+  ): Promise<AppResponse<UpsertStudentMarksResponse>> {
+    const result = await this.assignmentService.upsertStudentMarks(data);
+    return { data: result };
+  }
+
+  @Get(':assignmentId/my-mark')
+  @UseGuards(JwtAuthGuard)
+  async getMyMark(
+    @Param() params: GetMyMarkRequest,
+    @LoggedInUser() user: User,
+  ): Promise<AppResponse<GetMyMarkResponse>> {
+    const result = await this.assignmentService.getMyMark(
+      params.assignmentId,
+      user.userId,
     );
     return { data: result };
   }

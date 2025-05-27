@@ -10,7 +10,9 @@ import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import {
   CreateAssignmentRequest,
+  MarkGroupRequest,
   UpdateAssignmentRequest,
+  UpsertStudentMarksRequest,
 } from './dto/assignment.request';
 import {
   CreateAssignmentResponse,
@@ -18,10 +20,15 @@ import {
   GetAssessmentPeriodsByAssignmentIdResponse,
   GetAssignmentByIdResponse,
   GetCriteriaByAssignmentIdResponse,
+  GetGroupMarkByGroupIdResponse,
   GetGroupsByAssignmentIdResponse,
   GetJoinedGroupResponse,
   GetMarkingProgressByAssignmentIdResponse,
+  GetMyMarkResponse,
+  GetStudentMarksByGroupIdResponse,
+  MarkGroupResponse,
   UpdateAssignmentResponse,
+  UpsertStudentMarksResponse,
 } from './dto/assignment.response';
 
 interface ValidateAssignmentInterface {
@@ -262,6 +269,139 @@ export class AssignmentService {
     }
 
     return group;
+  }
+
+  async getGroupMark(
+    groupId: schema.Group['groupId'],
+  ): Promise<GetGroupMarkByGroupIdResponse> {
+    const groupMarks = await this.db
+      .select()
+      .from(schema.groupMarks)
+      .innerJoin(
+        schema.criteria,
+        eq(schema.groupMarks.groupId, groupId) &&
+          eq(schema.criteria.criterionId, schema.groupMarks.criterionId),
+      )
+      .where(and(eq(schema.groupMarks.groupId, groupId)))
+      .orderBy(schema.criteria.displayOrder);
+
+    return groupMarks.map((item) => ({
+      ...item.criteria,
+      mark: item.group_marks,
+    }));
+  }
+
+  async markGroup(data: MarkGroupRequest): Promise<MarkGroupResponse> {
+    await this.db
+      .insert(schema.groupMarks)
+      .values(
+        data.marks.map((item) => ({
+          groupId: data.groupId,
+          criterionId: item.criterionId,
+          mark: item.mark,
+        })),
+      )
+      .returning();
+    return { groupId: data.groupId };
+  }
+
+  async getStudnetMark(
+    groupId: schema.Group['groupId'],
+  ): Promise<GetStudentMarksByGroupIdResponse> {
+    const [group] = await this.db
+      .select()
+      .from(schema.groups)
+      .where(eq(schema.groups.groupId, groupId));
+
+    if (!group) return [];
+
+    const result = await this.db
+      .select({
+        users: {
+          userId: schema.users.userId,
+          name: schema.users.name,
+          email: schema.users.email,
+          roleId: schema.users.roleId,
+        },
+        student_marks: schema.studentMarks,
+      })
+      .from(schema.groupMembers)
+      .innerJoin(
+        schema.users,
+        eq(schema.users.userId, schema.groupMembers.studentUserId),
+      )
+      .leftJoin(
+        schema.studentMarks,
+        eq(
+          schema.studentMarks.studentUserId,
+          schema.groupMembers.studentUserId,
+        ),
+      )
+      .where(
+        and(
+          eq(schema.groupMembers.groupId, groupId),
+          eq(schema.studentMarks.assignmentId, group.assignmentId),
+        ),
+      )
+      .orderBy(schema.users.userId);
+
+    return result.map((item) => ({
+      ...item.users,
+      mark: item.student_marks,
+    }));
+  }
+
+  async upsertStudentMarks(
+    data: UpsertStudentMarksRequest,
+  ): Promise<UpsertStudentMarksResponse> {
+    const { assignmentId, marks } = data;
+
+    for (const { studentUserId, mark } of marks) {
+      const studentMark = await this.db.query.studentMarks.findFirst({
+        where: and(
+          eq(schema.studentMarks.assignmentId, assignmentId),
+          eq(schema.studentMarks.studentUserId, studentUserId),
+        ),
+      });
+
+      // update
+      if (studentMark) {
+        await this.db
+          .update(schema.studentMarks)
+          .set({ mark })
+          .where(
+            and(
+              eq(schema.studentMarks.assignmentId, assignmentId),
+              eq(schema.studentMarks.studentUserId, studentUserId),
+            ),
+          );
+      }
+      // create
+      else {
+        await this.db.insert(schema.studentMarks).values({
+          assignmentId,
+          studentUserId,
+          mark,
+        });
+      }
+    }
+
+    return { assignmentId };
+  }
+
+  async getMyMark(
+    assignmentId: schema.Assignment['assignmentId'],
+    studentUserId: schema.User['userId'],
+  ): Promise<GetMyMarkResponse> {
+    const result = await this.db.query.studentMarks.findFirst({
+      where: and(
+        eq(schema.studentMarks.assignmentId, assignmentId),
+        eq(schema.studentMarks.studentUserId, studentUserId),
+      ),
+    });
+    return {
+      mark: result?.mark ?? null,
+    };
   }
 
   async validateAssignment(data: ValidateAssignmentInterface) {

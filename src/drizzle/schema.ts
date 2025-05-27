@@ -172,7 +172,7 @@ export type AssessmentPeriod = typeof assessmentPeriods.$inferSelect;
 // ========== GROUP_MARK ==========
 export const groupMarks = pgTable('group_marks', {
   groupMarkId: serial('group_mark_id').primaryKey(),
-  criteriaId: integer('criteria_id')
+  criterionId: integer('criterion_id')
     .references(() => criteria.criterionId)
     .notNull(),
   groupId: integer('group_id')
