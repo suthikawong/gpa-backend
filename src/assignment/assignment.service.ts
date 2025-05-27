@@ -59,10 +59,29 @@ export class AssignmentService {
   async getGroupsByAssignmentId(
     assignmentId: schema.Assignment['assignmentId'],
   ): Promise<GetGroupsByAssignmentIdResponse> {
-    const groups = await this.db
+    const result = await this.db
       .select()
       .from(schema.groups)
+      .leftJoin(
+        schema.groupMarks,
+        eq(schema.groups.groupId, schema.groupMarks.groupId),
+      )
       .where(eq(schema.groups.assignmentId, assignmentId));
+
+    const groups: GetGroupsByAssignmentIdResponse = [];
+
+    result.forEach((item) => {
+      if (
+        groups.length === 0 ||
+        groups[groups.length - 1].groupId !== item.groups.groupId
+      ) {
+        groups.push({
+          ...item.groups,
+          isMarked: item.group_marks ? true : false,
+        });
+      }
+    });
+
     return groups;
   }
 

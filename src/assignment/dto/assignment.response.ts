@@ -12,16 +12,21 @@ export interface GetAssignmentByIdResponse extends Assignment {
   isEnded: boolean;
 }
 
-export interface GetGroupsByAssignmentIdResponse extends Array<Group> {}
+interface GroupWithMarkingStatus extends Group {
+  isMarked: boolean;
+}
+
+export interface GetGroupsByAssignmentIdResponse
+  extends Array<GroupWithMarkingStatus> {}
 
 export interface GetCriteriaByAssignmentIdResponse extends Array<Criterion> {}
 
-interface TempPeriod extends AssessmentPeriod {
+interface PeriodWithQuestions extends AssessmentPeriod {
   questions: Question[];
 }
 
 export interface GetAssessmentPeriodsByAssignmentIdResponse
-  extends Array<TempPeriod> {}
+  extends Array<PeriodWithQuestions> {}
 
 export interface GetMarkingProgressByAssignmentIdResponse {
   markingProgress: number;
@@ -35,8 +40,8 @@ export interface DeleteAssignmentResponse {
   assignmentId: Assignment['assignmentId'];
 }
 
-interface GroupTemp extends Group {
+interface GroupWithMembers extends Group {
   members: UserProtected[];
 }
 
-export type GetJoinedGroupResponse = GroupTemp | null;
+export type GetJoinedGroupResponse = GroupWithMembers | null;
