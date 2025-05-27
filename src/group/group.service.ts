@@ -6,17 +6,27 @@ import {
 } from '@nestjs/common';
 import { and, eq, ne } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { AssignmentService } from 'src/assignment/assignment.service';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 import { generateCode } from 'src/utils/generate-code';
 import * as schema from '../drizzle/schema';
-import { CreateGroupRequest, UpdateGroupRequest } from './dto/group.request';
 import {
+  AddGroupMemberRequest,
+  CreateGroupRequest,
+  DeleteGroupMemberRequest,
+  UpdateGroupRequest,
+} from './dto/group.request';
+import {
+  AddGroupMemberResponse,
   CreateGroupResponse,
+  DeleteGroupMemberResponse,
   DeleteGroupResponse,
   GetGroupByIdResponse,
+  GetGroupMembersResponse,
+  JoinGroupResponse,
+  LeaveGroupResponse,
   UpdateGroupResponse,
 } from './dto/group.response';
-import { AssignmentService } from 'src/assignment/assignment.service';
 
 interface ValidateGroupInterface {
   groupId?: schema.Group['groupId'];
@@ -82,6 +92,94 @@ export class GroupService {
       .where(eq(schema.groups.groupId, groupId));
 
     return { groupId };
+  }
+
+  async joinGroup(
+    groupCode: schema.Group['groupCode'],
+    studentUserId: schema.User['userId'],
+  ): Promise<JoinGroupResponse> {
+    const group = await this.db.query.groups.findFirst({
+      where: eq(schema.groups.groupCode, groupCode),
+    });
+    if (!group) {
+      throw new BadRequestException('Group not found.');
+    }
+
+    const existing = await this.db.query.groupMembers.findFirst({
+      where: (gm) =>
+        eq(gm.groupId, group.groupId) && eq(gm.studentUserId, studentUserId),
+    });
+    if (existing) {
+      throw new BadRequestException('You already joined this group.');
+    }
+
+    await this.db.insert(schema.groupMembers).values({
+      groupId: group.groupId,
+      studentUserId,
+    });
+
+    return { group };
+  }
+
+  async leaveGroup(
+    groupId: schema.Group['groupId'],
+    studentUserId: schema.User['userId'],
+  ): Promise<LeaveGroupResponse> {
+    await this.getGroupById(groupId);
+    await this.db
+      .delete(schema.groupMembers)
+      .where(
+        and(
+          eq(schema.groupMembers.groupId, groupId),
+          eq(schema.groupMembers.studentUserId, studentUserId),
+        ),
+      );
+
+    return { groupId };
+  }
+
+  async getGroupMembersById(
+    groupId: schema.Group['groupId'],
+  ): Promise<GetGroupMembersResponse> {
+    await this.getGroupById(groupId);
+    const members = await this.db
+      .select({
+        userId: schema.users.userId,
+        name: schema.users.name,
+        email: schema.users.email,
+        roleId: schema.users.roleId,
+      })
+      .from(schema.groupMembers)
+      .innerJoin(
+        schema.users,
+        eq(schema.groupMembers.studentUserId, schema.users.userId),
+      )
+      .where(eq(schema.groupMembers.groupId, groupId));
+
+    return members;
+  }
+
+  async addGroupMember(
+    data: AddGroupMemberRequest,
+  ): Promise<AddGroupMemberResponse> {
+    await this.getGroupById(data.groupId);
+    await this.db.insert(schema.groupMembers).values(data);
+    return { studentUserId: data.studentUserId };
+  }
+
+  async deleteGroupMember(
+    data: DeleteGroupMemberRequest,
+  ): Promise<DeleteGroupMemberResponse> {
+    await this.getGroupById(data.groupId);
+    await this.db
+      .delete(schema.groupMembers)
+      .where(
+        and(
+          eq(schema.groupMembers.groupId, data.groupId),
+          eq(schema.groupMembers.studentUserId, data.studentUserId),
+        ),
+      );
+    return { studentUserId: data.studentUserId };
   }
 
   async validateGroup(data: ValidateGroupInterface) {

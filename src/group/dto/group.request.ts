@@ -1,10 +1,10 @@
 import { Transform } from 'class-transformer';
-import { IsNumber, IsString } from 'class-validator';
-import { Group } from '../../drizzle/schema';
+import { IsInt, IsString } from 'class-validator';
+import { Assignment, Group, User } from '../../drizzle/schema';
 
 export class GetGroupByIdRequest {
   @Transform(({ value }) => parseInt(value))
-  @IsNumber()
+  @IsInt()
   groupId: Group['groupId'];
 }
 
@@ -12,12 +12,12 @@ export class CreateGroupRequest {
   @IsString()
   groupName: Group['groupName'];
 
-  @IsNumber()
+  @IsInt()
   assignmentId: Group['assignmentId'];
 }
 
 export class UpdateGroupRequest {
-  @IsNumber()
+  @IsInt()
   groupId: Group['groupId'];
 
   @IsString()
@@ -26,6 +26,40 @@ export class UpdateGroupRequest {
 
 export class DeleteGroupRequest {
   @Transform(({ value }) => parseInt(value))
-  @IsNumber()
+  @IsInt()
   groupId: Group['groupId'];
+}
+
+export class JoinGroupRequest {
+  @IsString()
+  groupCode: Group['groupCode'];
+}
+
+export class LeaveGroupRequest {
+  @IsInt()
+  groupId: Group['groupId'];
+}
+
+export class GetGroupMembersRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  groupId: Group['groupId'];
+}
+
+export class AddGroupMemberRequest {
+  @IsInt()
+  groupId: Group['groupId'];
+
+  @IsInt()
+  studentUserId: User['userId'];
+}
+
+export class DeleteGroupMemberRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  groupId: Group['groupId'];
+
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  studentUserId: User['userId'];
 }
