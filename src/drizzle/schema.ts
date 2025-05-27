@@ -77,20 +77,15 @@ export const classrooms = pgTable('classrooms', {
 export type Classroom = typeof classrooms.$inferSelect;
 
 // ========== ENROLLMENTS ==========
-export const enrollments = pgTable(
-  'enrollments',
-  {
-    studentUserId: integer('student_user_id')
-      .references(() => users.userId)
-      .notNull(),
-    classroomId: integer('classroom_id')
-      .references(() => classrooms.classroomId, { onDelete: 'cascade' })
-      .notNull(),
-  },
-  (table) => [
-    primaryKey({ columns: [table.studentUserId, table.classroomId] }),
-  ],
-);
+export const enrollments = pgTable('enrollments', {
+  enrollmentId: serial('enrollment_id').primaryKey(),
+  studentUserId: integer('student_user_id')
+    .references(() => users.userId)
+    .notNull(),
+  classroomId: integer('classroom_id')
+    .references(() => classrooms.classroomId, { onDelete: 'cascade' })
+    .notNull(),
+});
 
 export type Enrollment = typeof enrollments.$inferSelect;
 
@@ -144,18 +139,15 @@ export const groups = pgTable('groups', {
 export type Group = typeof groups.$inferSelect;
 
 // ========== GROUP_MEMBER ==========
-export const groupMembers = pgTable(
-  'group_members',
-  {
-    groupId: integer('group_id')
-      .references(() => groups.groupId, { onDelete: 'cascade' })
-      .notNull(),
-    studentUserId: integer('student_user_id')
-      .references(() => users.userId)
-      .notNull(),
-  },
-  (table) => [primaryKey({ columns: [table.groupId, table.studentUserId] })],
-);
+export const groupMembers = pgTable('group_members', {
+  groupMemberId: serial('group_member_id').primaryKey(),
+  groupId: integer('group_id')
+    .references(() => groups.groupId, { onDelete: 'cascade' })
+    .notNull(),
+  studentUserId: integer('student_user_id')
+    .references(() => users.userId)
+    .notNull(),
+});
 
 export type GroupMember = typeof groupMembers.$inferSelect;
 
@@ -186,38 +178,30 @@ export const assessmentPeriods = pgTable('assessment_periods', {
 export type AssessmentPeriod = typeof assessmentPeriods.$inferSelect;
 
 // ========== GROUP_MARK ==========
-export const groupMarks = pgTable(
-  'group_marks',
-  {
-    criteriaId: integer('criteria_id')
-      .references(() => criteria.criterionId)
-      .notNull(),
-    groupId: integer('group_id')
-      .references(() => groups.groupId, { onDelete: 'cascade' })
-      .notNull(),
-    mark: integer('mark').notNull(),
-  },
-  (table) => [primaryKey({ columns: [table.criteriaId, table.groupId] })],
-);
+export const groupMarks = pgTable('group_marks', {
+  groupMarkId: serial('group_mark_id').primaryKey(),
+  criteriaId: integer('criteria_id')
+    .references(() => criteria.criterionId)
+    .notNull(),
+  groupId: integer('group_id')
+    .references(() => groups.groupId, { onDelete: 'cascade' })
+    .notNull(),
+  mark: integer('mark').notNull(),
+});
 
 export type GroupMark = typeof groupMarks.$inferSelect;
 
 // ========== STUDENT_MARK ==========
-export const studentMarks = pgTable(
-  'student_marks',
-  {
-    assignmentId: integer('assignment_id')
-      .references(() => assignments.assignmentId, { onDelete: 'cascade' })
-      .notNull(),
-    studentUserId: integer('student_user_id')
-      .references(() => users.userId)
-      .notNull(),
-    mark: integer('mark').notNull(),
-  },
-  (table) => [
-    primaryKey({ columns: [table.assignmentId, table.studentUserId] }),
-  ],
-);
+export const studentMarks = pgTable('student_marks', {
+  studentMarkId: serial('student_mark_id').primaryKey(),
+  assignmentId: integer('assignment_id')
+    .references(() => assignments.assignmentId, { onDelete: 'cascade' })
+    .notNull(),
+  studentUserId: integer('student_user_id')
+    .references(() => users.userId)
+    .notNull(),
+  mark: integer('mark').notNull(),
+});
 
 export type StudentMark = typeof studentMarks.$inferSelect;
 
