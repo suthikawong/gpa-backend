@@ -19,6 +19,7 @@ import {
   GetAssignmentByIdResponse,
   GetCriteriaByAssignmentIdResponse,
   GetGroupsByAssignmentIdResponse,
+  GetJoinedGroupResponse,
   GetMarkingProgressByAssignmentIdResponse,
   UpdateAssignmentResponse,
 } from './dto/assignment.response';
@@ -192,6 +193,56 @@ export class AssignmentService {
       .where(eq(schema.assignments.assignmentId, assignmentId));
 
     return { assignmentId };
+  }
+
+  async getJoinedGroup(
+    studentUserId: schema.User['userId'],
+    assignmentId: schema.Assignment['assignmentId'],
+  ): Promise<GetJoinedGroupResponse> {
+    const [result] = await this.db
+      .select()
+      .from(schema.groupMembers)
+      .innerJoin(
+        schema.groups,
+        eq(schema.groupMembers.groupId, schema.groups.groupId),
+      )
+      .leftJoin(
+        schema.users,
+        eq(schema.groupMembers.studentUserId, schema.users.userId),
+      )
+      .where(
+        and(
+          eq(schema.groupMembers.studentUserId, studentUserId),
+          eq(schema.groups.assignmentId, assignmentId),
+        ),
+      )
+      .limit(1);
+
+    const group: GetJoinedGroupResponse = result.groups
+      ? { ...result.groups, members: [] }
+      : null;
+
+    if (group) {
+      const groupMembers = await this.db
+        .select()
+        .from(schema.groupMembers)
+        .innerJoin(
+          schema.users,
+          eq(schema.groupMembers.studentUserId, schema.users.userId),
+        )
+        .where(and(eq(schema.groupMembers.groupId, group.groupId)));
+
+      groupMembers.forEach((item) => {
+        const temp = {
+          ...item.users,
+          refreshToken: undefined,
+          password: undefined,
+        };
+        group.members.push(temp);
+      });
+    }
+
+    return group;
   }
 
   async validateAssignment(data: ValidateAssignmentInterface) {

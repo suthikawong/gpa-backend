@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { AppResponse } from '../app.response';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { LoggedInUser } from '../auth/logged-in-user.decorator';
+import { User } from '../drizzle/schema';
 import { AssignmentService } from './assignment.service';
 import {
   CreateAssignmentRequest,
@@ -18,6 +20,7 @@ import {
   GetAssignmentByIdRequest,
   GetCriteriaByAssignmentIdRequest,
   GetGroupsByAssignmentIdRequest,
+  GetJoinedGroupRequest,
   GetMarkingProgressByAssignmentIdRequest,
   UpdateAssignmentRequest,
 } from './dto/assignment.request';
@@ -28,6 +31,7 @@ import {
   GetAssignmentByIdResponse,
   GetCriteriaByAssignmentIdResponse,
   GetGroupsByAssignmentIdResponse,
+  GetJoinedGroupResponse,
   GetMarkingProgressByAssignmentIdResponse,
   UpdateAssignmentResponse,
 } from './dto/assignment.response';
@@ -117,5 +121,18 @@ export class AssignmentController {
   ): Promise<AppResponse<DeleteAssignmentResponse>> {
     const data = await this.assignmentService.delete(params.assignmentId);
     return { data };
+  }
+
+  @Get(':assignmentId/group/joined')
+  @UseGuards(JwtAuthGuard)
+  async getJoinedGroup(
+    @Param() params: GetJoinedGroupRequest,
+    @LoggedInUser() user: User,
+  ): Promise<AppResponse<GetJoinedGroupResponse>> {
+    const result = await this.assignmentService.getJoinedGroup(
+      user.userId,
+      params.assignmentId,
+    );
+    return { data: result };
   }
 }

@@ -77,3 +77,9 @@ export class DeleteAssignmentRequest {
   @IsNumber()
   assignmentId: Assignment['assignmentId'];
 }
+
+export class GetJoinedGroupRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  assignmentId: Assignment['assignmentId'];
+}
