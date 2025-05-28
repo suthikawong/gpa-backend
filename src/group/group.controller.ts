@@ -36,12 +36,12 @@ import {
 } from './dto/group.response';
 import { GroupService } from './group.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('group')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
   @Get(':groupId')
-  @UseGuards(JwtAuthGuard)
   async getById(
     @Param() params: GetGroupByIdRequest,
   ): Promise<AppResponse<GetGroupByIdResponse>> {
@@ -50,7 +50,6 @@ export class GroupController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   async create(
     @Body() data: CreateGroupRequest,
   ): Promise<AppResponse<CreateGroupResponse>> {
@@ -59,7 +58,6 @@ export class GroupController {
   }
 
   @Put()
-  @UseGuards(JwtAuthGuard)
   async update(
     @Body() data: UpdateGroupRequest,
   ): Promise<AppResponse<UpdateGroupResponse>> {
@@ -68,7 +66,6 @@ export class GroupController {
   }
 
   @Delete(':groupId')
-  @UseGuards(JwtAuthGuard)
   async delete(
     @Param() params: DeleteGroupRequest,
   ): Promise<AppResponse<DeleteGroupResponse>> {
@@ -77,7 +74,6 @@ export class GroupController {
   }
 
   @Post('join')
-  @UseGuards(JwtAuthGuard)
   async joinGroup(
     @Body() body: JoinGroupRequest,
     @LoggedInUser() user: User,
@@ -90,7 +86,6 @@ export class GroupController {
   }
 
   @Post('leave')
-  @UseGuards(JwtAuthGuard)
   async leaveGroup(
     @Body() body: LeaveGroupRequest,
     @LoggedInUser() user: User,
@@ -103,7 +98,6 @@ export class GroupController {
   }
 
   @Get(':groupId/member')
-  @UseGuards(JwtAuthGuard)
   async getMembers(
     @Param() params: GetGroupMembersRequest,
   ): Promise<AppResponse<GetGroupMembersResponse>> {
@@ -112,7 +106,6 @@ export class GroupController {
   }
 
   @Post('member')
-  @UseGuards(JwtAuthGuard)
   async addMember(
     @Body() body: AddGroupMemberRequest,
   ): Promise<AppResponse<AddGroupMemberResponse>> {
@@ -121,7 +114,6 @@ export class GroupController {
   }
 
   @Delete(':groupId/member/:studentUserId')
-  @UseGuards(JwtAuthGuard)
   async deleteMember(
     @Param() params: DeleteGroupMemberRequest,
   ): Promise<AppResponse<DeleteGroupMemberResponse>> {

@@ -21,12 +21,12 @@ import {
 } from './dto/user.response';
 import { UserService } from './user.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Get(':userId')
-  @UseGuards(JwtAuthGuard)
   async getUserById(
     @Param() data: GetUserByIdRequest,
   ): Promise<AppResponse<GetUserByIdResponse>> {
@@ -35,7 +35,6 @@ export class UserController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   async createUser(
     @Body() data: CreateUserRequest,
   ): Promise<AppResponse<CreateUserResponse>> {
@@ -44,7 +43,6 @@ export class UserController {
   }
 
   @Put()
-  @UseGuards(JwtAuthGuard)
   async updateUser(
     @Body() data: UpdateUserRequest,
   ): Promise<AppResponse<UpdateUserResponse>> {

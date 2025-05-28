@@ -11,12 +11,12 @@ import {
 } from './dto/model.response';
 import { ModelService } from './model.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('model')
 export class ModelController {
   constructor(private modelService: ModelService) {}
 
   @Get(':modelConfigurationId')
-  @UseGuards(JwtAuthGuard)
   async getAssignmentById(
     @Param() params: GetModelConfigurationByIdRequest,
   ): Promise<AppResponse<GetModelConfigurationByIdResponse>> {
@@ -27,7 +27,6 @@ export class ModelController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   async upsert(
     @Body() data: UpsertModelConfigurationRequest,
   ): Promise<AppResponse<UpsertModelConfigurationResponse>> {

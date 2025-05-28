@@ -8,6 +8,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AppResponse } from '../app.response';
 import { AssessmentPeriodService } from './assessment-period.service';
 import {
@@ -28,8 +29,8 @@ import {
   UpdateAssessmentPeriodResponse,
   UpdateAssessmentQuestionResponse,
 } from './dto/assessment-period.response';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('assessment-period')
 export class AssessmentPeriodController {
   constructor(
@@ -37,7 +38,6 @@ export class AssessmentPeriodController {
   ) {}
 
   @Get(':assessmentPeriodId')
-  @UseGuards(JwtAuthGuard)
   async getAssessmentPeriodById(
     @Param() params: GetAssessmentPeriodByIdRequest,
   ): Promise<AppResponse<GetAssessmentPeriodByIdResponse>> {
@@ -49,7 +49,6 @@ export class AssessmentPeriodController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   async create(
     @Body() data: CreateAssessmentPeriodRequest,
   ): Promise<AppResponse<CreateAssessmentPeriodResponse>> {
@@ -58,7 +57,6 @@ export class AssessmentPeriodController {
   }
 
   @Put()
-  @UseGuards(JwtAuthGuard)
   async update(
     @Body() data: UpdateAssessmentPeriodRequest,
   ): Promise<AppResponse<UpdateAssessmentPeriodResponse>> {
@@ -67,7 +65,6 @@ export class AssessmentPeriodController {
   }
 
   @Delete(':assessmentPeriodId')
-  @UseGuards(JwtAuthGuard)
   async delete(
     @Param() params: DeleteAssessmentPeriodRequest,
   ): Promise<AppResponse<DeleteAssessmentPeriodResponse>> {
@@ -78,7 +75,6 @@ export class AssessmentPeriodController {
   }
 
   @Post('assessment-question')
-  @UseGuards(JwtAuthGuard)
   async createAssessmentQuestion(
     @Body() body: CreateAssessmentQuestionRequest,
   ): Promise<AppResponse<CreateAssessmentQuestionResponse>> {
@@ -88,7 +84,6 @@ export class AssessmentPeriodController {
   }
 
   @Put('assessment-question')
-  @UseGuards(JwtAuthGuard)
   async updateAssessmentQuestion(
     @Body() body: UpdateAssessmentQuestionRequest,
   ): Promise<AppResponse<UpdateAssessmentQuestionResponse>> {
@@ -98,7 +93,6 @@ export class AssessmentPeriodController {
   }
 
   @Delete('assessment-question/:questionId')
-  @UseGuards(JwtAuthGuard)
   async deleteAssessmentQuestion(
     @Param() params: DeleteAssessmentQuestionRequest,
   ): Promise<AppResponse<DeleteAssessmentQuestionResponse>> {

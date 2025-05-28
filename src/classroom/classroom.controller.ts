@@ -39,12 +39,12 @@ import {
   UpdateClassroomResponse,
 } from './dto/classroom.response';
 
+@UseGuards(JwtAuthGuard)
 @Controller('classroom')
 export class ClassroomController {
   constructor(private readonly classroomService: ClassroomService) {}
 
   @Get(':classroomId')
-  @UseGuards(JwtAuthGuard)
   async getById(
     @Param() data: GetClassroomByIdRequest,
   ): Promise<AppResponse<GetClassroomByIdResponse>> {
@@ -55,7 +55,6 @@ export class ClassroomController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   async create(
     @Body() data: CreateClassroomRequest,
     @LoggedInUser() user: User,
@@ -65,7 +64,6 @@ export class ClassroomController {
   }
 
   @Put()
-  @UseGuards(JwtAuthGuard)
   async update(
     @Body() data: UpdateClassroomRequest,
   ): Promise<AppResponse<UpdateClassroomResponse>> {
@@ -74,7 +72,6 @@ export class ClassroomController {
   }
 
   @Delete(':classroomId')
-  @UseGuards(JwtAuthGuard)
   async delete(
     @Param() params: DeleteClassroomRequest,
   ): Promise<AppResponse<DeleteClassroomResponse>> {
@@ -83,7 +80,6 @@ export class ClassroomController {
   }
 
   @Get('student/search')
-  @UseGuards(JwtAuthGuard)
   async searchStudentsInClassroom(
     @Query() query: SearchStudentsInClassroomRequest,
   ): Promise<AppResponse<SearchStudentsInClassroomResponse>> {
@@ -93,7 +89,6 @@ export class ClassroomController {
   }
 
   @Get('instructor/:instructorUserId')
-  @UseGuards(JwtAuthGuard)
   async getByInstructor(
     @Param() params: GetClassroomsByInstructorRequest,
   ): Promise<AppResponse<GetClassroomsByInstructorResponse>> {
@@ -104,7 +99,6 @@ export class ClassroomController {
   }
 
   @Get('student/:studentUserId')
-  @UseGuards(JwtAuthGuard)
   async getByStudent(
     @Param() params: GetClassroomsByStudentRequest,
   ): Promise<AppResponse<GetClassroomsByStudentResponse>> {
@@ -115,7 +109,6 @@ export class ClassroomController {
   }
 
   @Delete(':classroomId/student/:studentUserId')
-  @UseGuards(JwtAuthGuard)
   async removeStudentFromClassroom(
     @Param() params: RemoveStudentFromClassroomRequest,
   ): Promise<AppResponse<RemoveStudentFromClassroomResponse>> {
@@ -127,7 +120,6 @@ export class ClassroomController {
   }
 
   @Get(':classroomId/assignment')
-  @UseGuards(JwtAuthGuard)
   async getAssignmentsByClassroomId(
     @Param() params: GetAssignmentsByClassroomIdRequest,
   ): Promise<AppResponse<GetAssignmentsByClassroomIdResponse>> {
@@ -138,7 +130,6 @@ export class ClassroomController {
   }
 
   @Post('join')
-  @UseGuards(JwtAuthGuard)
   async join(
     @Body() data: JoinClassroomRequest,
     @LoggedInUser() user: User,

@@ -13,12 +13,12 @@ import {
 } from './dto/peer-assessment.response';
 import { PeerAssessmentService } from './peer-assessment.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('peer-assessment')
 export class PeerAssessmentController {
   constructor(private readonly peerAssessmentService: PeerAssessmentService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   async assessPeer(
     @Body() data: AssessPeerRequest,
     @LoggedInUser() user: User,
@@ -31,7 +31,6 @@ export class PeerAssessmentController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   async getPeerAssessmentsByGroupId(
     @Query() query: GetPeerAssessmentsByGroupIdRequest,
   ): Promise<AppResponse<GetPeerAssessmentsByGroupIdResponse>> {

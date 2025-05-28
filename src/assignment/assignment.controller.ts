@@ -49,12 +49,12 @@ import {
   UpsertStudentMarksResponse,
 } from './dto/assignment.response';
 
+@UseGuards(JwtAuthGuard)
 @Controller('assignment')
 export class AssignmentController {
   constructor(private readonly assignmentService: AssignmentService) {}
 
   @Get(':assignmentId')
-  @UseGuards(JwtAuthGuard)
   async getAssignmentById(
     @Param() params: GetAssignmentByIdRequest,
   ): Promise<AppResponse<GetAssignmentByIdResponse>> {
@@ -65,7 +65,6 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/groups')
-  @UseGuards(JwtAuthGuard)
   async getGroupsByAssignmentId(
     @Param() params: GetGroupsByAssignmentIdRequest,
   ): Promise<AppResponse<GetGroupsByAssignmentIdResponse>> {
@@ -76,7 +75,6 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/criteria')
-  @UseGuards(JwtAuthGuard)
   async getCriteriaByAssignmentId(
     @Param() params: GetCriteriaByAssignmentIdRequest,
   ): Promise<AppResponse<GetCriteriaByAssignmentIdResponse>> {
@@ -87,7 +85,6 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/assessment-periods')
-  @UseGuards(JwtAuthGuard)
   async getAssessmentPeriodsByAssignmentId(
     @Param() params: GetAssessmentPeriodsByAssignmentIdRequest,
   ): Promise<AppResponse<GetAssessmentPeriodsByAssignmentIdResponse>> {
@@ -99,7 +96,6 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/marking-progress')
-  @UseGuards(JwtAuthGuard)
   async getMarkingProgressByAssignmentId(
     @Param() params: GetMarkingProgressByAssignmentIdRequest,
   ): Promise<AppResponse<GetMarkingProgressByAssignmentIdResponse>> {
@@ -110,7 +106,6 @@ export class AssignmentController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   async create(
     @Body() data: CreateAssignmentRequest,
   ): Promise<AppResponse<CreateAssignmentResponse>> {
@@ -119,7 +114,6 @@ export class AssignmentController {
   }
 
   @Put()
-  @UseGuards(JwtAuthGuard)
   async update(
     @Body() data: UpdateAssignmentRequest,
   ): Promise<AppResponse<UpdateAssignmentResponse>> {
@@ -128,7 +122,6 @@ export class AssignmentController {
   }
 
   @Delete(':assignmentId')
-  @UseGuards(JwtAuthGuard)
   async delete(
     @Param() params: DeleteAssignmentRequest,
   ): Promise<AppResponse<DeleteAssignmentResponse>> {
@@ -137,7 +130,6 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/group/joined')
-  @UseGuards(JwtAuthGuard)
   async getJoinedGroup(
     @Param() params: GetJoinedGroupRequest,
     @LoggedInUser() user: User,
@@ -150,7 +142,6 @@ export class AssignmentController {
   }
 
   @Get('group/:groupId/group-mark')
-  @UseGuards(JwtAuthGuard)
   async getGroupMark(
     @Param() data: GetGroupMarkByGroupIdRequest,
   ): Promise<AppResponse<GetGroupMarkByGroupIdResponse>> {
@@ -159,7 +150,6 @@ export class AssignmentController {
   }
 
   @Post('group/group-mark')
-  @UseGuards(JwtAuthGuard)
   async markGroup(
     @Body() data: MarkGroupRequest,
   ): Promise<AppResponse<MarkGroupResponse>> {
@@ -168,7 +158,6 @@ export class AssignmentController {
   }
 
   @Get('group/:groupId/student-marks')
-  @UseGuards(JwtAuthGuard)
   async getStudnetMark(
     @Param() params: GetStudentMarksByGroupIdRequest,
   ): Promise<AppResponse<GetStudentMarksByGroupIdResponse>> {
@@ -177,7 +166,6 @@ export class AssignmentController {
   }
 
   @Post('group/student-marks')
-  @UseGuards(JwtAuthGuard)
   async upsertStudentMarks(
     @Body() data: UpsertStudentMarksRequest,
   ): Promise<AppResponse<UpsertStudentMarksResponse>> {
@@ -186,7 +174,6 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/export')
-  @UseGuards(JwtAuthGuard)
   async exportAssignmentScores(
     @Param() params: ExportAssignmentScoresRequest,
     @Res() res: Response,
@@ -206,7 +193,6 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/my-mark')
-  @UseGuards(JwtAuthGuard)
   async getMyMark(
     @Param() params: GetMyMarkRequest,
     @LoggedInUser() user: User,

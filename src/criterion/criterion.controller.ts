@@ -21,12 +21,12 @@ import {
   UpdateCriterionResponse,
 } from './dto/criterion.response';
 
+@UseGuards(JwtAuthGuard)
 @Controller('criterion')
 export class CriterionController {
   constructor(private readonly criterionService: CriterionService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   async create(
     @Body() data: CreateCriterionRequest,
   ): Promise<AppResponse<CreateCriterionResponse>> {
@@ -35,7 +35,6 @@ export class CriterionController {
   }
 
   @Put()
-  @UseGuards(JwtAuthGuard)
   async update(
     @Body() data: UpdateCriterionRequest,
   ): Promise<AppResponse<UpdateCriterionResponse>> {
@@ -44,7 +43,6 @@ export class CriterionController {
   }
 
   @Delete(':criterionId')
-  @UseGuards(JwtAuthGuard)
   async delete(
     @Param() params: DeleteCriterionRequest,
   ): Promise<AppResponse<DeleteCriterionResponse>> {
