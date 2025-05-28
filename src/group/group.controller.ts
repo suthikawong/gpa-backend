@@ -55,20 +55,24 @@ export class GroupController {
   @Post()
   async create(
     @Body() data: CreateGroupRequest,
+    @LoggedInUser() user: User,
   ): Promise<AppResponse<CreateGroupResponse>> {
-    const group = await this.groupService.create(data);
+    const group = await this.groupService.create(data, user.userId);
     return { data: group };
   }
 
   @Put()
+  @Roles([Role.Instructor])
   async update(
     @Body() data: UpdateGroupRequest,
+    @LoggedInUser() user: User,
   ): Promise<AppResponse<UpdateGroupResponse>> {
-    const group = await this.groupService.update(data);
+    const group = await this.groupService.update(data, user.userId);
     return { data: group };
   }
 
   @Delete(':groupId')
+  @Roles([Role.Instructor])
   async delete(
     @Param() params: DeleteGroupRequest,
   ): Promise<AppResponse<DeleteGroupResponse>> {

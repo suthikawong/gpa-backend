@@ -55,7 +55,10 @@ export class GroupService {
     return group;
   }
 
-  async create(data: CreateGroupRequest): Promise<CreateGroupResponse> {
+  async create(
+    data: CreateGroupRequest,
+    userId: schema.User['userId'],
+  ): Promise<CreateGroupResponse> {
     await this.validateGroup(data);
     const groupCode = await this.generateUniqueCode();
 
@@ -65,19 +68,24 @@ export class GroupService {
         groupName: data.groupName,
         groupCode: groupCode,
         assignmentId: data.assignmentId,
+        createdBy: userId,
+        createdDate: new Date(),
       })
       .returning();
 
     return group;
   }
 
-  async update(data: UpdateGroupRequest): Promise<UpdateGroupResponse> {
+  async update(
+    data: UpdateGroupRequest,
+    userId: schema.User['userId'],
+  ): Promise<UpdateGroupResponse> {
     const { groupId, ...updatedData } = data;
     await this.validateGroup(data);
 
     const [group] = await this.db
       .update(schema.groups)
-      .set(updatedData)
+      .set({ ...updatedData, updatedBy: userId, updatedDate: new Date() })
       .where(eq(schema.groups.groupId, data.groupId))
       .returning();
 

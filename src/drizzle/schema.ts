@@ -126,6 +126,10 @@ export const groups = pgTable('groups', {
   assignmentId: integer('assignment_id')
     .references(() => assignments.assignmentId, { onDelete: 'cascade' })
     .notNull(),
+  createdBy: integer('created_by').notNull(),
+  createdDate: timestamp('created_date').notNull(),
+  updatedBy: integer('updated_by'),
+  updatedDate: timestamp('updated_date'),
 });
 
 export type Group = typeof groups.$inferSelect;
