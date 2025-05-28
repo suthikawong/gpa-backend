@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsInt, IsString } from 'class-validator';
-import { Assignment, Group, User } from '../../drizzle/schema';
+import { Group, User } from '../../drizzle/schema';
 
 export class GetGroupByIdRequest {
   @Transform(({ value }) => parseInt(value))
@@ -62,4 +62,10 @@ export class DeleteGroupMemberRequest {
   @Transform(({ value }) => parseInt(value))
   @IsInt()
   studentUserId: User['userId'];
+}
+
+export class GetAssessmentStatusByGroupIdRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  groupId: Group['groupId'];
 }

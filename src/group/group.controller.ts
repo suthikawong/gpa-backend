@@ -20,6 +20,7 @@ import {
   CreateGroupRequest,
   DeleteGroupMemberRequest,
   DeleteGroupRequest,
+  GetAssessmentStatusByGroupIdRequest,
   GetGroupByIdRequest,
   GetGroupMembersRequest,
   JoinGroupRequest,
@@ -31,6 +32,7 @@ import {
   CreateGroupResponse,
   DeleteGroupMemberResponse,
   DeleteGroupResponse,
+  GetAssessmentStatusByGroupIdResponse,
   GetGroupByIdResponse,
   GetGroupMembersResponse,
   JoinGroupResponse,
@@ -130,6 +132,19 @@ export class GroupController {
     @Param() params: DeleteGroupMemberRequest,
   ): Promise<AppResponse<DeleteGroupMemberResponse>> {
     const result = await this.groupService.deleteGroupMember(params);
+    return { data: result };
+  }
+
+  @Get(':groupId/assessment-status')
+  @Roles([Role.Student])
+  async getAssessmentStatusByGroupId(
+    @Param() params: GetAssessmentStatusByGroupIdRequest,
+    @LoggedInUser() user: User,
+  ): Promise<AppResponse<GetAssessmentStatusByGroupIdResponse>> {
+    const result = await this.groupService.getAssessmentStatusByGroupId(
+      params.groupId,
+      user.userId,
+    );
     return { data: result };
   }
 }

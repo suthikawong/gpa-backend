@@ -28,3 +28,10 @@ export interface AddGroupMemberResponse {
 export interface DeleteGroupMemberResponse {
   studentUserId: User['userId'];
 }
+
+export interface UserWithAssessmentStatus extends UserProtected {
+  assessmentStatus: boolean;
+}
+
+export type GetAssessmentStatusByGroupIdResponse =
+  Array<UserWithAssessmentStatus>;

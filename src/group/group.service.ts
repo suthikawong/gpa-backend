@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, ne } from 'drizzle-orm';
+import { and, eq, inArray, ne } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { AssignmentService } from '../assignment/assignment.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
@@ -21,6 +21,7 @@ import {
   CreateGroupResponse,
   DeleteGroupMemberResponse,
   DeleteGroupResponse,
+  GetAssessmentStatusByGroupIdResponse,
   GetGroupByIdResponse,
   GetGroupMembersResponse,
   JoinGroupResponse,
@@ -188,6 +189,50 @@ export class GroupService {
         ),
       );
     return { studentUserId: data.studentUserId };
+  }
+
+  async getAssessmentStatusByGroupId(
+    groupId: schema.Group['groupId'],
+    userId: schema.User['userId'],
+  ): Promise<GetAssessmentStatusByGroupIdResponse> {
+    const group = await this.getGroupById(groupId);
+
+    const members = await this.db
+      .select({
+        userId: schema.users.userId,
+        name: schema.users.name,
+        email: schema.users.email,
+        roleId: schema.users.roleId,
+      })
+      .from(schema.groupMembers)
+      .innerJoin(
+        schema.users,
+        eq(schema.groupMembers.studentUserId, schema.users.userId),
+      )
+      .where(eq(schema.groupMembers.groupId, groupId))
+      .orderBy(schema.users.userId);
+
+    const targetUserIds = members.map((user) => user.userId);
+
+    const assessed = await this.db
+      .select({
+        assessedUserId: schema.peerAssessments.assessedStudentUserId,
+      })
+      .from(schema.peerAssessments)
+      .where(
+        and(
+          eq(schema.peerAssessments.assessorStudentUserId, userId),
+          inArray(schema.peerAssessments.assessedStudentUserId, targetUserIds),
+          eq(schema.peerAssessments.assignmentId, group.assignmentId),
+        ),
+      );
+
+    const assessedSet = new Set(assessed.map((item) => item.assessedUserId));
+
+    return members.map((user) => ({
+      ...user,
+      assessmentStatus: assessedSet.has(user.userId),
+    }));
   }
 
   async validateGroup(data: ValidateGroupInterface) {
