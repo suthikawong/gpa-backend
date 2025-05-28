@@ -52,9 +52,6 @@ export class CreateAssignmentRequest {
   @IsString()
   assignmentName: Assignment['assignmentName'];
 
-  @IsBoolean()
-  isPublished: Assignment['isPublished'];
-
   @IsDateString()
   dueDate: string;
 

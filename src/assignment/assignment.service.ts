@@ -7,6 +7,7 @@ import {
 import { and, eq, inArray, ne } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as ExcelJS from 'exceljs';
+import { ModelService } from 'src/model/model.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import {
@@ -35,6 +36,7 @@ import {
 interface ValidateAssignmentInterface {
   assignmentId?: schema.Assignment['assignmentId'];
   assignmentName: schema.Assignment['assignmentName'];
+  isPublished: schema.Assignment['isPublished'];
   classroomId: schema.Assignment['classroomId'];
 }
 
@@ -174,7 +176,7 @@ export class AssignmentService {
   async create(
     data: CreateAssignmentRequest,
   ): Promise<CreateAssignmentResponse> {
-    await this.validateAssignment(data);
+    await this.validateAssignment({ ...data, isPublished: false });
 
     const [assignment] = await this.db
       .insert(schema.assignments)
@@ -471,6 +473,21 @@ export class AssignmentService {
       data.assignmentName,
       data?.assignmentId,
     );
+    if (data.assignmentId && data.isPublished) {
+      await this.validateAssignmentBeforePublish(data.assignmentId);
+    }
+  }
+
+  async validateAssignmentBeforePublish(
+    assignmentId: schema.Assignment['assignmentId'],
+  ) {
+    // validate criteria
+    const criteria = await this.getCriteriaByAssignmentId(assignmentId);
+    if (criteria.length === 0) {
+      throw new BadRequestException(
+        `Criterion must be added to publish an assignment`,
+      );
+    }
   }
 
   async validateAssignmentName(
