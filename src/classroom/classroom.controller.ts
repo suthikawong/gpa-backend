@@ -130,12 +130,13 @@ export class ClassroomController {
   }
 
   @Get(':classroomId/assignments')
-  @Roles([Role.Instructor])
   async getAssignmentsByClassroomId(
     @Param() params: GetAssignmentsByClassroomIdRequest,
+    @LoggedInUser() user: User,
   ): Promise<AppResponse<GetAssignmentsByClassroomIdResponse>> {
     const data = await this.classroomService.getAssignmentsByClassroomId(
       params.classroomId,
+      user.roleId,
     );
     return { data };
   }

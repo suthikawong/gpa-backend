@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -24,6 +25,7 @@ import {
   SearchStudentsInClassroomResponse,
   UpdateClassroomResponse,
 } from './dto/classroom.response';
+import { Role } from 'src/app.config';
 
 @Injectable()
 export class ClassroomService {
@@ -195,11 +197,17 @@ export class ClassroomService {
 
   async getAssignmentsByClassroomId(
     classroomId: schema.Classroom['classroomId'],
+    roleId: schema.User['roleId'],
   ) {
+    const conditions = [eq(schema.assignments.classroomId, classroomId)];
+    if (roleId === parseInt(Role.Student)) {
+      conditions.push(eq(schema.assignments.isPublished, true));
+    }
+
     return await this.db
       .select()
       .from(schema.assignments)
-      .where(eq(schema.assignments.classroomId, classroomId));
+      .where(and(...conditions));
   }
 
   async joinClassroom(
@@ -214,10 +222,16 @@ export class ClassroomService {
       throw new NotFoundException('Classroom not found');
     }
 
+    if (!classroom.isActive) {
+      throw new ForbiddenException(`Inactive classroom cannot be joined`);
+    }
+
     const existing = await this.db.query.enrollments.findFirst({
       where: (enrollment) =>
-        eq(enrollment.classroomId, classroom.classroomId) &&
-        eq(enrollment.studentUserId, studentUserId),
+        and(
+          eq(enrollment.classroomId, classroom.classroomId),
+          eq(enrollment.studentUserId, studentUserId),
+        ),
     });
 
     if (existing) {
