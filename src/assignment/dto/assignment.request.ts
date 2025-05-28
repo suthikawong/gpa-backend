@@ -145,6 +145,12 @@ export class UpsertStudentMarksRequest {
   marks: StudentMarkItem[];
 }
 
+export class ExportAssignmentScoresRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  assignmentId: Assignment['assignmentId'];
+}
+
 export class GetMyMarkRequest {
   @Transform(({ value }) => parseInt(value))
   @IsInt()

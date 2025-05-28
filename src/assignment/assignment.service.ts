@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { and, eq, inArray, ne } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import * as ExcelJS from 'exceljs';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import {
@@ -387,6 +388,63 @@ export class AssignmentService {
     }
 
     return { assignmentId };
+  }
+
+  async exportAssignmentScores(
+    assignmentId: schema.Assignment['assignmentId'],
+  ): Promise<{ filename: string; buffer: ExcelJS.Buffer }> {
+    const scores = await this.db
+      .select({
+        studentUserId: schema.studentMarks.studentUserId,
+        mark: schema.studentMarks.mark,
+        name: schema.users.name,
+        email: schema.users.email,
+      })
+      .from(schema.studentMarks)
+      .innerJoin(
+        schema.users,
+        eq(schema.users.userId, schema.studentMarks.studentUserId),
+      )
+      .where(eq(schema.studentMarks.assignmentId, assignmentId));
+
+    const [assignmentInfo] = await this.db
+      .select({
+        assignmentName: schema.assignments.assignmentName,
+        classroomName: schema.classrooms.classroomName,
+      })
+      .from(schema.assignments)
+      .innerJoin(
+        schema.classrooms,
+        eq(schema.classrooms.classroomId, schema.assignments.classroomId),
+      )
+      .where(eq(schema.assignments.assignmentId, assignmentId));
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('scores');
+
+    worksheet.columns = [
+      { header: 'Student Name', key: 'name', width: 40 },
+      { header: 'Score', key: 'mark', width: 10 },
+    ];
+
+    scores.forEach((s) => {
+      worksheet.addRow({
+        name: s.name,
+        mark: s.mark,
+      });
+    });
+
+    worksheet.insertRow(1, [
+      `Scores for ${assignmentInfo.assignmentName} (${assignmentInfo.classroomName})`,
+    ]);
+    worksheet.mergeCells('A1:C1');
+    worksheet.getCell('A1').font = { size: 14, bold: true };
+    worksheet.getCell('A1').alignment = { horizontal: 'center' };
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const filename = `${assignmentInfo.assignmentName.toLowerCase().replace(/ /g, '-')}-scores.xlsx`;
+
+    return { filename, buffer };
   }
 
   async getMyMark(

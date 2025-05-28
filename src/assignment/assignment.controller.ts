@@ -6,8 +6,10 @@ import {
   Param,
   Post,
   Put,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AppResponse } from '../app.response';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { LoggedInUser } from '../auth/logged-in-user.decorator';
@@ -16,6 +18,7 @@ import { AssignmentService } from './assignment.service';
 import {
   CreateAssignmentRequest,
   DeleteAssignmentRequest,
+  ExportAssignmentScoresRequest,
   GetAssessmentPeriodsByAssignmentIdRequest,
   GetAssignmentByIdRequest,
   GetCriteriaByAssignmentIdRequest,
@@ -180,6 +183,25 @@ export class AssignmentController {
   ): Promise<AppResponse<UpsertStudentMarksResponse>> {
     const result = await this.assignmentService.upsertStudentMarks(data);
     return { data: result };
+  }
+
+  @Get(':assignmentId/export')
+  async exportAssignmentScores(
+    @Param() params: ExportAssignmentScoresRequest,
+    @Res() res: Response,
+  ) {
+    const result = await this.assignmentService.exportAssignmentScores(
+      params.assignmentId,
+    );
+
+    res.header(
+      'Content-Disposition',
+      `attachment; filename=${result.filename}`,
+    );
+    res.type(
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.send(result.buffer);
   }
 
   @Get(':assignmentId/my-mark')
