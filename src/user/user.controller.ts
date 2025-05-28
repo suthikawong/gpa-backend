@@ -1,5 +1,14 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { AppResponse } from '../app.response';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   CreateUserRequest,
   GetUserByIdRequest,
@@ -17,6 +26,7 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Get(':userId')
+  @UseGuards(JwtAuthGuard)
   async getUserById(
     @Param() data: GetUserByIdRequest,
   ): Promise<AppResponse<GetUserByIdResponse>> {
@@ -25,6 +35,7 @@ export class UserController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async createUser(
     @Body() data: CreateUserRequest,
   ): Promise<AppResponse<CreateUserResponse>> {
@@ -33,6 +44,7 @@ export class UserController {
   }
 
   @Put()
+  @UseGuards(JwtAuthGuard)
   async updateUser(
     @Body() data: UpdateUserRequest,
   ): Promise<AppResponse<UpdateUserResponse>> {

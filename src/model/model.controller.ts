@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AppResponse } from '../app.response';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   GetModelConfigurationByIdRequest,
   UpsertModelConfigurationRequest,

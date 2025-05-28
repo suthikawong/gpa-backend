@@ -9,10 +9,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { LoggedInUser } from 'src/auth/logged-in-user.decorator';
-import { User } from 'src/drizzle/schema';
 import { AppResponse } from '../app.response';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { LoggedInUser } from '../auth/logged-in-user.decorator';
+import { User } from '../drizzle/schema';
 import { ClassroomService } from './classroom.service';
 import {
   CreateClassroomRequest,

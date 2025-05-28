@@ -1,12 +1,12 @@
 import { Transform } from 'class-transformer';
 import {
-  IsString,
   IsBoolean,
   IsInt,
-  IsOptional,
   IsNumber,
+  IsOptional,
+  IsString,
 } from 'class-validator';
-import { Classroom, User } from 'src/drizzle/schema';
+import { Classroom, User } from '../../drizzle/schema';
 
 export class CreateClassroomRequest {
   @IsString()

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { and, eq, ilike } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
+import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { UserService } from '../user/user.service';
 import { generateCode } from '../utils/generate-code';

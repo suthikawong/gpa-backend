@@ -1,5 +1,14 @@
-import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common';
-import { AppResponse } from 'src/app.response';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
+import { AppResponse } from '../app.response';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CriterionService } from './criterion.service';
 import {
   CreateCriterionRequest,
@@ -17,6 +26,7 @@ export class CriterionController {
   constructor(private readonly criterionService: CriterionService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(
     @Body() data: CreateCriterionRequest,
   ): Promise<AppResponse<CreateCriterionResponse>> {
@@ -25,6 +35,7 @@ export class CriterionController {
   }
 
   @Put()
+  @UseGuards(JwtAuthGuard)
   async update(
     @Body() data: UpdateCriterionRequest,
   ): Promise<AppResponse<UpdateCriterionResponse>> {
@@ -33,6 +44,7 @@ export class CriterionController {
   }
 
   @Delete(':criterionId')
+  @UseGuards(JwtAuthGuard)
   async delete(
     @Param() params: DeleteCriterionRequest,
   ): Promise<AppResponse<DeleteCriterionResponse>> {

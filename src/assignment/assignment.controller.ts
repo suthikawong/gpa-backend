@@ -186,6 +186,7 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/export')
+  @UseGuards(JwtAuthGuard)
   async exportAssignmentScores(
     @Param() params: ExportAssignmentScoresRequest,
     @Res() res: Response,

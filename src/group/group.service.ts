@@ -6,10 +6,10 @@ import {
 } from '@nestjs/common';
 import { and, eq, ne } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { AssignmentService } from 'src/assignment/assignment.service';
-import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
-import { generateCode } from 'src/utils/generate-code';
+import { AssignmentService } from '../assignment/assignment.service';
+import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
+import { generateCode } from '../utils/generate-code';
 import {
   AddGroupMemberRequest,
   CreateGroupRequest,

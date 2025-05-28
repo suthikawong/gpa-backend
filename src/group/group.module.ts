@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AssignmentModule } from 'src/assignment/assignment.module';
+import { AssignmentModule } from '../assignment/assignment.module';
 import { DrizzleModule } from '../drizzle/drizzle.module';
 import { GroupController } from './group.controller';
 import { GroupService } from './group.service';

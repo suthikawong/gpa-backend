@@ -4,10 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { and, eq, ne } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { AssignmentService } from '../assignment/assignment.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
-import { eq, ne, and } from 'drizzle-orm';
 import {
   CreateCriterionRequest,
   UpdateCriterionRequest,
@@ -17,7 +18,6 @@ import {
   DeleteCriterionResponse,
   UpdateCriterionResponse,
 } from './dto/criterion.response';
-import { AssignmentService } from 'src/assignment/assignment.service';
 
 interface ValidateCriterionInterface {
   criterionId?: schema.Criterion['criterionId'];

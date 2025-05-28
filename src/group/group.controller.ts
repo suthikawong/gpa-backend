@@ -8,7 +8,10 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { AppResponse } from 'src/app.response';
+import { AppResponse } from '../app.response';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { LoggedInUser } from '../auth/logged-in-user.decorator';
+import { User } from '../drizzle/schema';
 import {
   AddGroupMemberRequest,
   CreateGroupRequest,
@@ -32,15 +35,13 @@ import {
   UpdateGroupResponse,
 } from './dto/group.response';
 import { GroupService } from './group.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { User } from 'src/drizzle/schema';
-import { LoggedInUser } from 'src/auth/logged-in-user.decorator';
 
 @Controller('group')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
   @Get(':groupId')
+  @UseGuards(JwtAuthGuard)
   async getById(
     @Param() params: GetGroupByIdRequest,
   ): Promise<AppResponse<GetGroupByIdResponse>> {
@@ -49,6 +50,7 @@ export class GroupController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(
     @Body() data: CreateGroupRequest,
   ): Promise<AppResponse<CreateGroupResponse>> {
@@ -57,6 +59,7 @@ export class GroupController {
   }
 
   @Put()
+  @UseGuards(JwtAuthGuard)
   async update(
     @Body() data: UpdateGroupRequest,
   ): Promise<AppResponse<UpdateGroupResponse>> {
@@ -65,6 +68,7 @@ export class GroupController {
   }
 
   @Delete(':groupId')
+  @UseGuards(JwtAuthGuard)
   async delete(
     @Param() params: DeleteGroupRequest,
   ): Promise<AppResponse<DeleteGroupResponse>> {
@@ -99,6 +103,7 @@ export class GroupController {
   }
 
   @Get(':groupId/member')
+  @UseGuards(JwtAuthGuard)
   async getMembers(
     @Param() params: GetGroupMembersRequest,
   ): Promise<AppResponse<GetGroupMembersResponse>> {
@@ -107,6 +112,7 @@ export class GroupController {
   }
 
   @Post('member')
+  @UseGuards(JwtAuthGuard)
   async addMember(
     @Body() body: AddGroupMemberRequest,
   ): Promise<AppResponse<AddGroupMemberResponse>> {
@@ -115,6 +121,7 @@ export class GroupController {
   }
 
   @Delete(':groupId/member/:studentUserId')
+  @UseGuards(JwtAuthGuard)
   async deleteMember(
     @Param() params: DeleteGroupMemberRequest,
   ): Promise<AppResponse<DeleteGroupMemberResponse>> {

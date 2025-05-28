@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
-import { User } from 'src/drizzle/schema';
+import { User } from '../../drizzle/schema';
 
 export class CreateUserRequest {
   @IsString()

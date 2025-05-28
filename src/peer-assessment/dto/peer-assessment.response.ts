@@ -1,5 +1,5 @@
-import { UserProtected } from 'src/user/user.interface';
 import { PeerAssessment, Question } from '../../drizzle/schema';
+import { UserProtected } from '../../user/user.interface';
 
 export interface PeerAssessmentWithQuestion {
   assessorStudentUserId: PeerAssessment['assessorStudentUserId'];

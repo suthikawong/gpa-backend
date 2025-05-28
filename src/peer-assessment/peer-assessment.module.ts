@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { DrizzleModule } from 'src/drizzle/drizzle.module';
-import { GroupModule } from 'src/group/group.module';
+import { DrizzleModule } from '../drizzle/drizzle.module';
+import { GroupModule } from '../group/group.module';
 import { PeerAssessmentController } from './peer-assessment.controller';
 import { PeerAssessmentService } from './peer-assessment.service';
 

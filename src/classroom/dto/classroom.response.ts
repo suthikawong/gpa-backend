@@ -1,5 +1,5 @@
-import { UserProtected } from 'src/user/user.interface';
 import { Assignment, Classroom, User } from '../../drizzle/schema';
+import { UserProtected } from '../../user/user.interface';
 
 export interface CreateClassroomResponse extends Classroom {}
 

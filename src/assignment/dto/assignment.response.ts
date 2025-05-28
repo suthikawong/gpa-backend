@@ -1,4 +1,3 @@
-import { UserProtected } from 'src/user/user.interface';
 import {
   AssessmentPeriod,
   Assignment,
@@ -8,6 +7,7 @@ import {
   Question,
   StudentMark,
 } from '../../drizzle/schema';
+import { UserProtected } from '../../user/user.interface';
 
 export interface GetAssignmentByIdResponse extends Assignment {
   isEnded: boolean;
