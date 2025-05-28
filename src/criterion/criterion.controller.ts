@@ -7,8 +7,11 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
+import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { CriterionService } from './criterion.service';
 import {
   CreateCriterionRequest,
@@ -21,12 +24,13 @@ import {
   UpdateCriterionResponse,
 } from './dto/criterion.response';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('criterion')
 export class CriterionController {
   constructor(private readonly criterionService: CriterionService) {}
 
   @Post()
+  @Roles([Role.Instructor])
   async create(
     @Body() data: CreateCriterionRequest,
   ): Promise<AppResponse<CreateCriterionResponse>> {
@@ -35,6 +39,7 @@ export class CriterionController {
   }
 
   @Put()
+  @Roles([Role.Instructor])
   async update(
     @Body() data: UpdateCriterionRequest,
   ): Promise<AppResponse<UpdateCriterionResponse>> {
@@ -43,6 +48,7 @@ export class CriterionController {
   }
 
   @Delete(':criterionId')
+  @Roles([Role.Instructor])
   async delete(
     @Param() params: DeleteCriterionRequest,
   ): Promise<AppResponse<DeleteCriterionResponse>> {

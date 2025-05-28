@@ -10,9 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
+import { LoggedInUser } from '../auth/decorators/logged-in-user.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { LoggedInUser } from '../auth/logged-in-user.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { User } from '../drizzle/schema';
 import { AssignmentService } from './assignment.service';
 import {
@@ -49,7 +52,7 @@ import {
   UpsertStudentMarksResponse,
 } from './dto/assignment.response';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('assignment')
 export class AssignmentController {
   constructor(private readonly assignmentService: AssignmentService) {}
@@ -65,6 +68,7 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/groups')
+  @Roles([Role.Instructor])
   async getGroupsByAssignmentId(
     @Param() params: GetGroupsByAssignmentIdRequest,
   ): Promise<AppResponse<GetGroupsByAssignmentIdResponse>> {
@@ -75,6 +79,7 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/criteria')
+  @Roles([Role.Instructor])
   async getCriteriaByAssignmentId(
     @Param() params: GetCriteriaByAssignmentIdRequest,
   ): Promise<AppResponse<GetCriteriaByAssignmentIdResponse>> {
@@ -85,6 +90,7 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/assessment-periods')
+  @Roles([Role.Instructor])
   async getAssessmentPeriodsByAssignmentId(
     @Param() params: GetAssessmentPeriodsByAssignmentIdRequest,
   ): Promise<AppResponse<GetAssessmentPeriodsByAssignmentIdResponse>> {
@@ -96,6 +102,7 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/marking-progress')
+  @Roles([Role.Instructor])
   async getMarkingProgressByAssignmentId(
     @Param() params: GetMarkingProgressByAssignmentIdRequest,
   ): Promise<AppResponse<GetMarkingProgressByAssignmentIdResponse>> {
@@ -106,6 +113,7 @@ export class AssignmentController {
   }
 
   @Post()
+  @Roles([Role.Instructor])
   async create(
     @Body() data: CreateAssignmentRequest,
   ): Promise<AppResponse<CreateAssignmentResponse>> {
@@ -114,6 +122,7 @@ export class AssignmentController {
   }
 
   @Put()
+  @Roles([Role.Instructor])
   async update(
     @Body() data: UpdateAssignmentRequest,
   ): Promise<AppResponse<UpdateAssignmentResponse>> {
@@ -122,6 +131,7 @@ export class AssignmentController {
   }
 
   @Delete(':assignmentId')
+  @Roles([Role.Instructor])
   async delete(
     @Param() params: DeleteAssignmentRequest,
   ): Promise<AppResponse<DeleteAssignmentResponse>> {
@@ -130,6 +140,7 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/group/joined')
+  @Roles([Role.Student])
   async getJoinedGroup(
     @Param() params: GetJoinedGroupRequest,
     @LoggedInUser() user: User,
@@ -142,6 +153,7 @@ export class AssignmentController {
   }
 
   @Get('group/:groupId/group-mark')
+  @Roles([Role.Instructor])
   async getGroupMark(
     @Param() data: GetGroupMarkByGroupIdRequest,
   ): Promise<AppResponse<GetGroupMarkByGroupIdResponse>> {
@@ -150,6 +162,7 @@ export class AssignmentController {
   }
 
   @Post('group/group-mark')
+  @Roles([Role.Instructor])
   async markGroup(
     @Body() data: MarkGroupRequest,
   ): Promise<AppResponse<MarkGroupResponse>> {
@@ -158,6 +171,7 @@ export class AssignmentController {
   }
 
   @Get('group/:groupId/student-marks')
+  @Roles([Role.Instructor])
   async getStudnetMark(
     @Param() params: GetStudentMarksByGroupIdRequest,
   ): Promise<AppResponse<GetStudentMarksByGroupIdResponse>> {
@@ -166,6 +180,7 @@ export class AssignmentController {
   }
 
   @Post('group/student-marks')
+  @Roles([Role.Instructor])
   async upsertStudentMarks(
     @Body() data: UpsertStudentMarksRequest,
   ): Promise<AppResponse<UpsertStudentMarksResponse>> {
@@ -174,6 +189,7 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/export')
+  @Roles([Role.Instructor])
   async exportAssignmentScores(
     @Param() params: ExportAssignmentScoresRequest,
     @Res() res: Response,
@@ -193,6 +209,7 @@ export class AssignmentController {
   }
 
   @Get(':assignmentId/my-mark')
+  @Roles([Role.Student])
   async getMyMark(
     @Param() params: GetMyMarkRequest,
     @LoggedInUser() user: User,

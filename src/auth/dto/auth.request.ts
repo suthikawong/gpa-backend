@@ -1,5 +1,5 @@
 import { IsNumber, IsString, MinLength } from 'class-validator';
-import { User } from 'src/drizzle/schema';
+import { User } from '../../drizzle/schema';
 
 export class RegisterRequest {
   @IsString()

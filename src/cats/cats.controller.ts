@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { LoggedInUser } from '../auth/logged-in-user.decorator';
+import { LoggedInUser } from '../auth/decorators/logged-in-user.decorator';
 import { User } from '../drizzle/schema';
 import { AppResponse } from '../app.response';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';

@@ -9,9 +9,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
+import { LoggedInUser } from '../auth/decorators/logged-in-user.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { LoggedInUser } from '../auth/logged-in-user.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { User } from '../drizzle/schema';
 import { ClassroomService } from './classroom.service';
 import {
@@ -39,7 +42,7 @@ import {
   UpdateClassroomResponse,
 } from './dto/classroom.response';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('classroom')
 export class ClassroomController {
   constructor(private readonly classroomService: ClassroomService) {}
@@ -55,6 +58,7 @@ export class ClassroomController {
   }
 
   @Post()
+  @Roles([Role.Instructor])
   async create(
     @Body() data: CreateClassroomRequest,
     @LoggedInUser() user: User,
@@ -64,6 +68,7 @@ export class ClassroomController {
   }
 
   @Put()
+  @Roles([Role.Instructor])
   async update(
     @Body() data: UpdateClassroomRequest,
   ): Promise<AppResponse<UpdateClassroomResponse>> {
@@ -72,6 +77,7 @@ export class ClassroomController {
   }
 
   @Delete(':classroomId')
+  @Roles([Role.Instructor])
   async delete(
     @Param() params: DeleteClassroomRequest,
   ): Promise<AppResponse<DeleteClassroomResponse>> {
@@ -80,6 +86,7 @@ export class ClassroomController {
   }
 
   @Get('student/search')
+  @Roles([Role.Instructor])
   async searchStudentsInClassroom(
     @Query() query: SearchStudentsInClassroomRequest,
   ): Promise<AppResponse<SearchStudentsInClassroomResponse>> {
@@ -89,6 +96,7 @@ export class ClassroomController {
   }
 
   @Get('instructor/:instructorUserId')
+  @Roles([Role.Instructor])
   async getByInstructor(
     @Param() params: GetClassroomsByInstructorRequest,
   ): Promise<AppResponse<GetClassroomsByInstructorResponse>> {
@@ -99,6 +107,7 @@ export class ClassroomController {
   }
 
   @Get('student/:studentUserId')
+  @Roles([Role.Student])
   async getByStudent(
     @Param() params: GetClassroomsByStudentRequest,
   ): Promise<AppResponse<GetClassroomsByStudentResponse>> {
@@ -109,6 +118,7 @@ export class ClassroomController {
   }
 
   @Delete(':classroomId/student/:studentUserId')
+  @Roles([Role.Instructor])
   async removeStudentFromClassroom(
     @Param() params: RemoveStudentFromClassroomRequest,
   ): Promise<AppResponse<RemoveStudentFromClassroomResponse>> {
@@ -119,7 +129,8 @@ export class ClassroomController {
     return { data: result };
   }
 
-  @Get(':classroomId/assignment')
+  @Get(':classroomId/assignments')
+  @Roles([Role.Instructor])
   async getAssignmentsByClassroomId(
     @Param() params: GetAssignmentsByClassroomIdRequest,
   ): Promise<AppResponse<GetAssignmentsByClassroomIdResponse>> {
@@ -130,6 +141,7 @@ export class ClassroomController {
   }
 
   @Post('join')
+  @Roles([Role.Student])
   async join(
     @Body() data: JoinClassroomRequest,
     @LoggedInUser() user: User,

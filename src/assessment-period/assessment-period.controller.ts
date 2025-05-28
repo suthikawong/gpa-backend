@@ -8,8 +8,11 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { AssessmentPeriodService } from './assessment-period.service';
 import {
   CreateAssessmentPeriodRequest,
@@ -30,7 +33,7 @@ import {
   UpdateAssessmentQuestionResponse,
 } from './dto/assessment-period.response';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('assessment-period')
 export class AssessmentPeriodController {
   constructor(
@@ -38,6 +41,7 @@ export class AssessmentPeriodController {
   ) {}
 
   @Get(':assessmentPeriodId')
+  @Roles([Role.Instructor])
   async getAssessmentPeriodById(
     @Param() params: GetAssessmentPeriodByIdRequest,
   ): Promise<AppResponse<GetAssessmentPeriodByIdResponse>> {
@@ -49,6 +53,7 @@ export class AssessmentPeriodController {
   }
 
   @Post()
+  @Roles([Role.Instructor])
   async create(
     @Body() data: CreateAssessmentPeriodRequest,
   ): Promise<AppResponse<CreateAssessmentPeriodResponse>> {
@@ -57,6 +62,7 @@ export class AssessmentPeriodController {
   }
 
   @Put()
+  @Roles([Role.Instructor])
   async update(
     @Body() data: UpdateAssessmentPeriodRequest,
   ): Promise<AppResponse<UpdateAssessmentPeriodResponse>> {
@@ -65,6 +71,7 @@ export class AssessmentPeriodController {
   }
 
   @Delete(':assessmentPeriodId')
+  @Roles([Role.Instructor])
   async delete(
     @Param() params: DeleteAssessmentPeriodRequest,
   ): Promise<AppResponse<DeleteAssessmentPeriodResponse>> {
@@ -75,6 +82,7 @@ export class AssessmentPeriodController {
   }
 
   @Post('assessment-question')
+  @Roles([Role.Instructor])
   async createAssessmentQuestion(
     @Body() body: CreateAssessmentQuestionRequest,
   ): Promise<AppResponse<CreateAssessmentQuestionResponse>> {
@@ -84,6 +92,7 @@ export class AssessmentPeriodController {
   }
 
   @Put('assessment-question')
+  @Roles([Role.Instructor])
   async updateAssessmentQuestion(
     @Body() body: UpdateAssessmentQuestionRequest,
   ): Promise<AppResponse<UpdateAssessmentQuestionResponse>> {
@@ -93,6 +102,7 @@ export class AssessmentPeriodController {
   }
 
   @Delete('assessment-question/:questionId')
+  @Roles([Role.Instructor])
   async deleteAssessmentQuestion(
     @Param() params: DeleteAssessmentQuestionRequest,
   ): Promise<AppResponse<DeleteAssessmentQuestionResponse>> {

@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import {
   GetModelConfigurationByIdRequest,
   UpsertModelConfigurationRequest,
@@ -11,12 +14,13 @@ import {
 } from './dto/model.response';
 import { ModelService } from './model.service';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('model')
 export class ModelController {
   constructor(private modelService: ModelService) {}
 
   @Get(':modelConfigurationId')
+  @Roles([Role.Instructor])
   async getAssignmentById(
     @Param() params: GetModelConfigurationByIdRequest,
   ): Promise<AppResponse<GetModelConfigurationByIdResponse>> {
@@ -27,6 +31,7 @@ export class ModelController {
   }
 
   @Post()
+  @Roles([Role.Instructor])
   async upsert(
     @Body() data: UpsertModelConfigurationRequest,
   ): Promise<AppResponse<UpsertModelConfigurationResponse>> {

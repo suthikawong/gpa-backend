@@ -1,4 +1,4 @@
-import { User } from 'src/drizzle/schema';
+import { User } from '../../drizzle/schema';
 import { UserProtected } from '../../user/user.interface';
 
 export interface LoginResponse extends UserProtected {}

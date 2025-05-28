@@ -8,9 +8,12 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
+import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
+import { LoggedInUser } from '../auth/decorators/logged-in-user.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { LoggedInUser } from '../auth/logged-in-user.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { User } from '../drizzle/schema';
 import {
   AddGroupMemberRequest,
@@ -36,7 +39,7 @@ import {
 } from './dto/group.response';
 import { GroupService } from './group.service';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('group')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
@@ -74,6 +77,7 @@ export class GroupController {
   }
 
   @Post('join')
+  @Roles([Role.Student])
   async joinGroup(
     @Body() body: JoinGroupRequest,
     @LoggedInUser() user: User,
@@ -86,6 +90,7 @@ export class GroupController {
   }
 
   @Post('leave')
+  @Roles([Role.Student])
   async leaveGroup(
     @Body() body: LeaveGroupRequest,
     @LoggedInUser() user: User,
@@ -98,6 +103,7 @@ export class GroupController {
   }
 
   @Get(':groupId/member')
+  @Roles([Role.Instructor])
   async getMembers(
     @Param() params: GetGroupMembersRequest,
   ): Promise<AppResponse<GetGroupMembersResponse>> {
@@ -106,6 +112,7 @@ export class GroupController {
   }
 
   @Post('member')
+  @Roles([Role.Instructor])
   async addMember(
     @Body() body: AddGroupMemberRequest,
   ): Promise<AppResponse<AddGroupMemberResponse>> {
@@ -114,6 +121,7 @@ export class GroupController {
   }
 
   @Delete(':groupId/member/:studentUserId')
+  @Roles([Role.Instructor])
   async deleteMember(
     @Param() params: DeleteGroupMemberRequest,
   ): Promise<AppResponse<DeleteGroupMemberResponse>> {
