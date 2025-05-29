@@ -45,7 +45,10 @@ export class AuthService {
     response.cookie('Authentication', accessToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
-      sameSite: 'none',
+      sameSite:
+        this.configService.get('NODE_ENV') === 'production'
+          ? 'none'
+          : undefined,
       expires: expireAccessToken,
       path: '/',
     });
@@ -70,7 +73,10 @@ export class AuthService {
     response.clearCookie('Authentication', {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
-      sameSite: 'none',
+      sameSite:
+        this.configService.get('NODE_ENV') === 'production'
+          ? 'none'
+          : undefined,
       path: '/',
     });
   }
