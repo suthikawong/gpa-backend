@@ -25,7 +25,7 @@ import {
   SearchStudentsInClassroomResponse,
   UpdateClassroomResponse,
 } from './dto/classroom.response';
-import { Role } from 'src/app.config';
+import { Role } from '../app.config';
 
 @Injectable()
 export class ClassroomService {

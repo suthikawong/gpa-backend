@@ -7,7 +7,7 @@ import {
 import { and, eq, inArray, ne } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as ExcelJS from 'exceljs';
-import { ModelService } from 'src/model/model.service';
+import { ModelService } from '../model/model.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import {
