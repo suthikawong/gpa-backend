@@ -47,6 +47,27 @@ import {
 export class ClassroomController {
   constructor(private readonly classroomService: ClassroomService) {}
 
+  @Get('instructor')
+  @Roles([Role.Instructor])
+  async getByInstructor(
+    @LoggedInUser() user: User,
+  ): Promise<AppResponse<GetClassroomsByInstructorResponse>> {
+    console.log(user);
+    const classrooms = await this.classroomService.getClassroomsByInstructor(
+      user.userId,
+    );
+    return { data: classrooms };
+  }
+
+  @Get('student')
+  @Roles([Role.Student])
+  async getByStudent(
+    @LoggedInUser() user: User,
+  ): Promise<AppResponse<GetClassroomsByStudentResponse>> {
+    const classrooms = await this.classroomService.getByStudentId(user.userId);
+    return { data: classrooms };
+  }
+
   @Get(':classroomId')
   async getById(
     @Param() data: GetClassroomByIdRequest,
@@ -93,28 +114,6 @@ export class ClassroomController {
     const students =
       await this.classroomService.searchStudentsInClassroom(query);
     return { data: students };
-  }
-
-  @Get('instructor/:instructorUserId')
-  @Roles([Role.Instructor])
-  async getByInstructor(
-    @Param() params: GetClassroomsByInstructorRequest,
-  ): Promise<AppResponse<GetClassroomsByInstructorResponse>> {
-    const classrooms = await this.classroomService.getClassroomsByInstructor(
-      params.instructorUserId,
-    );
-    return { data: classrooms };
-  }
-
-  @Get('student/:studentUserId')
-  @Roles([Role.Student])
-  async getByStudent(
-    @Param() params: GetClassroomsByStudentRequest,
-  ): Promise<AppResponse<GetClassroomsByStudentResponse>> {
-    const classrooms = await this.classroomService.getByStudentId(
-      params.studentUserId,
-    );
-    return { data: classrooms };
   }
 
   @Delete(':classroomId/student/:studentUserId')

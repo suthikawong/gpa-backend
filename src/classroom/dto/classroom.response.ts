@@ -1,19 +1,25 @@
-import { Assignment, Classroom, User } from '../../drizzle/schema';
+import { Assignment, Classroom, Institute, User } from '../../drizzle/schema';
 import { UserProtected } from '../../user/user.interface';
+
+interface ClassroomWithInstitute extends Classroom {
+  institute: Institute;
+}
+
+export interface GetClassroomByIdResponse extends ClassroomWithInstitute {}
 
 export interface CreateClassroomResponse extends Classroom {}
 
 export interface UpdateClassroomResponse extends Classroom {}
 
-export interface GetClassroomByIdResponse extends Classroom {}
-
 export interface DeleteClassroomResponse {
   classroomId: Classroom['classroomId'];
 }
 
-export interface GetClassroomsByInstructorResponse extends Array<Classroom> {}
+export interface GetClassroomsByInstructorResponse
+  extends Array<ClassroomWithInstitute> {}
 
-export interface GetClassroomsByStudentResponse extends Array<Classroom> {}
+export interface GetClassroomsByStudentResponse
+  extends Array<ClassroomWithInstitute> {}
 
 export interface SearchStudentsInClassroomResponse
   extends Array<UserProtected> {}

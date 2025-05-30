@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { and, eq, ilike } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { Role } from '../app.config';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { UserService } from '../user/user.service';
@@ -25,7 +26,6 @@ import {
   SearchStudentsInClassroomResponse,
   UpdateClassroomResponse,
 } from './dto/classroom.response';
-import { Role } from '../app.config';
 
 @Injectable()
 export class ClassroomService {
@@ -38,15 +38,21 @@ export class ClassroomService {
   async getClassroomById(
     classroomId: schema.Classroom['classroomId'],
   ): Promise<GetClassroomByIdResponse> {
-    const classroom = await this.db.query.classrooms.findFirst({
-      where: eq(schema.classrooms.classroomId, classroomId),
-    });
+    const [result] = await this.db
+      .select()
+      .from(schema.classrooms)
+      .innerJoin(
+        schema.institutes,
+        eq(schema.institutes.instituteId, schema.classrooms.instituteId),
+      )
+      .where(eq(schema.classrooms.classroomId, classroomId))
+      .limit(1);
 
-    if (!classroom) {
+    if (!result) {
       throw new NotFoundException(`Classroom not found`);
     }
 
-    return classroom;
+    return { ...result.classrooms, institute: result.institutes };
   }
 
   async create(
@@ -122,10 +128,18 @@ export class ClassroomService {
   async getClassroomsByInstructor(
     instructorUserId: schema.Classroom['instructorUserId'],
   ): Promise<GetClassroomsByInstructorResponse> {
-    return await this.db
+    const result = await this.db
       .select()
       .from(schema.classrooms)
+      .innerJoin(
+        schema.institutes,
+        eq(schema.institutes.instituteId, schema.classrooms.instituteId),
+      )
       .where(eq(schema.classrooms.instructorUserId, instructorUserId));
+    return result.map((item) => ({
+      ...item.classrooms,
+      institute: item.institutes,
+    }));
   }
 
   async getByStudentId(
@@ -138,8 +152,15 @@ export class ClassroomService {
         schema.classrooms,
         eq(schema.enrollments.classroomId, schema.classrooms.classroomId),
       )
+      .innerJoin(
+        schema.institutes,
+        eq(schema.institutes.instituteId, schema.classrooms.instituteId),
+      )
       .where(eq(schema.enrollments.studentUserId, studentUserId));
-    return result.map((row) => row.classrooms);
+    return result.map((item) => ({
+      ...item.classrooms,
+      institute: item.institutes,
+    }));
   }
 
   async searchStudentsInClassroom(
