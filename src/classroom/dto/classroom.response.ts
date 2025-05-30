@@ -1,7 +1,7 @@
 import { Assignment, Classroom, Institute, User } from '../../drizzle/schema';
 import { UserProtected } from '../../user/user.interface';
 
-interface ClassroomWithInstitute extends Classroom {
+export interface ClassroomWithInstitute extends Classroom {
   institute: Institute;
 }
 

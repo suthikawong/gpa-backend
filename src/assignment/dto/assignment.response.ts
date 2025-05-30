@@ -13,7 +13,7 @@ export interface GetAssignmentByIdResponse extends Assignment {
   isEnded: boolean;
 }
 
-interface GroupWithMarkingStatus extends Group {
+export interface GroupWithMarkingStatus extends Group {
   isMarked: boolean;
 }
 
@@ -22,7 +22,7 @@ export interface GetGroupsByAssignmentIdResponse
 
 export interface GetCriteriaByAssignmentIdResponse extends Array<Criterion> {}
 
-interface PeriodWithQuestions extends AssessmentPeriod {
+export interface PeriodWithQuestions extends AssessmentPeriod {
   questions: Question[];
 }
 
@@ -41,13 +41,13 @@ export interface DeleteAssignmentResponse {
   assignmentId: Assignment['assignmentId'];
 }
 
-interface GroupWithMembers extends Group {
+export interface GroupWithMembers extends Group {
   members: UserProtected[];
 }
 
 export type GetJoinedGroupResponse = GroupWithMembers | null;
 
-interface CriterionWithGroupMark extends Criterion {
+export interface CriterionWithGroupMark extends Criterion {
   mark: GroupMark;
 }
 
@@ -58,7 +58,7 @@ export interface MarkGroupResponse {
   groupId: Group['groupId'];
 }
 
-interface UserWithStudentMark extends UserProtected {
+export interface UserWithStudentMark extends UserProtected {
   mark: StudentMark | null;
 }
 
