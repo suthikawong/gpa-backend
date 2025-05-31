@@ -22,8 +22,6 @@ import {
   DeleteClassroomRequest,
   GetAssignmentsByClassroomIdRequest,
   GetClassroomByIdRequest,
-  GetClassroomsByInstructorRequest,
-  GetClassroomsByStudentRequest,
   JoinClassroomRequest,
   RemoveStudentFromClassroomRequest,
   SearchStudentsInClassroomRequest,

@@ -42,21 +42,6 @@ export class DeleteClassroomRequest {
   classroomId: Classroom['classroomId'];
 }
 
-export class GetClassroomsByInstructorRequest {
-  @Transform(({ value }) => {
-    console.log(value);
-    return parseInt(value);
-  })
-  @IsNumber()
-  instructorUserId: Classroom['instructorUserId'];
-}
-
-export class GetClassroomsByStudentRequest {
-  @Transform(({ value }) => parseInt(value))
-  @IsNumber()
-  studentUserId: User['userId'];
-}
-
 export class SearchStudentsInClassroomRequest {
   @Transform(({ value }) => parseInt(value))
   @IsNumber()
