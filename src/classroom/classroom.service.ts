@@ -45,6 +45,10 @@ export class ClassroomService {
         schema.institutes,
         eq(schema.institutes.instituteId, schema.classrooms.instituteId),
       )
+      .innerJoin(
+        schema.users,
+        eq(schema.users.userId, schema.classrooms.instructorUserId),
+      )
       .where(eq(schema.classrooms.classroomId, classroomId))
       .limit(1);
 
@@ -52,7 +56,11 @@ export class ClassroomService {
       throw new NotFoundException(`Classroom not found`);
     }
 
-    return { ...result.classrooms, institute: result.institutes };
+    return {
+      ...result.classrooms,
+      institute: result.institutes,
+      instructor: result.users,
+    };
   }
 
   async create(

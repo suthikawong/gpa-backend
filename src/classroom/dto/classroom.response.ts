@@ -5,7 +5,11 @@ export interface ClassroomWithInstitute extends Classroom {
   institute: Institute;
 }
 
-export interface GetClassroomByIdResponse extends ClassroomWithInstitute {}
+export interface ClassroomWithInstructor extends ClassroomWithInstitute {
+  instructor: User;
+}
+
+export interface GetClassroomByIdResponse extends ClassroomWithInstructor {}
 
 export interface CreateClassroomResponse extends Classroom {}
 
