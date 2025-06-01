@@ -6,6 +6,7 @@ import { CatsModule } from './cats/cats.module';
 import { ClassroomModule } from './classroom/classroom.module';
 import { CriterionModule } from './criterion/criterion.module';
 import { GroupModule } from './group/group.module';
+import { LookupModule } from './lookup/lookup.module';
 import { ModelModule } from './model/model.module';
 import { PeerAssessmentModule } from './peer-assessment/peer-assessment.module';
 import { UserModule } from './user/user.module';
@@ -22,6 +23,7 @@ import { UserModule } from './user/user.module';
     CriterionModule,
     AssessmentPeriodModule,
     PeerAssessmentModule,
+    LookupModule,
   ],
   providers: [],
   controllers: [],
