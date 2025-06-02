@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, ilike } from 'drizzle-orm';
+import { and, count, eq, ilike } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Role } from '../app.config';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
@@ -173,7 +173,7 @@ export class ClassroomService {
 
   async searchStudentsInClassroom(
     data: SearchStudentsInClassroomRequest,
-  ): Promise<SearchStudentsInClassroomResponse> {
+  ): Promise<{ students: SearchStudentsInClassroomResponse; total: number }> {
     await this.getClassroomById(data.classroomId);
 
     const condition = [eq(schema.enrollments.classroomId, data.classroomId)];
@@ -202,7 +202,17 @@ export class ClassroomService {
 
     const students = await query;
 
-    return students;
+    const [{ total }] = await this.db
+      .select({ total: count() })
+      .from(schema.enrollments)
+      .innerJoin(
+        schema.users,
+        eq(schema.enrollments.studentUserId, schema.users.userId),
+      )
+      .where(and(...condition))
+      .limit(1);
+
+    return { students, total };
   }
 
   async removeStudentFromClassroom(

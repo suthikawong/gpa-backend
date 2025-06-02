@@ -109,9 +109,8 @@ export class ClassroomController {
   async searchStudentsInClassroom(
     @Query() query: SearchStudentsInClassroomRequest,
   ): Promise<AppResponse<SearchStudentsInClassroomResponse>> {
-    const students =
-      await this.classroomService.searchStudentsInClassroom(query);
-    return { data: students };
+    const result = await this.classroomService.searchStudentsInClassroom(query);
+    return { data: result.students, total: result.total };
   }
 
   @Delete(':classroomId/student/:studentUserId')
