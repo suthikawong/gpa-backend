@@ -201,7 +201,6 @@ export class AssignmentService {
       .update(schema.assignments)
       .set({
         assignmentName: data.assignmentName,
-        modelConfigurationId: data.modelConfigurationId,
         isPublished: data.isPublished,
         dueDate: new Date(data.dueDate),
         updatedDate: new Date(),
