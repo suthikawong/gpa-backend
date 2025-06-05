@@ -4,11 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, inArray, ne } from 'drizzle-orm';
+import { and, eq, inArray, ne, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { AssignmentService } from '../assignment/assignment.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
+import { UserService } from '../user/user.service';
 import { generateCode } from '../utils/generate-code';
 import {
   AddGroupMemberRequest,
@@ -41,6 +42,7 @@ export class GroupService {
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof schema>,
     private readonly assignmentService: AssignmentService,
+    private readonly userService: UserService,
   ) {}
 
   async getGroupById(
@@ -180,14 +182,38 @@ export class GroupService {
     data: DeleteGroupMemberRequest,
   ): Promise<DeleteGroupMemberResponse> {
     await this.getGroupById(data.groupId);
-    await this.db
-      .delete(schema.groupMembers)
-      .where(
-        and(
-          eq(schema.groupMembers.groupId, data.groupId),
-          eq(schema.groupMembers.studentUserId, data.studentUserId),
-        ),
-      );
+    await this.userService.getUserById(data.studentUserId);
+
+    await this.db.transaction(async (tx) => {
+      await tx.execute(sql`
+        DELETE FROM student_marks
+        USING groups
+        WHERE groups.assignment_id = student_marks.assignment_id
+          AND student_marks.student_user_id = ${data.studentUserId}
+          AND groups.group_id = ${data.groupId}
+      `);
+
+      await tx.execute(sql`
+        DELETE FROM peer_assessments
+        USING groups
+        WHERE groups.assignment_id = peer_assessments.assignment_id
+          AND groups.group_id = ${data.groupId}
+          AND (
+            peer_assessments.assessed_student_user_id = ${data.studentUserId}
+            OR peer_assessments.assessor_student_user_id = ${data.studentUserId}
+          )
+      `);
+
+      await tx
+        .delete(schema.groupMembers)
+        .where(
+          and(
+            eq(schema.groupMembers.groupId, data.groupId),
+            eq(schema.groupMembers.studentUserId, data.studentUserId),
+          ),
+        );
+    });
+
     return { studentUserId: data.studentUserId };
   }
 
