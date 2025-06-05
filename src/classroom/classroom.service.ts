@@ -233,8 +233,9 @@ export class ClassroomService {
 
       await tx.execute(sql`
         DELETE FROM peer_assessments
-        USING assignments
-        WHERE assignments.assignment_id = peer_assessments.assignment_id
+        USING groups, assignments
+        WHERE groups.group_id = peer_assessments.group_id
+          AND assignments.assignment_id = groups.assignment_id
           AND assignments.classroom_id = ${classroomId}
           AND (
             peer_assessments.assessed_student_user_id = ${studentUserId}

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq, inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
@@ -51,12 +51,7 @@ export class PeerAssessmentService {
         schema.questions,
         eq(schema.peerAssessments.questionId, schema.questions.questionId),
       )
-      .where(
-        and(
-          inArray(schema.peerAssessments.assessedStudentUserId, studentIds),
-          eq(schema.peerAssessments.assignmentId, group.assignmentId),
-        ),
-      )
+      .where(eq(schema.peerAssessments.groupId, group.groupId))
       .orderBy(
         schema.peerAssessments.assessedStudentUserId,
         schema.questions.displayOrder,
@@ -94,7 +89,7 @@ export class PeerAssessmentService {
   ): Promise<AssessPeerResponse> {
     const values = data.ratings.map((rating) => ({
       assessorStudentUserId,
-      assignmentId: data.assignmentId,
+      groupId: data.groupId,
       assessedStudentUserId: data.assessedStudentUserId,
       questionId: rating.questionId,
       score: rating.score,

@@ -218,8 +218,10 @@ export type Question = typeof questions.$inferSelect;
 // ========== PEER_ASSESSMENT ==========
 export const peerAssessments = pgTable('peer_assessments', {
   peerAssessmentId: serial('peer_assessment_id').primaryKey(),
-  assignmentId: integer('assignment_id')
-    .references(() => assignments.assignmentId, { onDelete: 'cascade' })
+  groupId: integer('group_id')
+    .references(() => groups.groupId, {
+      onDelete: 'cascade',
+    })
     .notNull(),
   assessedStudentUserId: integer('assessed_student_user_id')
     .references(() => users.userId)

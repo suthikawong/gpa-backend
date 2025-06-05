@@ -20,7 +20,7 @@ class RatingItem {
 
 export class AssessPeerRequest {
   @IsInt()
-  assignmentId: PeerAssessment['assignmentId'];
+  groupId: PeerAssessment['groupId'];
 
   @IsInt()
   assessedStudentUserId: PeerAssessment['assessedStudentUserId'];

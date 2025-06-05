@@ -98,9 +98,16 @@ export class GroupService {
   async delete(groupId: schema.Group['groupId']): Promise<DeleteGroupResponse> {
     await this.getGroupById(groupId);
 
-    await this.db
-      .delete(schema.groups)
-      .where(eq(schema.groups.groupId, groupId));
+    await this.db.transaction(async (tx) => {
+      await tx.execute(sql`
+        DELETE FROM student_marks
+        USING groups
+        WHERE groups.assignment_id = student_marks.assignment_id
+          AND groups.group_id = ${groupId}
+      `);
+
+      await tx.delete(schema.groups).where(eq(schema.groups.groupId, groupId));
+    });
 
     return { groupId };
   }
@@ -193,16 +200,17 @@ export class GroupService {
           AND groups.group_id = ${data.groupId}
       `);
 
-      await tx.execute(sql`
-        DELETE FROM peer_assessments
-        USING groups
-        WHERE groups.assignment_id = peer_assessments.assignment_id
-          AND groups.group_id = ${data.groupId}
-          AND (
-            peer_assessments.assessed_student_user_id = ${data.studentUserId}
-            OR peer_assessments.assessor_student_user_id = ${data.studentUserId}
-          )
-      `);
+      await tx
+        .delete(schema.peerAssessments)
+        .where(
+          and(
+            eq(schema.peerAssessments.groupId, data.groupId),
+            eq(
+              schema.peerAssessments.assessedStudentUserId,
+              data.studentUserId,
+            ),
+          ),
+        );
 
       await tx
         .delete(schema.groupMembers)
@@ -238,20 +246,12 @@ export class GroupService {
       .where(eq(schema.groupMembers.groupId, groupId))
       .orderBy(schema.users.userId);
 
-    const targetUserIds = members.map((user) => user.userId);
-
     const assessed = await this.db
       .select({
         assessedUserId: schema.peerAssessments.assessedStudentUserId,
       })
       .from(schema.peerAssessments)
-      .where(
-        and(
-          eq(schema.peerAssessments.assessorStudentUserId, userId),
-          inArray(schema.peerAssessments.assessedStudentUserId, targetUserIds),
-          eq(schema.peerAssessments.assignmentId, group.assignmentId),
-        ),
-      );
+      .where(eq(schema.peerAssessments.groupId, group.groupId));
 
     const assessedSet = new Set(assessed.map((item) => item.assessedUserId));
 
