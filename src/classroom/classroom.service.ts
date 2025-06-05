@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, count, eq, ilike } from 'drizzle-orm';
+import { and, count, eq, ilike, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Role } from '../app.config';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
@@ -222,14 +222,44 @@ export class ClassroomService {
     await this.getClassroomById(classroomId);
     await this.userService.getUserById(studentUserId);
 
-    await this.db
-      .delete(schema.enrollments)
-      .where(
-        and(
-          eq(schema.enrollments.classroomId, classroomId),
-          eq(schema.enrollments.studentUserId, studentUserId),
-        ),
-      );
+    await this.db.transaction(async (tx) => {
+      await tx.execute(sql`
+        DELETE FROM student_marks
+        USING assignments
+        WHERE assignments.assignment_id = student_marks.assignment_id
+          AND assignments.classroom_id = ${classroomId}
+          AND student_marks.student_user_id = ${studentUserId}
+      `);
+
+      await tx.execute(sql`
+        DELETE FROM peer_assessments
+        USING assignments
+        WHERE assignments.assignment_id = peer_assessments.assignment_id
+          AND assignments.classroom_id = ${classroomId}
+          AND (
+            peer_assessments.assessed_student_user_id = ${studentUserId}
+            OR peer_assessments.assessor_student_user_id = ${studentUserId}
+          )
+      `);
+
+      await tx.execute(sql`
+        DELETE FROM group_members
+        USING groups, assignments
+        WHERE groups.group_id = group_members.group_id
+          AND assignments.assignment_id = groups.assignment_id
+          AND assignments.classroom_id = ${classroomId}
+          AND group_members.student_user_id = ${studentUserId}
+      `);
+
+      await tx
+        .delete(schema.enrollments)
+        .where(
+          and(
+            eq(schema.enrollments.classroomId, classroomId),
+            eq(schema.enrollments.studentUserId, studentUserId),
+          ),
+        );
+    });
 
     return { studentUserId };
   }

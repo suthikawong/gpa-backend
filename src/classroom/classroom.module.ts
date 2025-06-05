@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { DrizzleModule } from '../drizzle/drizzle.module';
+import { UserModule } from '../user/user.module';
 import { ClassroomController } from './classroom.controller';
 import { ClassroomService } from './classroom.service';
-import { DrizzleModule } from '../drizzle/drizzle.module';
-import { ConfigModule } from '@nestjs/config';
-import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
