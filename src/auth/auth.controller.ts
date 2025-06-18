@@ -12,6 +12,7 @@ import {
 } from './dto/auth.response';
 import { LocalAuthGuard } from './guards/auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +21,16 @@ export class AuthController {
   @Post('login')
   @UseGuards(LocalAuthGuard)
   async login(
+    @LoggedInUser() user: User,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AppResponse<LoginResponse>> {
+    const data = await this.authService.login(user, response);
+    return { data };
+  }
+
+  @Post('refresh')
+  @UseGuards(JwtRefreshAuthGuard)
+  async refreshToken(
     @LoggedInUser() user: User,
     @Res({ passthrough: true }) response: Response,
   ): Promise<AppResponse<LoginResponse>> {

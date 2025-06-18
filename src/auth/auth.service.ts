@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { compare } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Response } from 'express';
@@ -32,15 +32,37 @@ export class AuthService {
   async login(user: User, response: Response): Promise<LoginResponse> {
     const expireAccessToken = new Date(
       Date.now() +
-        parseInt(this.configService.getOrThrow<string>('JWT_EXPIRATION_MS')),
+        parseInt(
+          this.configService.getOrThrow<string>(
+            'JWT_ACCESS_TOKEN_EXPIRATION_MS',
+          ),
+        ),
+    );
+    const expireRefreshToken = new Date(
+      Date.now() +
+        parseInt(
+          this.configService.getOrThrow<string>(
+            'JWT_REFRESH_TOKEN_EXPIRATION_MS',
+          ),
+        ),
     );
     const tokenPayload: TokenPayload = {
       userId: user.userId,
     };
     const accessToken = this.jwtService.sign(tokenPayload, {
-      secret: this.configService.getOrThrow('JWT_SECRET'),
-      expiresIn: `${this.configService.getOrThrow('JWT_EXPIRATION_MS')}ms`,
+      secret: this.configService.getOrThrow('JWT_ACCESS_TOKEN_SECRET'),
+      expiresIn: `${this.configService.getOrThrow('JWT_ACCESS_TOKEN_EXPIRATION_MS')}ms`,
     });
+    const refreshToken = this.jwtService.sign(tokenPayload, {
+      secret: this.configService.getOrThrow('JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn: `${this.configService.getOrThrow('JWT_REFRESH_TOKEN_EXPIRATION_MS')}ms`,
+    });
+
+    await this.db
+      .update(schema.users)
+      .set({ refreshToken: await hash(refreshToken, 10) })
+      .where(eq(schema.users.userId, user.userId))
+      .returning();
 
     response.cookie('Authentication', accessToken, {
       httpOnly: true,
@@ -50,6 +72,17 @@ export class AuthService {
           ? 'none'
           : undefined,
       expires: expireAccessToken,
+      path: '/',
+    });
+
+    response.cookie('RefreshToken', refreshToken, {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite:
+        this.configService.get('NODE_ENV') === 'production'
+          ? 'none'
+          : undefined,
+      expires: expireRefreshToken,
       path: '/',
     });
     const result = { ...user, password: undefined, refreshToken: undefined };
@@ -69,8 +102,32 @@ export class AuthService {
     }
   }
 
+  async verifyRefreshToken(refreshToken: string, userId: number) {
+    try {
+      const user = await this.userService.getUserById(userId);
+      if (!user.refreshToken) throw new UnauthorizedException();
+
+      const authenticated = await compare(refreshToken, user.refreshToken);
+      if (!authenticated) {
+        throw new UnauthorizedException();
+      }
+      return user;
+    } catch (err) {
+      throw new UnauthorizedException('Refresh token is not valid.');
+    }
+  }
+
   async logout(response: Response) {
     response.clearCookie('Authentication', {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite:
+        this.configService.get('NODE_ENV') === 'production'
+          ? 'none'
+          : undefined,
+      path: '/',
+    });
+    response.clearCookie('RefreshToken', {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
       sameSite:
