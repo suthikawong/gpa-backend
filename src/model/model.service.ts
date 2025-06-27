@@ -7,6 +7,10 @@ import { systemQ } from '../utils/system-q-model';
 import { webavalia } from '../utils/webavalia-model';
 import { UpsertModelConfigurationRequest } from './dto/model.request';
 import { GetModelConfigurationByIdResponse } from './dto/model.response';
+import {
+  calculateStudentsScoresFromSpecificComponentByQASS,
+  QASSMode,
+} from 'src/utils/qass.model';
 
 @Injectable()
 export class ModelService {
@@ -70,6 +74,28 @@ export class ModelService {
       return config;
     }
   }
+
+  calcualteMarksByQASS = (
+    peerMatrix: number[][],
+    groupProductScore: number,
+    peerRatingImpact: number,
+    groupSpread: number,
+    tuningFactor: number,
+    peerRatingWeights: number[],
+    mode: QASSMode,
+  ): number[] => {
+    const { studentScores } =
+      calculateStudentsScoresFromSpecificComponentByQASS(
+        peerMatrix,
+        groupProductScore,
+        peerRatingImpact,
+        groupSpread,
+        tuningFactor,
+        peerRatingWeights,
+        mode,
+      );
+    return studentScores;
+  };
 
   calcualteMarksBySystemQ = (
     peerRating: (number | null)[][],

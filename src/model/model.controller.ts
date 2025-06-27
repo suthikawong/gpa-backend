@@ -13,6 +13,7 @@ import {
   UpsertModelConfigurationResponse,
 } from './dto/model.response';
 import { ModelService } from './model.service';
+import { QASSMode } from '../utils/qass.model';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('model')
@@ -37,6 +38,35 @@ export class ModelController {
   ): Promise<AppResponse<UpsertModelConfigurationResponse>> {
     const config = await this.modelService.upsert(data);
     return { data: config };
+  }
+
+  @Post('qass')
+  calcualteGroupMarkByQASS(
+    @Body()
+    data: {
+      peerMatrix: number[][];
+      groupProductScore: number;
+      peerRatingImpact: number;
+      groupSpread: number;
+      tuningFactor: number;
+      peerRatingWeights: number[];
+      mode: keyof typeof QASSMode;
+    },
+  ): number[] | null {
+    try {
+      return this.modelService.calcualteMarksByQASS(
+        data.peerMatrix,
+        data.groupProductScore,
+        data.peerRatingImpact,
+        data.groupSpread,
+        data.tuningFactor,
+        data.peerRatingWeights,
+        QASSMode[data.mode],
+      );
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   @Post('system-q')
