@@ -1,20 +1,33 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { and, count, eq, ilike } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { generateCode } from 'src/utils/generate-code';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import {
+  ConfirmStudentJoinAssessmentRequest,
   CreateAssessmentRequest,
   DeleteAssessmentRequest,
+  RemoveStudentFromAssessmentRequest,
+  SearchStudentsInAssessmentRequest,
+  StudentJoinAssessmentRequest,
   UpdateAssessmentRequest,
 } from './dto/assessment.request';
 import {
+  ConfirmStudentJoinAssessmentResponse,
   CreateAssessmentResponse,
   DeleteAssessmentResponse,
   GetAssessmentByIdResponse,
   GetAssessmentsByInstructorResponse,
   GetAssessmentsByStudentResponse,
+  RemoveStudentFromAssessmentResponse,
+  SearchStudentsInAssessmentResponse,
+  StudentJoinAssessmentResponse,
   UpdateAssessmentResponse,
 } from './dto/assessment.response';
 
@@ -127,6 +140,142 @@ export class AssessmentService {
       .where(eq(schema.assessments.assessmentId, data.assessmentId));
 
     return { assessmentId: data.assessmentId };
+  }
+
+  async searchStudentsInAssessment(
+    data: SearchStudentsInAssessmentRequest,
+  ): Promise<{ students: SearchStudentsInAssessmentResponse; total: number }> {
+    await this.getAssessmentById(data.assessmentId);
+
+    const condition = [
+      eq(schema.assessmentStudent.assessmentId, data.assessmentId),
+    ];
+
+    if (data.keyword) {
+      condition.push(ilike(schema.users.name, `%${data.keyword}%`));
+    }
+
+    const query = this.db
+      .select({
+        userId: schema.users.userId,
+        name: schema.users.name,
+        email: schema.users.email,
+        isConfirmed: schema.assessmentStudent.isConfirmed,
+      })
+      .from(schema.assessmentStudent)
+      .innerJoin(
+        schema.users,
+        eq(schema.assessmentStudent.studentUserId, schema.users.userId),
+      )
+      .where(and(...condition));
+
+    if (data.limit !== undefined && data.offset !== undefined) {
+      query.limit(data.limit).offset(data.offset);
+    }
+
+    const students = await query;
+
+    const [{ total }] = await this.db
+      .select({ total: count() })
+      .from(schema.assessmentStudent)
+      .innerJoin(
+        schema.users,
+        eq(schema.assessmentStudent.studentUserId, schema.users.userId),
+      )
+      .where(and(...condition))
+      .limit(1);
+
+    return { students, total };
+  }
+
+  async studentJoinAssessment(
+    data: StudentJoinAssessmentRequest,
+    studentUserId: schema.AssessmentStudent['studentUserId'],
+  ): Promise<StudentJoinAssessmentResponse> {
+    const assessment = await this.db.query.assessments.findFirst({
+      where: eq(schema.assessments.assessmentCode, data.assessmentCode),
+    });
+
+    if (!assessment) {
+      throw new NotFoundException('Assessment not found with provided code');
+    }
+
+    const existing = await this.db.query.assessmentStudent.findFirst({
+      where: and(
+        eq(schema.assessmentStudent.assessmentId, assessment.assessmentId),
+        eq(schema.assessmentStudent.studentUserId, studentUserId),
+      ),
+    });
+
+    if (existing) {
+      throw new BadRequestException('You already joined this assessment');
+    }
+
+    const [assessmentStudent] = await this.db
+      .insert(schema.assessmentStudent)
+      .values({
+        assessmentId: assessment.assessmentId,
+        studentUserId: studentUserId,
+        isConfirmed: false,
+        createdDate: new Date(),
+      })
+      .returning();
+
+    return { studentUserId: assessmentStudent.studentUserId };
+  }
+
+  async confirmStudentJoinAssessment(
+    data: ConfirmStudentJoinAssessmentRequest,
+  ): Promise<ConfirmStudentJoinAssessmentResponse | null> {
+    const existing = await this.db.query.assessmentStudent.findFirst({
+      where: and(
+        eq(schema.assessmentStudent.assessmentId, data.assessmentId),
+        eq(schema.assessmentStudent.studentUserId, data.studentUserId),
+      ),
+    });
+
+    if (!existing) {
+      throw new NotFoundException(
+        `This student didn't request to join the assessment yet`,
+      );
+    }
+
+    if (data.isConfirmed) {
+      await this.db
+        .update(schema.assessmentStudent)
+        .set({ isConfirmed: true, updatedDate: new Date() })
+        .where(
+          eq(
+            schema.assessmentStudent.assessmentStudentId,
+            existing.assessmentStudentId,
+          ),
+        );
+    } else {
+      await this.db
+        .delete(schema.assessmentStudent)
+        .where(
+          eq(
+            schema.assessmentStudent.assessmentStudentId,
+            existing.assessmentStudentId,
+          ),
+        );
+    }
+    return { studentUserId: data.studentUserId };
+  }
+
+  async removeStudentFromAssessment(
+    data: RemoveStudentFromAssessmentRequest,
+  ): Promise<RemoveStudentFromAssessmentResponse> {
+    await this.getAssessmentById(data.assessmentId);
+    await this.db
+      .delete(schema.assessmentStudent)
+      .where(
+        and(
+          eq(schema.assessmentStudent.assessmentId, data.assessmentId),
+          eq(schema.assessmentStudent.studentUserId, data.studentUserId),
+        ),
+      );
+    return { studentUserId: data.studentUserId };
   }
 
   async generateUniqueCode(length = 8): Promise<string> {

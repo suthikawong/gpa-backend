@@ -28,8 +28,8 @@ export const users = pgTable('users', {
     .references(() => roles.roleId)
     .notNull(),
   refreshToken: text('refreshToken'),
-  createdDate: timestamp('created_date', { withTimezone: true }),
-  updatedDate: timestamp('updated_date', { withTimezone: true }),
+  createdDate: timestamp('created_date').notNull(),
+  updatedDate: timestamp('updated_date'),
 });
 
 export type User = typeof users.$inferSelect;
@@ -53,11 +53,11 @@ export const assessments = pgTable('assessments', {
     onDelete: 'cascade',
   }),
   modelConfig: jsonb('model_config'),
-  isPublished: boolean('is_published').default(false),
+  isPublished: boolean('is_published').notNull(),
   instructorUserId: integer('instructor_user_id')
     .references(() => users.userId)
     .notNull(),
-  createdDate: timestamp('created_date'),
+  createdDate: timestamp('created_date').notNull(),
   updatedDate: timestamp('updated_date'),
 });
 
@@ -68,15 +68,15 @@ export const assessmentStudent = pgTable(
   'assessment_student',
   {
     assessmentStudentId: serial('assessment_student_id').primaryKey(),
-    assessmentId: integer('assessment_id').references(
-      () => assessments.assessmentId,
-      { onDelete: 'cascade' },
-    ),
+    assessmentId: integer('assessment_id')
+      .references(() => assessments.assessmentId, { onDelete: 'cascade' })
+      .notNull(),
     studentUserId: integer('student_user_id')
       .references(() => users.userId)
       .notNull(),
-    isConfirmed: boolean('is_confirmed').default(false),
-    createdDate: timestamp('created_date'),
+    isConfirmed: boolean('is_confirmed').notNull(),
+    createdDate: timestamp('created_date').notNull(),
+    updatedDate: timestamp('updated_date'),
   },
   (table) => [
     unique('uniqueAssessmentStudent').on(
@@ -99,7 +99,7 @@ export const groups = pgTable('groups', {
   createdBy: integer('created_by')
     .references(() => users.userId)
     .notNull(),
-  createdDate: timestamp('created_date'),
+  createdDate: timestamp('created_date').notNull(),
   updatedBy: integer('updated_by').references(() => users.userId),
   updatedDate: timestamp('updated_date'),
 });
@@ -111,13 +111,15 @@ export const groupMembers = pgTable(
   'group_members',
   {
     groupMemberId: serial('group_member_id').primaryKey(),
-    groupId: integer('group_id').references(() => groups.groupId, {
-      onDelete: 'cascade',
-    }),
+    groupId: integer('group_id')
+      .references(() => groups.groupId, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
     studentUserId: integer('student_user_id')
       .references(() => users.userId)
       .notNull(),
-    createdDate: timestamp('created_date'),
+    createdDate: timestamp('created_date').notNull(),
   },
   (table) => [
     unique('uniqueMembership').on(table.groupId, table.studentUserId),
@@ -129,11 +131,13 @@ export type GroupMember = typeof groupMembers.$inferSelect;
 // ========== GROUP SCORES ==========
 export const groupScores = pgTable('group_scores', {
   groupScoreId: serial('group_score_id').primaryKey(),
-  groupId: integer('group_id').references(() => groups.groupId, {
-    onDelete: 'cascade',
-  }),
-  score: integer('score'),
-  createdDate: timestamp('created_date'),
+  groupId: integer('group_id')
+    .references(() => groups.groupId, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
+  score: integer('score').notNull(),
+  createdDate: timestamp('created_date').notNull(),
   updatedDate: timestamp('updated_date'),
 });
 
@@ -145,12 +149,14 @@ export const studentScores = pgTable('student_scores', {
   studentUserId: integer('student_user_id')
     .references(() => users.userId)
     .notNull(),
-  groupId: integer('group_id').references(() => groups.groupId, {
-    onDelete: 'cascade',
-  }),
-  score: integer('score'),
+  groupId: integer('group_id')
+    .references(() => groups.groupId, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
+  score: integer('score').notNull(),
   remark: text('remark'),
-  createdDate: timestamp('created_date'),
+  createdDate: timestamp('created_date').notNull(),
   updatedDate: timestamp('updated_date'),
 });
 
@@ -159,14 +165,13 @@ export type StudentScore = typeof studentScores.$inferSelect;
 // ========== SCORING COMPONENTS ==========
 export const scoringComponents = pgTable('scoring_components', {
   scoringComponentId: serial('scoring_component_id').primaryKey(),
-  startDate: timestamp('start_date'),
-  endDate: timestamp('end_date'),
-  weight: integer('weight'),
-  assessmentId: integer('assessment_id').references(
-    () => assessments.assessmentId,
-    { onDelete: 'cascade' },
-  ),
-  createdDate: timestamp('created_date'),
+  startDate: timestamp('start_date').notNull(),
+  endDate: timestamp('end_date').notNull(),
+  weight: integer('weight').notNull(),
+  assessmentId: integer('assessment_id')
+    .references(() => assessments.assessmentId, { onDelete: 'cascade' })
+    .notNull(),
+  createdDate: timestamp('created_date').notNull(),
 });
 
 export type ScoringComponent = typeof scoringComponents.$inferSelect;
@@ -176,19 +181,20 @@ export const peerRatings = pgTable(
   'peer_ratings',
   {
     peerRatingId: serial('peer_rating_id').primaryKey(),
-    scoringComponentId: integer('scoring_component_id').references(
-      () => scoringComponents.scoringComponentId,
-      { onDelete: 'cascade' },
-    ),
+    scoringComponentId: integer('scoring_component_id')
+      .references(() => scoringComponents.scoringComponentId, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
     rateeStudentUserId: integer('ratee_student_user_id')
       .references(() => users.userId)
       .notNull(),
     raterStudentUserId: integer('rater_student_user_id')
       .references(() => users.userId)
       .notNull(),
-    score: integer('score'),
+    score: integer('score').notNull(),
     comment: text('comment'),
-    createdDate: timestamp('created_date'),
+    createdDate: timestamp('created_date').notNull(),
     updatedDate: timestamp('updated_date'),
   },
   (table) => [
