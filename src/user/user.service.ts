@@ -25,7 +25,11 @@ export class UserService {
   async createUser(data: CreateUserRequest): Promise<CreateUserResponse> {
     const [user] = await this.db
       .insert(schema.users)
-      .values({ ...data, password: await hash(data.password, 10) })
+      .values({
+        ...data,
+        password: await hash(data.password, 10),
+        createdDate: new Date(),
+      })
       .returning();
 
     const result = {
@@ -62,7 +66,7 @@ export class UserService {
 
     const [user] = await this.db
       .update(schema.users)
-      .set(data)
+      .set({ ...data, updatedDate: new Date() })
       .where(eq(schema.users.userId, data.userId))
       .returning();
 

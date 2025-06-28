@@ -6,234 +6,201 @@ import {
   serial,
   text,
   timestamp,
+  unique,
   varchar,
 } from 'drizzle-orm/pg-core';
 
-export const cats = pgTable('cats', {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar({ length: 255 }).notNull(),
-  age: integer().notNull(),
-  breed: varchar({ length: 255 }).notNull(),
-});
-
-// ========== INSTITUTE ==========
-export const institutes = pgTable('institutes', {
-  instituteId: serial('institute_id').primaryKey(),
-  instituteName: varchar('institute_name', { length: 255 }).notNull(),
-  createdBy: integer('created_by').notNull(),
-  createdDate: timestamp('created_date').notNull(),
-  updatedBy: integer('updated_by'),
-  updatedDate: timestamp('updated_date'),
-});
-
-export type Institute = typeof institutes.$inferSelect;
-
-// ========== ROLE ==========
+// ========== ROLES ==========
 export const roles = pgTable('roles', {
   roleId: serial('role_id').primaryKey(),
-  roleName: varchar('role_name', { length: 100 }).notNull(),
+  roleName: varchar('role_name', { length: 255 }).notNull().unique(),
 });
 
 export type Role = typeof roles.$inferSelect;
 
-// ========== USER ==========
+// ========== USERS ==========
 export const users = pgTable('users', {
   userId: serial('user_id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
-  email: varchar('email', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
   password: varchar('password', { length: 255 }).notNull(),
   roleId: integer('role_id')
     .references(() => roles.roleId)
     .notNull(),
-  refreshToken: text('refresh_token'),
+  refreshToken: text('refreshToken'),
+  createdDate: timestamp('created_date', { withTimezone: true }),
+  updatedDate: timestamp('updated_date', { withTimezone: true }),
 });
 
 export type User = typeof users.$inferSelect;
 
-// ========== CLASSROOM ==========
-export const classrooms = pgTable('classrooms', {
-  classroomId: serial('classroom_id').primaryKey(),
-  classroomName: varchar('classroom_name', { length: 255 }).notNull(),
-  classroomCode: varchar('classroom_code', { length: 100 }).notNull(),
-  isActive: boolean('is_active').notNull(),
-  instructorUserId: integer('instructor_user_id')
-    .references(() => users.userId)
-    .notNull(),
-  instituteId: integer('institute_id')
-    .references(() => institutes.instituteId)
-    .notNull(),
-  createdDate: timestamp('created_date').notNull(),
-  updatedDate: timestamp('updated_date'),
-});
-
-export type Classroom = typeof classrooms.$inferSelect;
-
-// ========== ENROLLMENTS ==========
-export const enrollments = pgTable('enrollments', {
-  enrollmentId: serial('enrollment_id').primaryKey(),
-  studentUserId: integer('student_user_id')
-    .references(() => users.userId)
-    .notNull(),
-  classroomId: integer('classroom_id')
-    .references(() => classrooms.classroomId, { onDelete: 'cascade' })
-    .notNull(),
-});
-
-export type Enrollment = typeof enrollments.$inferSelect;
-
-// ========== MODEL ==========
+// ========== MODELS ==========
 export const models = pgTable('models', {
   modelId: serial('model_id').primaryKey(),
-  modelName: varchar('model_name', { length: 255 }).notNull(),
+  modelName: varchar('model_name', { length: 255 }).notNull().unique(),
 });
 
 export type Model = typeof models.$inferSelect;
 
-// ========== MODEL_CONFIGURATION ==========
-export const modelConfigurations = pgTable('model_configurations', {
-  modelConfigurationId: serial('model_configuration_id').primaryKey(),
-  modelId: integer('model_id')
-    .references(() => models.modelId)
+// ========== ASSESSMENTS ==========
+export const assessments = pgTable('assessments', {
+  assessmentId: serial('assessment_id').primaryKey(),
+  assessmentName: varchar('assessment_name', { length: 255 }).notNull(),
+  assessmentCode: varchar('assessment_code', { length: 255 })
+    .notNull()
+    .unique(),
+  modelId: integer('model_id').references(() => models.modelId, {
+    onDelete: 'cascade',
+  }),
+  modelConfig: jsonb('model_config'),
+  isPublished: boolean('is_published').default(false),
+  instructorUserId: integer('instructor_user_id')
+    .references(() => users.userId)
     .notNull(),
-  config: jsonb('config'),
-});
-
-export type ModelConfiguration = typeof modelConfigurations.$inferSelect;
-
-// ========== ASSIGNMENT ==========
-export const assignments = pgTable('assignments', {
-  assignmentId: serial('assignment_id').primaryKey(),
-  assignmentName: varchar('assignment_name', { length: 255 }).notNull(),
-  modelConfigurationId: integer('model_configuration_id').references(
-    () => modelConfigurations.modelConfigurationId,
-  ),
-  isPublished: boolean('is_published').notNull(),
-  dueDate: timestamp('due_date').notNull(),
-  classroomId: integer('classroom_id')
-    .references(() => classrooms.classroomId, { onDelete: 'cascade' })
-    .notNull(),
-  createdDate: timestamp('created_date').notNull(),
+  createdDate: timestamp('created_date'),
   updatedDate: timestamp('updated_date'),
 });
 
-export type Assignment = typeof assignments.$inferSelect;
+export type Assessment = typeof assessments.$inferSelect;
 
-// ========== GROUP ==========
+// ========== ASSESSMENT STUDENT ==========
+export const assessmentStudent = pgTable(
+  'assessment_student',
+  {
+    assessmentStudentId: serial('assessment_student_id').primaryKey(),
+    assessmentId: integer('assessment_id').references(
+      () => assessments.assessmentId,
+      { onDelete: 'cascade' },
+    ),
+    studentUserId: integer('student_user_id')
+      .references(() => users.userId)
+      .notNull(),
+    isConfirmed: boolean('is_confirmed').default(false),
+    createdDate: timestamp('created_date'),
+  },
+  (table) => [
+    unique('uniqueAssessmentStudent').on(
+      table.assessmentId,
+      table.studentUserId,
+    ),
+  ],
+);
+
+export type AssessmentStudent = typeof assessmentStudent.$inferSelect;
+
+// ========== GROUPS ==========
 export const groups = pgTable('groups', {
   groupId: serial('group_id').primaryKey(),
   groupName: varchar('group_name', { length: 255 }).notNull(),
-  groupCode: varchar('group_code', { length: 100 }).notNull(),
-  assignmentId: integer('assignment_id')
-    .references(() => assignments.assignmentId, { onDelete: 'cascade' })
+  groupCode: varchar('group_code', { length: 255 }).notNull().unique(),
+  assessmentId: integer('assessment_id').references(
+    () => assessments.assessmentId,
+    { onDelete: 'cascade' },
+  ),
+  createdBy: integer('created_by')
+    .references(() => users.userId)
     .notNull(),
-  createdBy: integer('created_by').notNull(),
-  createdDate: timestamp('created_date').notNull(),
-  updatedBy: integer('updated_by'),
+  createdDate: timestamp('created_date'),
+  updatedBy: integer('updated_by')
+    .references(() => users.userId)
+    .notNull(),
   updatedDate: timestamp('updated_date'),
 });
 
 export type Group = typeof groups.$inferSelect;
 
-// ========== GROUP_MEMBER ==========
-export const groupMembers = pgTable('group_members', {
-  groupMemberId: serial('group_member_id').primaryKey(),
-  groupId: integer('group_id')
-    .references(() => groups.groupId, { onDelete: 'cascade' })
-    .notNull(),
-  studentUserId: integer('student_user_id')
-    .references(() => users.userId)
-    .notNull(),
-});
+// ========== GROUP MEMBERS ==========
+export const groupMembers = pgTable(
+  'group_members',
+  {
+    groupMemberId: serial('group_member_id').primaryKey(),
+    groupId: integer('group_id').references(() => groups.groupId, {
+      onDelete: 'cascade',
+    }),
+    studentUserId: integer('student_user_id')
+      .references(() => users.userId)
+      .notNull(),
+    createdDate: timestamp('created_date'),
+  },
+  (table) => [
+    unique('uniqueMembership').on(table.groupId, table.studentUserId),
+  ],
+);
 
 export type GroupMember = typeof groupMembers.$inferSelect;
 
-// ========== CRITERIA ==========
-export const criteria = pgTable('criteria', {
-  criterionId: serial('criterion_id').primaryKey(),
-  criterionName: varchar('criterion_name', { length: 255 }).notNull(),
-  assignmentId: integer('assignment_id')
-    .references(() => assignments.assignmentId, { onDelete: 'cascade' })
-    .notNull(),
-  percentage: integer('percentage').notNull(),
-  displayOrder: integer('display_order').notNull(),
+// ========== GROUP SCORES ==========
+export const groupScores = pgTable('group_scores', {
+  groupScoreId: serial('group_score_id').primaryKey(),
+  groupId: integer('group_id').references(() => groups.groupId, {
+    onDelete: 'cascade',
+  }),
+  score: integer('score'),
+  createdDate: timestamp('created_date'),
+  updatedDate: timestamp('updated_date'),
 });
 
-export type Criterion = typeof criteria.$inferSelect;
+export type GroupScore = typeof groupScores.$inferSelect;
 
-// ========== ASSESSMENT PERIOD ==========
-export const assessmentPeriods = pgTable('assessment_periods', {
-  assessmentPeriodId: serial('assessment_period_id').primaryKey(),
-  assessStartDate: timestamp('assess_start_date').notNull(),
-  assessEndDate: timestamp('assess_end_date').notNull(),
-  weight: integer('weight').notNull(),
-  assignmentId: integer('assignment_id')
-    .references(() => assignments.assignmentId, { onDelete: 'cascade' })
-    .notNull(),
-});
-
-export type AssessmentPeriod = typeof assessmentPeriods.$inferSelect;
-
-// ========== GROUP_MARK ==========
-export const groupMarks = pgTable('group_marks', {
-  groupMarkId: serial('group_mark_id').primaryKey(),
-  criterionId: integer('criterion_id')
-    .references(() => criteria.criterionId)
-    .notNull(),
-  groupId: integer('group_id')
-    .references(() => groups.groupId, { onDelete: 'cascade' })
-    .notNull(),
-  mark: integer('mark').notNull(),
-});
-
-export type GroupMark = typeof groupMarks.$inferSelect;
-
-// ========== STUDENT_MARK ==========
-export const studentMarks = pgTable('student_marks', {
-  studentMarkId: serial('student_mark_id').primaryKey(),
-  assignmentId: integer('assignment_id')
-    .references(() => assignments.assignmentId, { onDelete: 'cascade' })
-    .notNull(),
+// ========== STUDENT SCORES ==========
+export const studentScores = pgTable('student_scores', {
+  studentScoreId: serial('student_score_id').primaryKey(),
   studentUserId: integer('student_user_id')
     .references(() => users.userId)
     .notNull(),
-  mark: integer('mark').notNull(),
+  groupId: integer('group_id').references(() => groups.groupId, {
+    onDelete: 'cascade',
+  }),
+  score: integer('score'),
+  remark: text('remark'),
+  createdDate: timestamp('created_date'),
+  updatedDate: timestamp('updated_date'),
 });
 
-export type StudentMark = typeof studentMarks.$inferSelect;
+export type StudentScore = typeof studentScores.$inferSelect;
 
-// ========== QUESTION ==========
-export const questions = pgTable('questions', {
-  questionId: serial('question_id').primaryKey(),
-  question: text('question').notNull(),
-  assessmentPeriodId: integer('assessment_period_id')
-    .references(() => assessmentPeriods.assessmentPeriodId, {
-      onDelete: 'cascade',
-    })
-    .notNull(),
-  displayOrder: integer('display_order').notNull(),
+// ========== SCORING COMPONENTS ==========
+export const scoringComponents = pgTable('scoring_components', {
+  scoringComponentId: serial('scoring_component_id').primaryKey(),
+  startDate: timestamp('start_date'),
+  endDate: timestamp('end_date'),
+  weight: integer('weight'),
+  assessmentId: integer('assessment_id').references(
+    () => assessments.assessmentId,
+    { onDelete: 'cascade' },
+  ),
+  createdDate: timestamp('created_date'),
 });
 
-export type Question = typeof questions.$inferSelect;
+export type ScoringComponent = typeof scoringComponents.$inferSelect;
 
-// ========== PEER_ASSESSMENT ==========
-export const peerAssessments = pgTable('peer_assessments', {
-  peerAssessmentId: serial('peer_assessment_id').primaryKey(),
-  groupId: integer('group_id')
-    .references(() => groups.groupId, {
-      onDelete: 'cascade',
-    })
-    .notNull(),
-  assessedStudentUserId: integer('assessed_student_user_id')
-    .references(() => users.userId)
-    .notNull(),
-  assessorStudentUserId: integer('assessor_student_user_id')
-    .references(() => users.userId)
-    .notNull(),
-  questionId: integer('question_id')
-    .references(() => questions.questionId)
-    .notNull(),
-  score: integer('score').notNull(),
-  createdDate: timestamp('created_date').notNull(),
-});
+// ========== PEER RATINGS ==========
+export const peerRatings = pgTable(
+  'peer_ratings',
+  {
+    peerRatingId: serial('peer_rating_id').primaryKey(),
+    scoringComponentId: integer('scoring_component_id').references(
+      () => scoringComponents.scoringComponentId,
+      { onDelete: 'cascade' },
+    ),
+    rateeStudentUserId: integer('ratee_student_user_id')
+      .references(() => users.userId)
+      .notNull(),
+    raterStudentUserId: integer('rater_student_user_id')
+      .references(() => users.userId)
+      .notNull(),
+    score: integer('score'),
+    comment: text('comment'),
+    createdDate: timestamp('created_date'),
+    updatedDate: timestamp('updated_date'),
+  },
+  (table) => [
+    unique('uniqueRaterRatee').on(
+      table.scoringComponentId,
+      table.rateeStudentUserId,
+      table.raterStudentUserId,
+    ),
+  ],
+);
 
-export type PeerAssessment = typeof peerAssessments.$inferSelect;
+export type PeerRating = typeof peerRatings.$inferSelect;

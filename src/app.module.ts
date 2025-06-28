@@ -1,24 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AssessmentPeriodModule } from './assessment-period/assessment-period.module';
-import { AssignmentModule } from './assignment/assignment.module';
+import { AssessmentModule } from './assessment/assessment.module';
 import { AuthModule } from './auth/auth.module';
-import { ClassroomModule } from './classroom/classroom.module';
-import { GroupModule } from './group/group.module';
-import { LookupModule } from './lookup/lookup.module';
-import { PeerAssessmentModule } from './peer-assessment/peer-assessment.module';
 import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [
-    UserModule,
-    AuthModule,
-    ClassroomModule,
-    AssignmentModule,
-    GroupModule,
-    AssessmentPeriodModule,
-    PeerAssessmentModule,
-    LookupModule,
-  ],
+  imports: [UserModule, AuthModule, AssessmentModule],
   providers: [],
   controllers: [],
 })
