@@ -8,5 +8,6 @@ import { AssessmentService } from './assessment.service';
   imports: [DrizzleModule, ConfigModule.forRoot({ isGlobal: true })],
   controllers: [AssessmentController],
   providers: [AssessmentService],
+  exports: [AssessmentService],
 })
 export class AssessmentModule {}

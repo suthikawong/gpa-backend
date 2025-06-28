@@ -93,17 +93,14 @@ export const groups = pgTable('groups', {
   groupId: serial('group_id').primaryKey(),
   groupName: varchar('group_name', { length: 255 }).notNull(),
   groupCode: varchar('group_code', { length: 255 }).notNull().unique(),
-  assessmentId: integer('assessment_id').references(
-    () => assessments.assessmentId,
-    { onDelete: 'cascade' },
-  ),
+  assessmentId: integer('assessment_id')
+    .references(() => assessments.assessmentId, { onDelete: 'cascade' })
+    .notNull(),
   createdBy: integer('created_by')
     .references(() => users.userId)
     .notNull(),
   createdDate: timestamp('created_date'),
-  updatedBy: integer('updated_by')
-    .references(() => users.userId)
-    .notNull(),
+  updatedBy: integer('updated_by').references(() => users.userId),
   updatedDate: timestamp('updated_date'),
 });
 
