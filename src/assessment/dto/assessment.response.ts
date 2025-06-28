@@ -1,4 +1,9 @@
-import { Assessment, AssessmentStudent, User } from '../../drizzle/schema';
+import {
+  Assessment,
+  AssessmentStudent,
+  ScoringComponent,
+  User,
+} from '../../drizzle/schema';
 
 export interface GetAssessmentByIdResponse
   extends Omit<Assessment, 'modelId' | 'modelConfig'> {}
@@ -41,3 +46,6 @@ export type RemoveStudentFromAssessmentResponse = Pick<
   AssessmentStudent,
   'studentUserId'
 >;
+
+export interface GetScoringComponentsByAssessmentIdResponse
+  extends Array<ScoringComponent> {}

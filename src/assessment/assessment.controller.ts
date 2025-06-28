@@ -24,6 +24,7 @@ import {
   GetAssessmentByIdRequest,
   GetAssessmentsByInstructorRequest,
   GetAssessmentsByStudentRequest,
+  GetScoringComponentsByAssessmentIdRequest,
   RemoveStudentFromAssessmentRequest,
   SearchStudentsInAssessmentRequest,
   StudentJoinAssessmentRequest,
@@ -36,6 +37,7 @@ import {
   GetAssessmentByIdResponse,
   GetAssessmentsByInstructorResponse,
   GetAssessmentsByStudentResponse,
+  GetScoringComponentsByAssessmentIdResponse,
   RemoveStudentFromAssessmentResponse,
   SearchStudentsInAssessmentResponse,
   StudentJoinAssessmentResponse,
@@ -152,5 +154,14 @@ export class AssessmentController {
     const result =
       await this.assessmentService.removeStudentFromAssessment(data);
     return { data: result };
+  }
+
+  @Get(':assessmentId/scoring-components')
+  async getScoringComponentsByAssessmentId(
+    @Param() data: GetScoringComponentsByAssessmentIdRequest,
+  ): Promise<AppResponse<GetScoringComponentsByAssessmentIdResponse>> {
+    const scoringComponents =
+      await this.assessmentService.getScoringComponentsByAssessmentId(data);
+    return { data: scoringComponents };
   }
 }

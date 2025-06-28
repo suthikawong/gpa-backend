@@ -1,6 +1,10 @@
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Assessment, AssessmentStudent } from '../../drizzle/schema';
+import {
+  Assessment,
+  AssessmentStudent,
+  ScoringComponent,
+} from '../../drizzle/schema';
 
 export class GetAssessmentByIdRequest {
   @Transform(({ value }) => parseInt(value))
@@ -91,4 +95,10 @@ export class RemoveStudentFromAssessmentRequest {
   @Transform(({ value }) => parseInt(value))
   @IsNumber()
   studentUserId: AssessmentStudent['studentUserId'];
+}
+
+export class GetScoringComponentsByAssessmentIdRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  assessmentId: ScoringComponent['assessmentId'];
 }

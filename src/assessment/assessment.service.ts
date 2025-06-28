@@ -13,6 +13,7 @@ import {
   ConfirmStudentJoinAssessmentRequest,
   CreateAssessmentRequest,
   DeleteAssessmentRequest,
+  GetScoringComponentsByAssessmentIdRequest,
   RemoveStudentFromAssessmentRequest,
   SearchStudentsInAssessmentRequest,
   StudentJoinAssessmentRequest,
@@ -25,6 +26,7 @@ import {
   GetAssessmentByIdResponse,
   GetAssessmentsByInstructorResponse,
   GetAssessmentsByStudentResponse,
+  GetScoringComponentsByAssessmentIdResponse,
   RemoveStudentFromAssessmentResponse,
   SearchStudentsInAssessmentResponse,
   StudentJoinAssessmentResponse,
@@ -227,6 +229,7 @@ export class AssessmentService {
   async confirmStudentJoinAssessment(
     data: ConfirmStudentJoinAssessmentRequest,
   ): Promise<ConfirmStudentJoinAssessmentResponse | null> {
+    await this.getAssessmentById(data.assessmentId);
     const existing = await this.db.query.assessmentStudent.findFirst({
       where: and(
         eq(schema.assessmentStudent.assessmentId, data.assessmentId),
@@ -276,6 +279,15 @@ export class AssessmentService {
         ),
       );
     return { studentUserId: data.studentUserId };
+  }
+
+  async getScoringComponentsByAssessmentId(
+    data: GetScoringComponentsByAssessmentIdRequest,
+  ): Promise<GetScoringComponentsByAssessmentIdResponse> {
+    const result = await this.db.query.scoringComponents.findMany({
+      where: eq(schema.scoringComponents.assessmentId, data.assessmentId),
+    });
+    return result;
   }
 
   async generateUniqueCode(length = 8): Promise<string> {
