@@ -24,7 +24,9 @@ import {
   GetAssessmentByIdRequest,
   GetAssessmentsByInstructorRequest,
   GetAssessmentsByStudentRequest,
+  GetGroupsByAssessmentIdRequest,
   GetScoringComponentsByAssessmentIdRequest,
+  GetStudentJoinedGroupRequest,
   RemoveStudentFromAssessmentRequest,
   SearchStudentsInAssessmentRequest,
   StudentJoinAssessmentRequest,
@@ -37,7 +39,9 @@ import {
   GetAssessmentByIdResponse,
   GetAssessmentsByInstructorResponse,
   GetAssessmentsByStudentResponse,
+  GetGroupsByAssessmentIdResponse,
   GetScoringComponentsByAssessmentIdResponse,
+  GetStudentJoinedGroupResponse,
   RemoveStudentFromAssessmentResponse,
   SearchStudentsInAssessmentResponse,
   StudentJoinAssessmentResponse,
@@ -140,7 +144,7 @@ export class AssessmentController {
   @Roles([Role.Instructor])
   async confirmStudentJoinAssessment(
     @Body() data: ConfirmStudentJoinAssessmentRequest,
-  ): Promise<AppResponse<ConfirmStudentJoinAssessmentResponse | null>> {
+  ): Promise<AppResponse<ConfirmStudentJoinAssessmentResponse>> {
     const result =
       await this.assessmentService.confirmStudentJoinAssessment(data);
     return { data: result };
@@ -157,11 +161,34 @@ export class AssessmentController {
   }
 
   @Get(':assessmentId/scoring-components')
+  @Roles([Role.Instructor])
   async getScoringComponentsByAssessmentId(
     @Param() data: GetScoringComponentsByAssessmentIdRequest,
   ): Promise<AppResponse<GetScoringComponentsByAssessmentIdResponse>> {
     const scoringComponents =
       await this.assessmentService.getScoringComponentsByAssessmentId(data);
     return { data: scoringComponents };
+  }
+
+  @Get(':assessmentId/group/joined')
+  @Roles([Role.Student])
+  async getJoinedGroup(
+    @Param() param: GetStudentJoinedGroupRequest,
+    @LoggedInUser() user: User,
+  ): Promise<AppResponse<GetStudentJoinedGroupResponse>> {
+    const group = await this.assessmentService.getStudentJoinedGroup(
+      param.assessmentId,
+      user.userId,
+    );
+    return { data: group };
+  }
+
+  @Get(':assessmentId/groups')
+  @Roles([Role.Instructor])
+  async getGroupsByAssessmentId(
+    @Param() data: GetGroupsByAssessmentIdRequest,
+  ): Promise<AppResponse<GetGroupsByAssessmentIdResponse>> {
+    const groups = await this.assessmentService.getGroupsByAssessmentId(data);
+    return { data: groups };
   }
 }

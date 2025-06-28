@@ -3,6 +3,7 @@ import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import {
   Assessment,
   AssessmentStudent,
+  Group,
   ScoringComponent,
 } from '../../drizzle/schema';
 
@@ -101,4 +102,16 @@ export class GetScoringComponentsByAssessmentIdRequest {
   @Transform(({ value }) => parseInt(value))
   @IsNumber()
   assessmentId: ScoringComponent['assessmentId'];
+}
+
+export class GetStudentJoinedGroupRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  assessmentId: Group['assessmentId'];
+}
+
+export class GetGroupsByAssessmentIdRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  assessmentId: Group['assessmentId'];
 }

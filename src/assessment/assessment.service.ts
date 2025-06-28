@@ -13,6 +13,7 @@ import {
   ConfirmStudentJoinAssessmentRequest,
   CreateAssessmentRequest,
   DeleteAssessmentRequest,
+  GetGroupsByAssessmentIdRequest,
   GetScoringComponentsByAssessmentIdRequest,
   RemoveStudentFromAssessmentRequest,
   SearchStudentsInAssessmentRequest,
@@ -26,7 +27,9 @@ import {
   GetAssessmentByIdResponse,
   GetAssessmentsByInstructorResponse,
   GetAssessmentsByStudentResponse,
+  GetGroupsByAssessmentIdResponse,
   GetScoringComponentsByAssessmentIdResponse,
+  GetStudentJoinedGroupResponse,
   RemoveStudentFromAssessmentResponse,
   SearchStudentsInAssessmentResponse,
   StudentJoinAssessmentResponse,
@@ -162,6 +165,7 @@ export class AssessmentService {
         userId: schema.users.userId,
         name: schema.users.name,
         email: schema.users.email,
+        roleId: schema.users.roleId,
         isConfirmed: schema.assessmentStudent.isConfirmed,
       })
       .from(schema.assessmentStudent)
@@ -228,7 +232,7 @@ export class AssessmentService {
 
   async confirmStudentJoinAssessment(
     data: ConfirmStudentJoinAssessmentRequest,
-  ): Promise<ConfirmStudentJoinAssessmentResponse | null> {
+  ): Promise<ConfirmStudentJoinAssessmentResponse> {
     await this.getAssessmentById(data.assessmentId);
     const existing = await this.db.query.assessmentStudent.findFirst({
       where: and(
@@ -284,8 +288,54 @@ export class AssessmentService {
   async getScoringComponentsByAssessmentId(
     data: GetScoringComponentsByAssessmentIdRequest,
   ): Promise<GetScoringComponentsByAssessmentIdResponse> {
+    await this.getAssessmentById(data.assessmentId);
     const result = await this.db.query.scoringComponents.findMany({
       where: eq(schema.scoringComponents.assessmentId, data.assessmentId),
+    });
+    return result;
+  }
+
+  async getStudentJoinedGroup(
+    assessmentId: schema.Assessment['assessmentId'],
+    studentUserId: schema.User['userId'],
+  ): Promise<GetStudentJoinedGroupResponse> {
+    await this.getAssessmentById(assessmentId);
+    const [result] = await this.db
+      .select()
+      .from(schema.groups)
+      .innerJoin(
+        schema.groupMembers,
+        eq(schema.groups.groupId, schema.groupMembers.groupId),
+      )
+      .where(eq(schema.groupMembers.studentUserId, studentUserId));
+
+    if (!result) return null;
+
+    const { groups: group } = result;
+
+    const members = await this.db
+      .select({
+        userId: schema.users.userId,
+        name: schema.users.name,
+        email: schema.users.email,
+        roleId: schema.users.roleId,
+      })
+      .from(schema.groupMembers)
+      .innerJoin(
+        schema.users,
+        eq(schema.groupMembers.studentUserId, schema.users.userId),
+      )
+      .where(eq(schema.groupMembers.groupId, group.groupId));
+
+    return { ...group, members };
+  }
+
+  async getGroupsByAssessmentId(
+    data: GetGroupsByAssessmentIdRequest,
+  ): Promise<GetGroupsByAssessmentIdResponse> {
+    await this.getAssessmentById(data.assessmentId);
+    const result = await this.db.query.groups.findMany({
+      where: eq(schema.groups.assessmentId, data.assessmentId),
     });
     return result;
   }

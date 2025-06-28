@@ -1,22 +1,36 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { and, eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { Role } from 'src/app.config';
+import { AssessmentService } from '../assessment/assessment.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
+import { Group, User } from '../drizzle/schema';
+import { UserService } from '../user/user.service';
+import { generateCode } from '../utils/generate-code';
 import {
+  AddGroupMemberRequest,
   CreateGroupRequest,
-  GetGroupByIdRequest,
+  DeleteGroupMemberRequest,
   UpdateGroupRequest,
 } from './dto/group.request';
 import {
+  AddGroupMemberResponse,
   CreateGroupResponse,
+  DeleteGroupMemberResponse,
   DeleteGroupResponse,
   GetGroupByIdResponse,
+  GetGroupMembersResponse,
+  JoinGroupResponse,
+  LeaveGroupResponse,
   UpdateGroupResponse,
 } from './dto/group.response';
-import { generateCode } from 'src/utils/generate-code';
-import { Group } from '../drizzle/schema';
-import { AssessmentService } from '../assessment/assessment.service';
 
 @Injectable()
 export class GroupService {
@@ -25,11 +39,14 @@ export class GroupService {
     private db: NodePgDatabase<typeof schema>,
 
     private readonly assessmentService: AssessmentService,
+    private readonly userService: UserService,
   ) {}
 
-  async getGroupById(data: GetGroupByIdRequest): Promise<GetGroupByIdResponse> {
+  async getGroupById(
+    groupId: schema.Group['groupId'],
+  ): Promise<GetGroupByIdResponse> {
     const group = await this.db.query.groups.findFirst({
-      where: eq(schema.groups.groupId, data.groupId),
+      where: eq(schema.groups.groupId, groupId),
     });
 
     if (!group) {
@@ -42,8 +59,11 @@ export class GroupService {
   async createGroup(
     data: CreateGroupRequest,
     createdBy: schema.User['userId'],
+    roleId: User['roleId'],
   ): Promise<CreateGroupResponse> {
     await this.assessmentService.getAssessmentById(data.assessmentId);
+    await this.checkUserRole(data.assessmentId, roleId);
+
     const groupCode = await this.generateUniqueCode();
 
     const [group] = await this.db
@@ -73,18 +93,173 @@ export class GroupService {
     return group;
   }
 
-  async deleteGroup(groupId: Group['groupId']): Promise<DeleteGroupResponse> {
+  async deleteGroup(
+    groupId: Group['groupId'],
+    roleId: User['roleId'],
+  ): Promise<DeleteGroupResponse> {
     const group = await this.db.query.groups.findFirst({
       where: eq(schema.groups.groupId, groupId),
     });
 
     if (!group) throw new NotFoundException('Group not found');
 
+    await this.checkUserRole(group.assessmentId, roleId);
+
     await this.db
       .delete(schema.groups)
       .where(eq(schema.groups.groupId, groupId));
 
     return { groupId: group.groupId };
+  }
+
+  async joinGroup(
+    groupCode: schema.Group['groupCode'],
+    studentUserId: schema.User['userId'],
+  ): Promise<JoinGroupResponse> {
+    const group = await this.db.query.groups.findFirst({
+      where: eq(schema.groups.groupCode, groupCode),
+    });
+    if (!group) {
+      throw new BadRequestException('Group not found.');
+    }
+
+    const existing = await this.db.query.groupMembers.findFirst({
+      where: and(
+        eq(schema.groupMembers.groupId, group.groupId),
+        eq(schema.groupMembers.studentUserId, studentUserId),
+      ),
+    });
+    if (existing) {
+      throw new BadRequestException('You already joined this group.');
+    }
+
+    await this.checkScoringComponentStarted(group.assessmentId);
+
+    await this.db.insert(schema.groupMembers).values({
+      groupId: group.groupId,
+      studentUserId,
+      createdDate: new Date(),
+    });
+
+    return { group };
+  }
+
+  async leaveGroup(
+    groupId: schema.Group['groupId'],
+    studentUserId: schema.User['userId'],
+  ): Promise<LeaveGroupResponse> {
+    const group = await this.getGroupById(groupId);
+    await this.checkScoringComponentStarted(group.assessmentId);
+
+    await this.db
+      .delete(schema.groupMembers)
+      .where(
+        and(
+          eq(schema.groupMembers.groupId, groupId),
+          eq(schema.groupMembers.studentUserId, studentUserId),
+        ),
+      );
+
+    return { groupId };
+  }
+
+  async getGroupMembersById(
+    groupId: schema.Group['groupId'],
+  ): Promise<GetGroupMembersResponse> {
+    await this.getGroupById(groupId);
+    const members = await this.db
+      .select({
+        userId: schema.users.userId,
+        name: schema.users.name,
+        email: schema.users.email,
+        roleId: schema.users.roleId,
+      })
+      .from(schema.groupMembers)
+      .innerJoin(
+        schema.users,
+        eq(schema.groupMembers.studentUserId, schema.users.userId),
+      )
+      .where(eq(schema.groupMembers.groupId, groupId));
+
+    return members;
+  }
+
+  async addGroupMember(
+    data: AddGroupMemberRequest,
+  ): Promise<AddGroupMemberResponse> {
+    await this.userService.getUserById(data.studentUserId);
+    const group = await this.getGroupById(data.groupId);
+    await this.checkScoringComponentStarted(group.assessmentId);
+
+    const existing = await this.db.query.groupMembers.findFirst({
+      where: and(
+        eq(schema.groupMembers.groupId, group.groupId),
+        eq(schema.groupMembers.studentUserId, data.studentUserId),
+      ),
+    });
+    if (existing) {
+      throw new BadRequestException('This student already joined this group.');
+    }
+
+    await this.db
+      .insert(schema.groupMembers)
+      .values({ ...data, createdDate: new Date() });
+    return { studentUserId: data.studentUserId };
+  }
+
+  async deleteGroupMember(
+    data: DeleteGroupMemberRequest,
+  ): Promise<DeleteGroupMemberResponse> {
+    await this.userService.getUserById(data.studentUserId);
+    const group = await this.getGroupById(data.groupId);
+    await this.checkScoringComponentStarted(group.assessmentId);
+
+    await this.db
+      .delete(schema.groupMembers)
+      .where(
+        and(
+          eq(schema.groupMembers.groupId, data.groupId),
+          eq(schema.groupMembers.studentUserId, data.studentUserId),
+        ),
+      );
+    return { studentUserId: data.studentUserId };
+  }
+
+  async checkUserRole(
+    assessmentId: schema.Assessment['assessmentId'],
+    roleId: schema.User['roleId'],
+  ) {
+    if (roleId === parseInt(Role.Student)) {
+      const scoringComponents =
+        await this.assessmentService.getScoringComponentsByAssessmentId({
+          assessmentId: assessmentId,
+        });
+
+      scoringComponents.forEach((comp) => {
+        if (new Date() >= comp.startDate) {
+          throw new ForbiddenException(
+            'Cannot create or delete groups after scoring has started.',
+          );
+        }
+      });
+    }
+  }
+
+  async checkScoringComponentStarted(
+    assessmentId: schema.Assessment['assessmentId'],
+  ) {
+    const scoringComponents =
+      await this.assessmentService.getScoringComponentsByAssessmentId({
+        assessmentId: assessmentId,
+      });
+
+    scoringComponents.forEach((comp) => {
+      if (new Date() >= comp.startDate) {
+        throw new ForbiddenException(
+          'Cannot add or remove members after scoring has started.',
+        );
+      }
+    });
   }
 
   async generateUniqueCode(length = 8): Promise<string> {
