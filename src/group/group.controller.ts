@@ -22,9 +22,11 @@ import {
   DeleteGroupRequest,
   GetGroupByIdRequest,
   GetGroupMembersRequest,
+  GetScoresRequest,
   JoinGroupRequest,
   LeaveGroupRequest,
   UpdateGroupRequest,
+  UpsertScoresRequest,
 } from './dto/group.request';
 import {
   AddGroupMemberResponse,
@@ -33,9 +35,11 @@ import {
   DeleteGroupResponse,
   GetGroupByIdResponse,
   GetGroupMembersResponse,
+  GetScoresResponse,
   JoinGroupResponse,
   LeaveGroupResponse,
   UpdateGroupResponse,
+  UpsertScoresResponse,
 } from './dto/group.response';
 import { GroupService } from './group.service';
 
@@ -140,6 +144,24 @@ export class GroupController {
     @Param() params: DeleteGroupMemberRequest,
   ): Promise<AppResponse<DeleteGroupMemberResponse>> {
     const result = await this.groupService.deleteGroupMember(params);
+    return { data: result };
+  }
+
+  @Get(':groupId/score')
+  @Roles([Role.Instructor])
+  async getScores(
+    @Param() params: GetScoresRequest,
+  ): Promise<AppResponse<GetScoresResponse>> {
+    const data = await this.groupService.getScores(params.groupId);
+    return { data };
+  }
+
+  @Post('score')
+  @Roles([Role.Instructor])
+  async upsertScore(
+    @Body() data: UpsertScoresRequest,
+  ): Promise<AppResponse<UpsertScoresResponse>> {
+    const result = await this.groupService.upsertScore(data);
     return { data: result };
   }
 }

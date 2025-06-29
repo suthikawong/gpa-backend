@@ -13,5 +13,6 @@ import { ScoringComponentService } from './scoring-component.service';
   ],
   providers: [ScoringComponentService],
   controllers: [ScoringComponentController],
+  exports: [ScoringComponentService],
 })
 export class ScoringComponentModule {}

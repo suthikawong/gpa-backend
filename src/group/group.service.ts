@@ -19,6 +19,7 @@ import {
   CreateGroupRequest,
   DeleteGroupMemberRequest,
   UpdateGroupRequest,
+  UpsertScoresRequest,
 } from './dto/group.request';
 import {
   AddGroupMemberResponse,
@@ -27,9 +28,11 @@ import {
   DeleteGroupResponse,
   GetGroupByIdResponse,
   GetGroupMembersResponse,
+  GetScoresResponse,
   JoinGroupResponse,
   LeaveGroupResponse,
   UpdateGroupResponse,
+  UpsertScoresResponse,
 } from './dto/group.response';
 
 @Injectable()
@@ -223,6 +226,96 @@ export class GroupService {
         ),
       );
     return { studentUserId: data.studentUserId };
+  }
+
+  async getScores(
+    groupId: schema.Group['groupId'],
+  ): Promise<GetScoresResponse> {
+    await this.getGroupById(groupId);
+
+    const groupScore = await this.db.query.groupScores.findFirst({
+      where: eq(schema.groupScores.groupId, groupId),
+    });
+
+    const studentScores = await this.db.query.studentScores.findMany({
+      where: eq(schema.studentScores.groupId, groupId),
+    });
+
+    return {
+      groupScore: groupScore ?? null,
+      studentScores,
+    };
+  }
+
+  async upsertScore(data: UpsertScoresRequest): Promise<UpsertScoresResponse> {
+    const { groupScore: currGroupScore, studentScores: currStudentScores } =
+      await this.getScores(data.groupId);
+
+    // upsert group score
+    if (!data?.groupScore && currGroupScore) {
+      await this.db
+        .delete(schema.groupScores)
+        .where(eq(schema.groupScores.groupId, data.groupId));
+    } else {
+      if (currGroupScore) {
+        await this.db
+          .update(schema.groupScores)
+          .set({ score: data.groupScore, updatedDate: new Date() })
+          .where(eq(schema.groupScores.groupId, data.groupId));
+      } else {
+        await this.db.insert(schema.groupScores).values({
+          groupId: data.groupId,
+          score: data.groupScore,
+          createdDate: new Date(),
+        });
+      }
+    }
+
+    // upsert student scores
+    const promises = data.studentScores.map(
+      ({ studentUserId, score, remark }) => {
+        const currStudentScore = currStudentScores.find(
+          (item) => item.studentUserId === studentUserId,
+        );
+
+        if (!score && currStudentScore?.score) {
+          return this.db
+            .delete(schema.studentScores)
+            .where(
+              and(
+                eq(schema.studentScores.groupId, data.groupId),
+                eq(schema.studentScores.studentUserId, studentUserId),
+              ),
+            );
+        }
+
+        if (score && currStudentScore?.score) {
+          return this.db
+            .update(schema.studentScores)
+            .set({ score, remark: remark ?? null, updatedDate: new Date() })
+            .where(
+              and(
+                eq(schema.studentScores.groupId, data.groupId),
+                eq(schema.studentScores.studentUserId, studentUserId),
+              ),
+            );
+        }
+
+        if (score) {
+          return this.db.insert(schema.studentScores).values({
+            groupId: data.groupId,
+            studentUserId,
+            score,
+            remark,
+            createdDate: new Date(),
+          });
+        }
+      },
+    );
+
+    await Promise.all(promises);
+
+    return { groupId: data.groupId };
   }
 
   async checkUserRole(

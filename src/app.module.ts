@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AssessmentModule } from './assessment/assessment.module';
 import { AuthModule } from './auth/auth.module';
 import { GroupModule } from './group/group.module';
+import { PeerRatingModule } from './peer-rating/peer-rating.module';
 import { ScoringComponentModule } from './scoring-component/scoring-component.module';
 import { UserModule } from './user/user.module';
 
@@ -12,6 +13,7 @@ import { UserModule } from './user/user.module';
     AssessmentModule,
     GroupModule,
     ScoringComponentModule,
+    PeerRatingModule,
   ],
   providers: [],
   controllers: [],

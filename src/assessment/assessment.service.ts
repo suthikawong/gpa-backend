@@ -28,6 +28,7 @@ import {
   GetAssessmentsByInstructorResponse,
   GetAssessmentsByStudentResponse,
   GetGroupsByAssessmentIdResponse,
+  GetMyScoreResponse,
   GetScoringComponentsByAssessmentIdResponse,
   GetStudentJoinedGroupResponse,
   RemoveStudentFromAssessmentResponse,
@@ -338,6 +339,46 @@ export class AssessmentService {
       where: eq(schema.groups.assessmentId, data.assessmentId),
     });
     return result;
+  }
+
+  async getMyScore(
+    assessmentId: schema.Assessment['assessmentId'],
+    studentUserId: schema.StudentScore['studentUserId'],
+  ): Promise<GetMyScoreResponse> {
+    const [result] = await this.db
+      .select()
+      .from(schema.groups)
+      .innerJoin(
+        schema.groupMembers,
+        eq(schema.groups.groupId, schema.groupMembers.groupId),
+      )
+      .where(
+        and(
+          eq(schema.groups.assessmentId, assessmentId),
+          eq(schema.groupMembers.studentUserId, studentUserId),
+        ),
+      );
+
+    if (!result?.groups) {
+      throw new NotFoundException(
+        'Student is not in any group of this assessment',
+      );
+    }
+
+    const { groups: group } = result;
+
+    const studentScore = await this.db.query.studentScores.findFirst({
+      columns: {
+        studentUserId: true,
+        score: true,
+      },
+      where: and(
+        eq(schema.studentScores.groupId, group.groupId),
+        eq(schema.studentScores.studentUserId, studentUserId),
+      ),
+    });
+
+    return studentScore ?? null;
   }
 
   async generateUniqueCode(length = 8): Promise<string> {

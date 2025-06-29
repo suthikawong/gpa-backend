@@ -4,6 +4,7 @@ import {
   AssessmentStudent,
   Group,
   ScoringComponent,
+  StudentScore,
 } from '../../drizzle/schema';
 
 export interface GetAssessmentByIdResponse
@@ -57,3 +58,8 @@ export interface GroupWithGroupMembers extends Group {
 export type GetStudentJoinedGroupResponse = GroupWithGroupMembers | null;
 
 export interface GetGroupsByAssessmentIdResponse extends Array<Group> {}
+
+export type GetMyScoreResponse = Pick<
+  StudentScore,
+  'studentUserId' | 'score'
+> | null;

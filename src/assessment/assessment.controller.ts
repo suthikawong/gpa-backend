@@ -25,6 +25,7 @@ import {
   GetAssessmentsByInstructorRequest,
   GetAssessmentsByStudentRequest,
   GetGroupsByAssessmentIdRequest,
+  GetMyScoreRequest,
   GetScoringComponentsByAssessmentIdRequest,
   GetStudentJoinedGroupRequest,
   RemoveStudentFromAssessmentRequest,
@@ -40,6 +41,7 @@ import {
   GetAssessmentsByInstructorResponse,
   GetAssessmentsByStudentResponse,
   GetGroupsByAssessmentIdResponse,
+  GetMyScoreResponse,
   GetScoringComponentsByAssessmentIdResponse,
   GetStudentJoinedGroupResponse,
   RemoveStudentFromAssessmentResponse,
@@ -190,5 +192,17 @@ export class AssessmentController {
   ): Promise<AppResponse<GetGroupsByAssessmentIdResponse>> {
     const groups = await this.assessmentService.getGroupsByAssessmentId(data);
     return { data: groups };
+  }
+
+  @Get(':assessmentId/my-score')
+  async getMyScore(
+    @Param() params: GetMyScoreRequest,
+    @LoggedInUser() user: User,
+  ): Promise<AppResponse<GetMyScoreResponse>> {
+    const data = await this.assessmentService.getMyScore(
+      params.assessmentId,
+      user.userId,
+    );
+    return { data };
   }
 }

@@ -1,5 +1,5 @@
 import { UserProtected } from 'src/user/user.interface';
-import { Group, User } from '../../drizzle/schema';
+import { Group, GroupScore, StudentScore, User } from '../../drizzle/schema';
 
 export interface GetGroupByIdResponse extends Group {}
 
@@ -24,3 +24,10 @@ export interface AddGroupMemberResponse {
 export interface DeleteGroupMemberResponse {
   studentUserId: User['userId'];
 }
+
+export interface GetScoresResponse {
+  groupScore: GroupScore | null;
+  studentScores: Array<StudentScore>;
+}
+
+export type UpsertScoresResponse = Pick<Group, 'groupId'>;

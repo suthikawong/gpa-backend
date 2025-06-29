@@ -115,3 +115,9 @@ export class GetGroupsByAssessmentIdRequest {
   @IsNumber()
   assessmentId: Group['assessmentId'];
 }
+
+export class GetMyScoreRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  assessmentId: Assessment['assessmentId'];
+}
