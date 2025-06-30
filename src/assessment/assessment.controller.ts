@@ -63,17 +63,6 @@ export class AssessmentController {
     return { data: result.students, total: result.total };
   }
 
-  @Get(':assessmentId')
-  @Roles([Role.Instructor, Role.Student])
-  async getAssessmentById(
-    @Param() data: GetAssessmentByIdRequest,
-  ): Promise<AppResponse<GetAssessmentByIdResponse>> {
-    const assessment = await this.assessmentService.getAssessmentById(
-      data.assessmentId,
-    );
-    return { data: assessment };
-  }
-
   @Get('instructor')
   @Roles([Role.Instructor])
   async getAssessmentsByInstructor(
@@ -94,6 +83,17 @@ export class AssessmentController {
       user.userId,
     );
     return { data: assessments };
+  }
+
+  @Get(':assessmentId')
+  @Roles([Role.Instructor, Role.Student])
+  async getAssessmentById(
+    @Param() data: GetAssessmentByIdRequest,
+  ): Promise<AppResponse<GetAssessmentByIdResponse>> {
+    const assessment = await this.assessmentService.getAssessmentById(
+      data.assessmentId,
+    );
+    return { data: assessment };
   }
 
   @Post()

@@ -47,16 +47,22 @@ export class AssessmentService {
   async getAssessmentById(
     assessmentId: schema.Assessment['assessmentId'],
   ): Promise<GetAssessmentByIdResponse> {
-    const assessment = await this.db.query.assessments.findFirst({
-      where: eq(schema.assessments.assessmentId, assessmentId),
-    });
+    const [result] = await this.db
+      .select()
+      .from(schema.assessments)
+      .innerJoin(
+        schema.users,
+        eq(schema.assessments.instructorUserId, schema.users.userId),
+      )
+      .where(eq(schema.assessments.assessmentId, assessmentId));
 
-    if (!assessment) {
+    if (!result?.assessments) {
       throw new NotFoundException('Assessment not found');
     }
 
-    const { modelId, modelConfig, ...data } = assessment;
-    return data;
+    const { modelId, modelConfig, ...assessment } = result?.assessments;
+    const { refreshToken, password, ...instructor } = result?.users ?? null;
+    return { ...assessment, instructor };
   }
 
   async getAssessmentsByInstructor(

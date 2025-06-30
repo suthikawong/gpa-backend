@@ -7,8 +7,12 @@ import {
   StudentScore,
 } from '../../drizzle/schema';
 
-export interface GetAssessmentByIdResponse
-  extends Omit<Assessment, 'modelId' | 'modelConfig'> {}
+export interface AssessmentWithInstructor
+  extends Omit<Assessment, 'modelId' | 'modelConfig'> {
+  instructor: UserProtected;
+}
+
+export interface GetAssessmentByIdResponse extends AssessmentWithInstructor {}
 
 export type GetAssessmentsByInstructorResponse = Omit<
   Assessment,
