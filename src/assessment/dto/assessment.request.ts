@@ -13,18 +13,6 @@ export class GetAssessmentByIdRequest {
   assessmentId: Assessment['assessmentId'];
 }
 
-export class GetAssessmentsByInstructorRequest {
-  @Transform(({ value }) => parseInt(value))
-  @IsNumber()
-  instructorUserId: number;
-}
-
-export class GetAssessmentsByStudentRequest {
-  @Transform(({ value }) => parseInt(value))
-  @IsNumber()
-  studentUserId: number;
-}
-
 export class CreateAssessmentRequest {
   @IsString()
   assessmentName: Assessment['assessmentName'];

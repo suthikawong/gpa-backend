@@ -22,8 +22,6 @@ import {
   CreateAssessmentRequest,
   DeleteAssessmentRequest,
   GetAssessmentByIdRequest,
-  GetAssessmentsByInstructorRequest,
-  GetAssessmentsByStudentRequest,
   GetGroupsByAssessmentIdRequest,
   GetMyScoreRequest,
   GetScoringComponentsByAssessmentIdRequest,
@@ -76,24 +74,24 @@ export class AssessmentController {
     return { data: assessment };
   }
 
-  @Get('instructor/:instructorUserId')
+  @Get('instructor')
   @Roles([Role.Instructor])
   async getAssessmentsByInstructor(
-    @Param() data: GetAssessmentsByInstructorRequest,
+    @LoggedInUser() user: User,
   ): Promise<AppResponse<GetAssessmentsByInstructorResponse>> {
     const assessments = await this.assessmentService.getAssessmentsByInstructor(
-      data.instructorUserId,
+      user.userId,
     );
     return { data: assessments };
   }
 
-  @Get('student/:studentUserId')
+  @Get('student')
   @Roles([Role.Student])
   async getAssessmentsByStudent(
-    @Param() data: GetAssessmentsByStudentRequest,
+    @LoggedInUser() user: User,
   ): Promise<AppResponse<GetAssessmentsByStudentResponse>> {
     const assessments = await this.assessmentService.getAssessmentsByStudent(
-      data.studentUserId,
+      user.userId,
     );
     return { data: assessments };
   }
