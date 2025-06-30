@@ -30,9 +30,9 @@ export interface UpdateAssessmentResponse extends Assessment {}
 
 export type DeleteAssessmentResponse = Pick<Assessment, 'assessmentId'>;
 
-export interface StudentWithIsConfirmed extends UserProtected {
+export type StudentWithIsConfirmed = UserProtected & {
   isConfirmed: AssessmentStudent['isConfirmed'];
-}
+};
 
 export interface SearchStudentsInAssessmentResponse
   extends Array<StudentWithIsConfirmed> {}
