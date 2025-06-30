@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { Role } from 'src/app.config';
+import { Role } from '../app.config';
 import { AssessmentService } from '../assessment/assessment.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';

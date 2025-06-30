@@ -1,4 +1,4 @@
-import { UserProtected } from 'src/user/user.interface';
+import { UserProtected } from '../../user/user.interface';
 import { Group, GroupScore, StudentScore, User } from '../../drizzle/schema';
 
 export interface GetGroupByIdResponse extends Group {}

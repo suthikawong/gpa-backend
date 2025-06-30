@@ -1,11 +1,10 @@
-import { UserProtected } from 'src/user/user.interface';
+import { UserProtected } from '../../user/user.interface';
 import {
   Assessment,
   AssessmentStudent,
   Group,
   ScoringComponent,
   StudentScore,
-  User,
 } from '../../drizzle/schema';
 
 export interface AssessmentWithInstructor
@@ -31,13 +30,17 @@ export interface UpdateAssessmentResponse extends Assessment {}
 
 export type DeleteAssessmentResponse = Pick<Assessment, 'assessmentId'>;
 
-export interface StudentWithIsConfirmed {
-  userId: User['userId'];
-  name: User['name'];
-  email: User['email'];
-  roleId: User['roleId'];
+export interface StudentWithIsConfirmed extends UserProtected {
   isConfirmed: AssessmentStudent['isConfirmed'];
 }
+
+// export interface StudentWithIsConfirmed {
+//   userId: User['userId'];
+//   name: User['name'];
+//   email: User['email'];
+//   roleId: User['roleId'];
+//   isConfirmed: AssessmentStudent['isConfirmed'];
+// }
 
 export interface SearchStudentsInAssessmentResponse
   extends Array<StudentWithIsConfirmed> {}

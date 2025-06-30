@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AssessmentModule } from 'src/assessment/assessment.module';
+import { AssessmentModule } from '../assessment/assessment.module';
 import { DrizzleModule } from '../drizzle/drizzle.module';
 import { ScoringComponentController } from './scoring-component.controller';
 import { ScoringComponentService } from './scoring-component.service';

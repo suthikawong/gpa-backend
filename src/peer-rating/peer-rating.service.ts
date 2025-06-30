@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, inArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { GroupService } from 'src/group/group.service';
-import { ScoringComponentService } from 'src/scoring-component/scoring-component.service';
+import { GroupService } from '../group/group.service';
+import { ScoringComponentService } from '../scoring-component/scoring-component.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { PeerRating } from '../drizzle/schema';
