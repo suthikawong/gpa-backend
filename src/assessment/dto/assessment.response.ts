@@ -34,14 +34,6 @@ export interface StudentWithIsConfirmed extends UserProtected {
   isConfirmed: AssessmentStudent['isConfirmed'];
 }
 
-// export interface StudentWithIsConfirmed {
-//   userId: User['userId'];
-//   name: User['name'];
-//   email: User['email'];
-//   roleId: User['roleId'];
-//   isConfirmed: AssessmentStudent['isConfirmed'];
-// }
-
 export interface SearchStudentsInAssessmentResponse
   extends Array<StudentWithIsConfirmed> {}
 

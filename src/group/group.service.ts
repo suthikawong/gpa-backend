@@ -166,7 +166,7 @@ export class GroupService {
     return { groupId };
   }
 
-  async getGroupMembersById(
+  async getMembersByGroupId(
     groupId: schema.Group['groupId'],
   ): Promise<GetGroupMembersResponse> {
     await this.getGroupById(groupId);

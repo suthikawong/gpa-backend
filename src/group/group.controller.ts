@@ -122,16 +122,16 @@ export class GroupController {
 
   @Get(':groupId/member')
   @Roles([Role.Instructor])
-  async getMembers(
+  async getMembersByGroupId(
     @Param() params: GetGroupMembersRequest,
   ): Promise<AppResponse<GetGroupMembersResponse>> {
-    const result = await this.groupService.getGroupMembersById(params.groupId);
+    const result = await this.groupService.getMembersByGroupId(params.groupId);
     return { data: result };
   }
 
   @Post('member')
   @Roles([Role.Instructor])
-  async addMember(
+  async addGroupMember(
     @Body() body: AddGroupMemberRequest,
   ): Promise<AppResponse<AddGroupMemberResponse>> {
     const result = await this.groupService.addGroupMember(body);
@@ -140,7 +140,7 @@ export class GroupController {
 
   @Delete(':groupId/member/:studentUserId')
   @Roles([Role.Instructor])
-  async deleteMember(
+  async deleteGroupMember(
     @Param() params: DeleteGroupMemberRequest,
   ): Promise<AppResponse<DeleteGroupMemberResponse>> {
     const result = await this.groupService.deleteGroupMember(params);
