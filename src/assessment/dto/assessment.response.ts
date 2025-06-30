@@ -5,6 +5,7 @@ import {
   Group,
   ScoringComponent,
   StudentScore,
+  User,
 } from '../../drizzle/schema';
 
 export interface AssessmentWithInstructor
@@ -30,9 +31,13 @@ export interface UpdateAssessmentResponse extends Assessment {}
 
 export type DeleteAssessmentResponse = Pick<Assessment, 'assessmentId'>;
 
-export type StudentWithIsConfirmed = UserProtected & {
+export interface StudentWithIsConfirmed {
+  userId: User['userId'];
+  name: User['name'];
+  email: User['email'];
+  roleId: User['roleId'];
   isConfirmed: AssessmentStudent['isConfirmed'];
-};
+}
 
 export interface SearchStudentsInAssessmentResponse
   extends Array<StudentWithIsConfirmed> {}
