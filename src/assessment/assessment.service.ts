@@ -60,9 +60,8 @@ export class AssessmentService {
       throw new NotFoundException('Assessment not found');
     }
 
-    const { modelId, modelConfig, ...assessment } = result?.assessments;
     const { refreshToken, password, ...instructor } = result?.users ?? null;
-    return { ...assessment, instructor };
+    return { ...result?.assessments, instructor };
   }
 
   async getAssessmentsByInstructor(
