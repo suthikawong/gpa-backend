@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { and, count, eq, ilike } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { generateCode } from '../utils/generate-code';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
+import { generateCode } from '../utils/generate-code';
 import {
   ConfirmStudentJoinAssessmentRequest,
   CreateAssessmentRequest,
@@ -79,15 +79,20 @@ export class AssessmentService {
   async getAssessmentsByStudent(
     studentUserId: schema.User['userId'],
   ): Promise<GetAssessmentsByStudentResponse> {
-    const entries = await this.db.query.assessments.findMany({
-      where: eq(schema.assessmentStudent.studentUserId, studentUserId),
-      with: {
-        assessmentStudent: true,
-      },
-    });
+    const entries = await this.db
+      .select()
+      .from(schema.assessmentStudent)
+      .innerJoin(
+        schema.assessments,
+        eq(
+          schema.assessmentStudent.assessmentId,
+          schema.assessments.assessmentId,
+        ),
+      )
+      .where(eq(schema.assessmentStudent.studentUserId, studentUserId));
 
-    const data = entries.map((assessment) => {
-      const { modelId, modelConfig, assessmentStudent, ...data } = assessment;
+    const data = entries.map(({ assessments }) => {
+      const { modelId, modelConfig, ...data } = assessments;
       return data;
     });
 
