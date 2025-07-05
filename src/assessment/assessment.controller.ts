@@ -18,6 +18,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { User } from '../drizzle/schema';
 import { AssessmentService } from './assessment.service';
 import {
+  CheckScoringComponentActiveRequest,
   ConfirmStudentJoinAssessmentRequest,
   CreateAssessmentRequest,
   DeleteAssessmentRequest,
@@ -32,6 +33,7 @@ import {
   UpdateAssessmentRequest,
 } from './dto/assessment.request';
 import {
+  CheckScoringComponentActiveResponse,
   ConfirmStudentJoinAssessmentResponse,
   CreateAssessmentResponse,
   DeleteAssessmentResponse,
@@ -201,6 +203,15 @@ export class AssessmentController {
       params.assessmentId,
       user.userId,
     );
+    return { data };
+  }
+
+  @Get(':assessmentId/scoring-component/check')
+  async checkScoringComponentActive(
+    @Param() params: CheckScoringComponentActiveRequest,
+  ): Promise<AppResponse<CheckScoringComponentActiveResponse>> {
+    const data =
+      await this.assessmentService.checkScoringComponentActive(params);
     return { data };
   }
 }

@@ -4,12 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, count, eq, ilike } from 'drizzle-orm';
+import { and, count, eq, gte, ilike, lte } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { generateCode } from '../utils/generate-code';
 import {
+  CheckScoringComponentActiveRequest,
   ConfirmStudentJoinAssessmentRequest,
   CreateAssessmentRequest,
   DeleteAssessmentRequest,
@@ -21,6 +22,7 @@ import {
   UpdateAssessmentRequest,
 } from './dto/assessment.request';
 import {
+  CheckScoringComponentActiveResponse,
   ConfirmStudentJoinAssessmentResponse,
   CreateAssessmentResponse,
   DeleteAssessmentResponse,
@@ -389,6 +391,21 @@ export class AssessmentService {
     });
 
     return studentScore ?? null;
+  }
+
+  async checkScoringComponentActive(
+    data: CheckScoringComponentActiveRequest,
+  ): Promise<CheckScoringComponentActiveResponse> {
+    const scoringComponent = await this.db.query.scoringComponents.findFirst({
+      where: and(
+        eq(schema.scoringComponents.assessmentId, data.assessmentId),
+        gte(schema.scoringComponents.startDate, new Date()),
+        lte(schema.scoringComponents.endDate, new Date()),
+      ),
+    });
+
+    if (!scoringComponent) return false;
+    return true;
   }
 
   async generateUniqueCode(length = 8): Promise<string> {
