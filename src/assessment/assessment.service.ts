@@ -404,8 +404,8 @@ export class AssessmentService {
       ),
     });
 
-    if (!scoringComponent) return false;
-    return true;
+    if (!scoringComponent) return null;
+    return { scoringComponentId: scoringComponent.scoringComponentId };
   }
 
   async generateUniqueCode(length = 8): Promise<string> {

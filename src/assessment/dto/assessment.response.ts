@@ -67,4 +67,7 @@ export type GetMyScoreResponse = Pick<
   'studentUserId' | 'score'
 > | null;
 
-export type CheckScoringComponentActiveResponse = Boolean;
+export type CheckScoringComponentActiveResponse = Pick<
+  ScoringComponent,
+  'scoringComponentId'
+> | null;
