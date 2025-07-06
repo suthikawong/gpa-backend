@@ -11,7 +11,9 @@ export interface AssessmentWithInstructor extends Assessment {
   instructor: UserProtected;
 }
 
-export interface GetAssessmentByIdResponse extends AssessmentWithInstructor {}
+export interface GetAssessmentByIdResponse extends AssessmentWithInstructor {
+  canEdit: boolean;
+}
 
 export type GetAssessmentsByInstructorResponse = Omit<
   Assessment,

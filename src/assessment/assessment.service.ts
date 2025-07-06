@@ -62,8 +62,15 @@ export class AssessmentService {
       throw new NotFoundException('Assessment not found');
     }
 
+    const exist = await this.db.query.scoringComponents.findFirst({
+      where: and(
+        eq(schema.scoringComponents.assessmentId, assessmentId),
+        lte(schema.scoringComponents.startDate, new Date()),
+      ),
+    });
+
     const { refreshToken, password, ...instructor } = result?.users ?? null;
-    return { ...result?.assessments, instructor };
+    return { ...result?.assessments, instructor, canEdit: !exist };
   }
 
   async getAssessmentsByInstructor(
