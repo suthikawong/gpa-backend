@@ -395,6 +395,7 @@ export class AssessmentService {
 
   async checkScoringComponentActive(
     data: CheckScoringComponentActiveRequest,
+    studentUserId: schema.User['userId'],
   ): Promise<CheckScoringComponentActiveResponse> {
     const scoringComponent = await this.db.query.scoringComponents.findFirst({
       where: and(
@@ -405,7 +406,21 @@ export class AssessmentService {
     });
 
     if (!scoringComponent) return null;
-    return { scoringComponentId: scoringComponent.scoringComponentId };
+
+    const peerRating = await this.db.query.peerRatings.findFirst({
+      where: and(
+        eq(
+          schema.peerRatings.scoringComponentId,
+          scoringComponent.scoringComponentId,
+        ),
+        eq(schema.peerRatings.raterStudentUserId, studentUserId),
+      ),
+    });
+
+    return {
+      scoringComponentId: scoringComponent.scoringComponentId,
+      rated: !!peerRating,
+    };
   }
 
   async generateUniqueCode(length = 8): Promise<string> {

@@ -209,9 +209,12 @@ export class AssessmentController {
   @Get(':assessmentId/scoring-component/check')
   async checkScoringComponentActive(
     @Param() params: CheckScoringComponentActiveRequest,
+    @LoggedInUser() user: User,
   ): Promise<AppResponse<CheckScoringComponentActiveResponse>> {
-    const data =
-      await this.assessmentService.checkScoringComponentActive(params);
+    const data = await this.assessmentService.checkScoringComponentActive(
+      params,
+      user.userId,
+    );
     return { data };
   }
 }
