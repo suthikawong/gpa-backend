@@ -26,7 +26,7 @@ class RatingItem {
 
   @IsInt()
   @Min(0)
-  @Max(5)
+  @Max(100)
   score: PeerRating['score'];
 
   @IsOptional()
