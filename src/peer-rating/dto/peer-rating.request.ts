@@ -1,5 +1,13 @@
-import { Transform } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { Group, PeerRating } from '../../drizzle/schema';
 
 export class GetPeerRatingsByGroupIdRequest {
@@ -30,12 +38,8 @@ export class RatePeerRequest {
   @IsInt()
   rateeStudentUserId: PeerRating['rateeStudentUserId'];
 
-  @IsInt()
-  @Min(0)
-  @Max(5)
-  score: PeerRating['score'];
-
-  @IsOptional()
-  @IsString()
-  comment?: PeerRating['comment'];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RatingItem)
+  studentScores: RatingItem[];
 }

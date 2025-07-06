@@ -92,7 +92,15 @@ export class PeerRatingService {
 
     await this.db
       .insert(schema.peerRatings)
-      .values({ ...data, raterStudentUserId, createdDate: new Date() });
+      .values(
+        data.studentScores.map((value) => ({
+          ...value,
+          scoringComponentId: data.scoringComponentId,
+          rateeStudentUserId: data.rateeStudentUserId,
+          raterStudentUserId,
+          createdDate: new Date(),
+        })),
+      );
 
     return {
       rateeStudentUserId: data.rateeStudentUserId,
