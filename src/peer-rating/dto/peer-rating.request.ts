@@ -22,6 +22,9 @@ export class GetPeerRatingsByGroupIdRequest {
 
 class RatingItem {
   @IsInt()
+  rateeStudentUserId: PeerRating['rateeStudentUserId'];
+
+  @IsInt()
   @Min(0)
   @Max(5)
   score: PeerRating['score'];
@@ -34,9 +37,6 @@ class RatingItem {
 export class RatePeerRequest {
   @IsInt()
   scoringComponentId: PeerRating['scoringComponentId'];
-
-  @IsInt()
-  rateeStudentUserId: PeerRating['rateeStudentUserId'];
 
   @IsArray()
   @ValidateNested({ each: true })
