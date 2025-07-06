@@ -399,8 +399,8 @@ export class AssessmentService {
     const scoringComponent = await this.db.query.scoringComponents.findFirst({
       where: and(
         eq(schema.scoringComponents.assessmentId, data.assessmentId),
-        gte(schema.scoringComponents.startDate, new Date()),
-        lte(schema.scoringComponents.endDate, new Date()),
+        lte(schema.scoringComponents.startDate, new Date()),
+        gte(schema.scoringComponents.endDate, new Date()),
       ),
     });
 
