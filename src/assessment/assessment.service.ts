@@ -98,7 +98,12 @@ export class AssessmentService {
           schema.assessments.assessmentId,
         ),
       )
-      .where(eq(schema.assessmentStudent.studentUserId, studentUserId));
+      .where(
+        and(
+          eq(schema.assessmentStudent.studentUserId, studentUserId),
+          eq(schema.assessmentStudent.isConfirmed, true),
+        ),
+      );
 
     const data = entries.map(({ assessments }) => {
       const { modelId, modelConfig, ...data } = assessments;
