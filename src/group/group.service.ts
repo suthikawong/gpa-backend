@@ -246,15 +246,38 @@ export class GroupService {
       )
       .where(eq(schema.studentScores.groupId, groupId));
 
+    const members = await this.db
+      .select({
+        userId: schema.users.userId,
+        name: schema.users.name,
+        email: schema.users.email,
+        roleId: schema.users.roleId,
+      })
+      .from(schema.groupMembers)
+      .innerJoin(
+        schema.users,
+        eq(schema.groupMembers.studentUserId, schema.users.userId),
+      )
+      .where(eq(schema.groupMembers.groupId, groupId));
+
+    const studentScoreMapping = {};
+
+    studentScores.forEach((student) => {
+      const { refreshToken, password, ...user } = student.users;
+      studentScoreMapping[student.student_scores.studentUserId] = {
+        ...user,
+        studentScores: student.student_scores,
+      };
+    });
+
+    const studentScoresResult = members.map((member) => ({
+      ...member,
+      studentScore: studentScoreMapping[member.userId] ?? null,
+    }));
+
     return {
       groupScore: groupScore ?? null,
-      studentScores: studentScores.map((item) => {
-        const { refreshToken, password, ...user } = item.users;
-        return {
-          ...item.student_scores,
-          user: user,
-        };
-      }),
+      studentScores: studentScoresResult,
     };
   }
 
@@ -286,10 +309,10 @@ export class GroupService {
     const promises = data.studentScores.map(
       ({ studentUserId, score, remark }) => {
         const currStudentScore = currStudentScores.find(
-          (item) => item.studentUserId === studentUserId,
+          (item) => item.studentScore.studentUserId === studentUserId,
         );
 
-        if (!score && currStudentScore?.score) {
+        if (!score && currStudentScore?.studentScore?.score) {
           return this.db
             .delete(schema.studentScores)
             .where(
@@ -300,7 +323,7 @@ export class GroupService {
             );
         }
 
-        if (score && currStudentScore?.score) {
+        if (score && currStudentScore?.studentScore?.score) {
           return this.db
             .update(schema.studentScores)
             .set({ score, remark: remark ?? null, updatedDate: new Date() })
