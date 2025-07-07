@@ -8,7 +8,7 @@ import * as schema from '../drizzle/schema';
 import { PeerRating } from '../drizzle/schema';
 import { RatePeerRequest } from './dto/peer-rating.request';
 import {
-  GetPeerRatingsByGroupIdResponse,
+  GetPeerRatingsByScoringComponentIdResponse,
   RatePeerResponse,
 } from './dto/peer-rating.response';
 
@@ -21,10 +21,10 @@ export class PeerRatingService {
     private readonly scoringComponentService: ScoringComponentService,
   ) {}
 
-  async getPeerRatingsByGroupId(
+  async getPeerRatingsByScoringComponentId(
     scoringComponentId: schema.ScoringComponent['scoringComponentId'],
     groupId: schema.Group['groupId'],
-  ): Promise<GetPeerRatingsByGroupIdResponse> {
+  ): Promise<GetPeerRatingsByScoringComponentIdResponse> {
     await this.groupService.getGroupById(groupId);
     await this.scoringComponentService.getScoringComponentById(
       scoringComponentId,

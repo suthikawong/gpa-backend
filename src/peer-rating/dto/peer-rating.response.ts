@@ -11,7 +11,8 @@ export interface UserWithPeerRating extends UserProtected {
   ratings: PeerRatingItem[];
 }
 
-export type GetPeerRatingsByGroupIdResponse = Array<UserWithPeerRating>;
+export type GetPeerRatingsByScoringComponentIdResponse =
+  Array<UserWithPeerRating>;
 
 export interface RatePeerResponse {
   raterStudentUserId: PeerRating['raterStudentUserId'];

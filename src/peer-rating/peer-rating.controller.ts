@@ -7,11 +7,11 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { User } from '../drizzle/schema';
 import {
-  GetPeerRatingsByGroupIdRequest,
+  GetPeerRatingsByScoringComponentIdRequest,
   RatePeerRequest,
 } from './dto/peer-rating.request';
 import {
-  GetPeerRatingsByGroupIdResponse,
+  GetPeerRatingsByScoringComponentIdResponse,
   RatePeerResponse,
 } from './dto/peer-rating.response';
 import { PeerRatingService } from './peer-rating.service';
@@ -33,13 +33,14 @@ export class PeerRatingController {
 
   @Get()
   @Roles([Role.Instructor])
-  async getPeerRatingsByGroupId(
-    @Query() query: GetPeerRatingsByGroupIdRequest,
-  ): Promise<AppResponse<GetPeerRatingsByGroupIdResponse>> {
-    const data = await this.peerAssessmentService.getPeerRatingsByGroupId(
-      query.scoringComponentId,
-      query.groupId,
-    );
+  async getPeerRatingsByScoringComponentId(
+    @Query() query: GetPeerRatingsByScoringComponentIdRequest,
+  ): Promise<AppResponse<GetPeerRatingsByScoringComponentIdResponse>> {
+    const data =
+      await this.peerAssessmentService.getPeerRatingsByScoringComponentId(
+        query.scoringComponentId,
+        query.groupId,
+      );
     return { data };
   }
 }

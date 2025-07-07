@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { Group, PeerRating } from '../../drizzle/schema';
 
-export class GetPeerRatingsByGroupIdRequest {
+export class GetPeerRatingsByScoringComponentIdRequest {
   @Transform(({ value }) => parseInt(value))
   @IsInt()
   scoringComponentId: PeerRating['scoringComponentId'];
