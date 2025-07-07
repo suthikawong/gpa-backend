@@ -2,7 +2,7 @@ import { PeerRating } from '../../drizzle/schema';
 import { UserProtected } from '../../user/user.interface';
 
 export interface PeerRatingItem {
-  rateeStudentUserId: PeerRating['rateeStudentUserId'];
+  raterStudentUserId: PeerRating['rateeStudentUserId'];
   score: PeerRating['score'];
   comment: PeerRating['comment'];
 }
