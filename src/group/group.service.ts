@@ -309,7 +309,7 @@ export class GroupService {
     const promises = data.studentScores.map(
       ({ studentUserId, score, remark }) => {
         const currStudentScore = currStudentScores.find(
-          (item) => item.studentScore.studentUserId === studentUserId,
+          (item) => item?.studentScore?.studentUserId === studentUserId,
         );
 
         if (!score && currStudentScore?.studentScore?.score) {
