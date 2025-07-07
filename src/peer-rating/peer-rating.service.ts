@@ -1,14 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, inArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { GroupService } from '../group/group.service';
-import { ScoringComponentService } from '../scoring-component/scoring-component.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { PeerRating } from '../drizzle/schema';
+import { GroupService } from '../group/group.service';
+import { ScoringComponentService } from '../scoring-component/scoring-component.service';
 import { RatePeerRequest } from './dto/peer-rating.request';
 import {
   GetPeerRatingsByScoringComponentIdResponse,
+  PeerRatingItem,
   RatePeerResponse,
 } from './dto/peer-rating.response';
 
@@ -25,10 +26,15 @@ export class PeerRatingService {
     scoringComponentId: schema.ScoringComponent['scoringComponentId'],
     groupId: schema.Group['groupId'],
   ): Promise<GetPeerRatingsByScoringComponentIdResponse> {
-    await this.groupService.getGroupById(groupId);
+    const group = await this.groupService.getGroupById(groupId);
     await this.scoringComponentService.getScoringComponentById(
       scoringComponentId,
     );
+    const assessment = await this.db.query.assessments.findFirst({
+      where: eq(schema.assessments.assessmentId, group.assessmentId),
+    });
+    const modelConfig = assessment?.modelConfig as { selfRating: boolean };
+    const selfRating = modelConfig?.selfRating;
 
     const members = await this.db
       .select({ studentUserId: schema.groupMembers.studentUserId })
@@ -48,7 +54,8 @@ export class PeerRatingService {
         roleId: schema.users.roleId,
       })
       .from(schema.users)
-      .where(inArray(schema.users.userId, studentIds));
+      .where(inArray(schema.users.userId, studentIds))
+      .orderBy(schema.users.name);
 
     const peerRating = await this.db
       .select()
@@ -60,24 +67,36 @@ export class PeerRatingService {
         ),
       );
 
-    const peerRatingObject = {};
+    const peerRatingObject = {}; // [ratee][rater]
 
     for (const item of peerRating) {
-      const key = item.rateeStudentUserId;
-      if (!peerRatingObject[key]) {
-        peerRatingObject[key] = [];
+      const rateeUserId = item.rateeStudentUserId;
+      if (!peerRatingObject[rateeUserId]) {
+        peerRatingObject[rateeUserId] = {};
       }
-      peerRatingObject[key].push({
+      peerRatingObject[rateeUserId][item.raterStudentUserId] = {
         raterStudentUserId: item.raterStudentUserId,
         score: item.score,
         comment: item.comment,
-      });
+      };
     }
 
-    const result = users.map((user) => ({
-      ...user,
-      ratings: peerRatingObject[user.userId] ?? [],
-    }));
+    const result: GetPeerRatingsByScoringComponentIdResponse = [];
+
+    for (let ratee of users) {
+      const ratings: PeerRatingItem[] = [];
+      for (let rater of users) {
+        if (ratee.userId === rater.userId && !selfRating) {
+          continue;
+        }
+        if (peerRatingObject?.[ratee.userId]?.[rater.userId]) {
+          ratings.push(peerRatingObject[ratee.userId][rater.userId]);
+        } else {
+          ratings.push({ raterStudentUserId: rater.userId });
+        }
+      }
+      result.push({ ...ratee, ratings });
+    }
 
     return result;
   }

@@ -3,8 +3,8 @@ import { UserProtected } from '../../user/user.interface';
 
 export interface PeerRatingItem {
   raterStudentUserId: PeerRating['rateeStudentUserId'];
-  score: PeerRating['score'];
-  comment: PeerRating['comment'];
+  score?: PeerRating['score'];
+  comment?: PeerRating['comment'];
 }
 
 export interface UserWithPeerRating extends UserProtected {
