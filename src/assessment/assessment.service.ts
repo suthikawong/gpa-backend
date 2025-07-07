@@ -102,6 +102,7 @@ export class AssessmentService {
         and(
           eq(schema.assessmentStudent.studentUserId, studentUserId),
           eq(schema.assessmentStudent.isConfirmed, true),
+          eq(schema.assessments.isPublished, true),
         ),
       );
 
