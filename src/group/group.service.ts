@@ -237,13 +237,24 @@ export class GroupService {
       where: eq(schema.groupScores.groupId, groupId),
     });
 
-    const studentScores = await this.db.query.studentScores.findMany({
-      where: eq(schema.studentScores.groupId, groupId),
-    });
+    const studentScores = await this.db
+      .select()
+      .from(schema.studentScores)
+      .innerJoin(
+        schema.users,
+        eq(schema.studentScores.studentUserId, schema.users.userId),
+      )
+      .where(eq(schema.studentScores.groupId, groupId));
 
     return {
       groupScore: groupScore ?? null,
-      studentScores,
+      studentScores: studentScores.map((item) => {
+        const { refreshToken, password, ...user } = item.users;
+        return {
+          ...item.student_scores,
+          user: user,
+        };
+      }),
     };
   }
 
