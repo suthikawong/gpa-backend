@@ -237,14 +237,18 @@ export class GroupService {
       where: eq(schema.groupScores.groupId, groupId),
     });
 
-    const studentScores = await this.db
-      .select()
-      .from(schema.studentScores)
-      .innerJoin(
-        schema.users,
-        eq(schema.studentScores.studentUserId, schema.users.userId),
-      )
-      .where(eq(schema.studentScores.groupId, groupId));
+    const studentScores = await this.db.query.studentScores.findMany({
+      where: eq(schema.studentScores.groupId, groupId),
+    });
+
+    // const studentScores = await this.db
+    //   .select()
+    //   .from(schema.studentScores)
+    //   .innerJoin(
+    //     schema.users,
+    //     eq(schema.studentScores.studentUserId, schema.users.userId),
+    //   )
+    //   .where(eq(schema.studentScores.groupId, groupId));
 
     const members = await this.db
       .select({
@@ -263,11 +267,7 @@ export class GroupService {
     const studentScoreMapping = {};
 
     studentScores.forEach((student) => {
-      const { refreshToken, password, ...user } = student.users;
-      studentScoreMapping[student.student_scores.studentUserId] = {
-        ...user,
-        studentScores: student.student_scores,
-      };
+      studentScoreMapping[student.studentUserId] = student;
     });
 
     const studentScoresResult = members.map((member) => ({
