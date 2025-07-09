@@ -17,6 +17,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { User } from '../drizzle/schema';
 import {
   AddGroupMemberRequest,
+  CalculateScoresRequest,
   CreateGroupRequest,
   DeleteGroupMemberRequest,
   DeleteGroupRequest,
@@ -30,6 +31,7 @@ import {
 } from './dto/group.request';
 import {
   AddGroupMemberResponse,
+  CalculateScoresResponse,
   CreateGroupResponse,
   DeleteGroupMemberResponse,
   DeleteGroupResponse,
@@ -162,6 +164,15 @@ export class GroupController {
     @Body() data: UpsertScoresRequest,
   ): Promise<AppResponse<UpsertScoresResponse>> {
     const result = await this.groupService.upsertScore(data);
+    return { data: result };
+  }
+
+  @Post('calculate-score')
+  @Roles([Role.Instructor])
+  async calculateScore(
+    @Body() data: CalculateScoresRequest,
+  ): Promise<AppResponse<CalculateScoresResponse>> {
+    const result = await this.groupService.calculateScore(data);
     return { data: result };
   }
 }

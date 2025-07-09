@@ -103,3 +103,8 @@ export class UpsertScoresRequest {
   @Type(() => StudentScoreItem)
   studentScores: StudentScoreItem[];
 }
+
+export class CalculateScoresRequest {
+  @IsNumber()
+  groupId: GroupScore['groupId'];
+}

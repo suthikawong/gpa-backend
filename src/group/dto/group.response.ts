@@ -35,3 +35,5 @@ export interface GetScoresResponse {
 }
 
 export type UpsertScoresResponse = Pick<Group, 'groupId'>;
+
+export type CalculateScoresResponse = Pick<Group, 'groupId'>;

@@ -16,6 +16,7 @@ import { UserService } from '../user/user.service';
 import { generateCode } from '../utils/generate-code';
 import {
   AddGroupMemberRequest,
+  CalculateScoresRequest,
   CreateGroupRequest,
   DeleteGroupMemberRequest,
   UpdateGroupRequest,
@@ -23,6 +24,7 @@ import {
 } from './dto/group.request';
 import {
   AddGroupMemberResponse,
+  CalculateScoresResponse,
   CreateGroupResponse,
   DeleteGroupMemberResponse,
   DeleteGroupResponse,
@@ -348,6 +350,44 @@ export class GroupService {
     );
 
     await Promise.all(promises);
+
+    return { groupId: data.groupId };
+  }
+
+  async calculateScore(
+    data: CalculateScoresRequest,
+  ): Promise<CalculateScoresResponse> {
+    const groupId = data.groupId;
+    // check group exist
+    const group = await this.getGroupById(groupId);
+
+    // check model exist
+    const assessment = await this.assessmentService.getAssessmentById(
+      group.assessmentId,
+    );
+
+    if (!assessment?.modelId || !assessment.modelConfig) {
+      throw new BadRequestException(
+        'Assessment model was not selected. Please choose model to proceed.',
+      );
+    }
+
+    // check at least one scoring component exist
+    const scoringComponents = await this.db.query.scoringComponents.findMany({
+      where: eq(schema.scoringComponents.assessmentId, group.assessmentId),
+    });
+
+    if (scoringComponents.length === 0) {
+      throw new BadRequestException(
+        'At least one scoring component must be created. Please create scoring component and wait for peer rating to be done before proceed.',
+      );
+    }
+
+    // All scoring component must be done???
+
+    // All student in the group must done peer rating in every existing scoring component???
+
+    // calculate scores
 
     return { groupId: data.groupId };
   }
