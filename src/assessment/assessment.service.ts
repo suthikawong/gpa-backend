@@ -313,6 +313,33 @@ export class AssessmentService {
           eq(schema.assessmentStudent.studentUserId, data.studentUserId),
         ),
       );
+
+    const [result] = await this.db
+      .select({
+        groupId: schema.groupMembers.groupId,
+      })
+      .from(schema.assessmentStudent)
+      .innerJoin(
+        schema.users,
+        eq(schema.assessmentStudent.studentUserId, schema.users.userId),
+      )
+      .leftJoin(
+        schema.groupMembers,
+        eq(schema.groupMembers.studentUserId, schema.users.userId),
+      )
+      .where(eq(schema.assessmentStudent.assessmentId, data.assessmentId));
+
+    if (result?.groupId) {
+      await this.db
+        .delete(schema.groupMembers)
+        .where(
+          and(
+            eq(schema.groupMembers.groupId, result.groupId),
+            eq(schema.groupMembers.studentUserId, data.studentUserId),
+          ),
+        );
+    }
+
     return { studentUserId: data.studentUserId };
   }
 
