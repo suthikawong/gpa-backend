@@ -63,7 +63,7 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
   const meanStudentScore =
     studentScores.reduce((prev, curr) => prev + curr, 0) / studentScores.length;
 
-  validateScores(
+  SplitJoinInvariance(
     meanStudentScore,
     groupProductScore,
     meanStudentContribution,
@@ -259,7 +259,7 @@ const calculateStudentScores = (
 };
 
 // validate scores with Split-Join-Invariance
-const validateScores = (
+const SplitJoinInvariance = (
   meanScore: number,
   groupProductScore: number,
   meanStudentContribution: number,
