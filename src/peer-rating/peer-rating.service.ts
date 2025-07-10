@@ -113,6 +113,7 @@ export class PeerRatingService {
       data.studentScores.map((value) => ({
         ...value,
         scoringComponentId: data.scoringComponentId,
+        groupId: data.groupId,
         raterStudentUserId,
         createdDate: new Date(),
       })),

@@ -186,6 +186,11 @@ export const peerRatings = pgTable(
         onDelete: 'cascade',
       })
       .notNull(),
+    groupId: integer('group_id')
+      .references(() => groups.groupId, {
+        onDelete: 'cascade',
+      })
+      .notNull(),
     rateeStudentUserId: integer('ratee_student_user_id')
       .references(() => users.userId)
       .notNull(),

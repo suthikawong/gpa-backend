@@ -38,6 +38,9 @@ export class RatePeerRequest {
   @IsInt()
   scoringComponentId: PeerRating['scoringComponentId'];
 
+  @IsInt()
+  groupId: PeerRating['groupId'];
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => RatingItem)
