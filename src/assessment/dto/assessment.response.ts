@@ -33,6 +33,7 @@ export type DeleteAssessmentResponse = Pick<Assessment, 'assessmentId'>;
 
 export interface StudentWithIsConfirmed extends UserProtected {
   isConfirmed: AssessmentStudent['isConfirmed'];
+  joinedGroupId: Group['groupId'] | null;
 }
 
 export interface SearchStudentsInAssessmentResponse

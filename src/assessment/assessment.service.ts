@@ -193,11 +193,16 @@ export class AssessmentService {
         email: schema.users.email,
         roleId: schema.users.roleId,
         isConfirmed: schema.assessmentStudent.isConfirmed,
+        joinedGroupId: schema.groupMembers.groupId,
       })
       .from(schema.assessmentStudent)
       .innerJoin(
         schema.users,
         eq(schema.assessmentStudent.studentUserId, schema.users.userId),
+      )
+      .leftJoin(
+        schema.groupMembers,
+        eq(schema.groupMembers.studentUserId, schema.users.userId),
       )
       .where(and(...condition));
 
