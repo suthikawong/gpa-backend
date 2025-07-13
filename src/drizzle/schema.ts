@@ -1,8 +1,8 @@
 import {
   boolean,
+  doublePrecision,
   integer,
   jsonb,
-  numeric,
   pgTable,
   serial,
   text,
@@ -144,7 +144,7 @@ export const groupScores = pgTable('group_scores', {
       onDelete: 'cascade',
     })
     .notNull(),
-  score: numeric('score').notNull(),
+  score: doublePrecision('score').notNull(),
   createdDate: timestamp('created_date').notNull(),
   updatedDate: timestamp('updated_date'),
 });
