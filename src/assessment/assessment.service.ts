@@ -202,7 +202,13 @@ export class AssessmentService {
       )
       .leftJoin(
         schema.groupMembers,
-        eq(schema.groupMembers.studentUserId, schema.users.userId),
+        and(
+          eq(schema.groupMembers.studentUserId, schema.users.userId),
+          eq(
+            schema.groupMembers.assessmentId,
+            schema.assessmentStudent.assessmentId,
+          ),
+        ),
       )
       .where(and(...condition));
 

@@ -2,6 +2,7 @@ import {
   boolean,
   integer,
   jsonb,
+  numeric,
   pgTable,
   serial,
   text,
@@ -119,10 +120,17 @@ export const groupMembers = pgTable(
     studentUserId: integer('student_user_id')
       .references(() => users.userId)
       .notNull(),
+    assessmentId: integer('assessment_id')
+      .references(() => assessments.assessmentId, { onDelete: 'cascade' })
+      .notNull(),
     createdDate: timestamp('created_date').notNull(),
   },
   (table) => [
-    unique('uniqueMembership').on(table.groupId, table.studentUserId),
+    unique('uniqueMembership').on(
+      table.groupId,
+      table.studentUserId,
+      table.assessmentId,
+    ),
   ],
 );
 
@@ -136,7 +144,7 @@ export const groupScores = pgTable('group_scores', {
       onDelete: 'cascade',
     })
     .notNull(),
-  score: integer('score').notNull(),
+  score: numeric('score').notNull(),
   createdDate: timestamp('created_date').notNull(),
   updatedDate: timestamp('updated_date'),
 });

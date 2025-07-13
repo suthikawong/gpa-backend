@@ -142,6 +142,7 @@ export class GroupService {
 
     await this.db.insert(schema.groupMembers).values({
       groupId: group.groupId,
+      assessmentId: group.assessmentId,
       studentUserId,
       createdDate: new Date(),
     });
@@ -206,9 +207,11 @@ export class GroupService {
       throw new BadRequestException('This student already joined this group.');
     }
 
-    await this.db
-      .insert(schema.groupMembers)
-      .values({ ...data, createdDate: new Date() });
+    await this.db.insert(schema.groupMembers).values({
+      ...data,
+      assessmentId: group.assessmentId,
+      createdDate: new Date(),
+    });
     return { studentUserId: data.studentUserId };
   }
 
