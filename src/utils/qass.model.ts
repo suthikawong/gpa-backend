@@ -1,7 +1,7 @@
 export enum QASSMode {
-  B = 'Bijunction',
-  C = 'Conjunction',
-  D = 'Disjunction',
+  B = 'B',
+  C = 'C',
+  D = 'D',
 }
 
 // calculate student scores in a specific scoring component
@@ -54,6 +54,8 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
     groupSpread,
   );
 
+  console.log('studentScores : ', studentScores);
+
   // validate scores
   const meanStudentContribution = calculateMeanStudentContribution(
     studentContributions,
@@ -105,6 +107,7 @@ export const calculateStudentsScoresFromAllComponentsByQASS = (
         peerRatingWeights,
         mode,
       );
+    console.log('TLOG ~ studentContributions:', studentContributions);
     studentContributions.forEach((cont, i) => {
       studentContributionsFromAllComponents[i].push(cont);
     });
@@ -118,10 +121,15 @@ export const calculateStudentsScoresFromAllComponentsByQASS = (
         studentContributionsInComponent,
         scoringComponentWeights,
       );
+      console.log(
+        'TLOG ~ totalStudentContributions:',
+        totalStudentContributions,
+      );
       const score = Math.pow(
         groupProductScore,
         Math.pow(groupSpread, totalStudentContributions),
       );
+      console.log('TLOG ~ score:', score);
       studentScores.push(score);
     },
   );
@@ -146,10 +154,6 @@ const caluclateRatings = (
   const formulas = {
     [QASSMode.B]: {
       'R2-1': (peerRating: number, selfRating: number, weight: number) => {
-        // console.log('TLOG ~ peerRating:', peerRating);
-        // console.log('TLOG ~ selfRating:', selfRating);
-        // console.log('TLOG ~ weight:', weight);
-
         return Math.pow(
           (peerRating / (1 - peerRating)) * ((1 - selfRating) / selfRating),
           weight,
@@ -159,11 +163,34 @@ const caluclateRatings = (
       'R3-1': (value: number, weight: number) => Math.pow(value, weight),
       'R3-2': (value: number) => value / (1 + value),
     },
+    [QASSMode.C]: {
+      'R2-1': (peerRating: number, selfRating: number, weight: number) => {
+        return Math.pow(
+          (peerRating / (2 - peerRating)) * ((2 - selfRating) / selfRating),
+          weight,
+        );
+      },
+      'R2-2': (value: number) => (2 * value) / (1 + value),
+      'R3-1': (value: number, weight: number) => Math.pow(value, weight),
+      'R3-2': (value: number) => (2 * value) / (1 + value),
+    },
+    [QASSMode.D]: {
+      'R2-1': (peerRating: number, selfRating: number, weight: number) => {
+        return Math.pow(
+          ((1 + peerRating) / (1 - peerRating)) *
+            ((1 - selfRating) / (1 + selfRating)),
+          weight,
+        );
+      },
+      'R2-2': (value: number) => (value - 1) / (value + 1),
+      'R3-1': (value: number, weight: number) => Math.pow(value, weight),
+      'R3-2': (value: number) => (value - 1) / (value + 1),
+    },
   };
 
-  let iSum = 0;
+  let iSum = 1;
   for (let i = 0; i < groupSize; i++) {
-    let jSum = 0;
+    let jSum = 1;
     for (let j = 0; j < groupSize; j++) {
       const peerRating = calculateRescaledPeerRating(
         tuningFactor,
@@ -173,14 +200,14 @@ const caluclateRatings = (
         tuningFactor,
         peerMatrix[j][j],
       );
-      jSum += formulas[mode]['R2-1'](
+      jSum *= formulas[mode]['R2-1'](
         peerRating,
         selfRating,
         peerRatingWeights[j],
       );
     }
     studentRatings.push(formulas[mode]['R2-2'](jSum)); // Step 2
-    iSum += formulas[mode]['R3-1'](jSum, peerRatingWeights[i]);
+    iSum *= formulas[mode]['R3-1'](jSum, peerRatingWeights[i]);
   }
   const meanStudentRating = formulas[mode]['R3-2'](iSum); // Step 3
   return { studentRatings, meanStudentRating };
@@ -203,6 +230,26 @@ const caluclateComponentStudentContributions = (
         Math.pow(meanStudentRating / (1 - meanStudentRating), impact),
       'C1-2': (value: number) => (value - 1) / (value + 1),
     },
+    [QASSMode.C]: {
+      'C1-1': (
+        studentRating: number,
+        meanStudentRating: number,
+        impact: number,
+      ) =>
+        Math.pow(studentRating / (2 - studentRating), impact) /
+        Math.pow(meanStudentRating / (2 - meanStudentRating), impact),
+      'C1-2': (value: number) => (value - 1) / (value + 1),
+    },
+    [QASSMode.D]: {
+      'C1-1': (
+        studentRating: number,
+        meanStudentRating: number,
+        impact: number,
+      ) =>
+        Math.pow((1 + studentRating) / (1 - studentRating), impact) /
+        Math.pow((1 + meanStudentRating) / (1 - meanStudentRating), impact),
+      'C1-2': (value: number) => (value - 1) / (value + 1),
+    },
   };
 
   const contributionValue = formulas[mode]['C1-1'](
@@ -219,9 +266,9 @@ const calculateStudentContribution = (
   studentContributions: number[], // student contribution of a specific student from multiple scoring components
   scoringComponentWeights: number[],
 ) => {
-  let sum = 0;
+  let sum = 1;
   scoringComponentWeights.forEach((weight, k) => {
-    sum += Math.pow(
+    sum *= Math.pow(
       (1 + studentContributions[k]) / (1 - studentContributions[k]),
       weight,
     );
@@ -232,9 +279,9 @@ const calculateMeanStudentContribution = (
   studentContributions: number[],
   peerRatingWeights: number[],
 ) => {
-  let sum = 0;
+  let sum = 1;
   peerRatingWeights.forEach((weight, i) => {
-    sum += Math.pow(
+    sum *= Math.pow(
       (1 + studentContributions[i]) / (1 - studentContributions[i]),
       weight,
     );
@@ -265,10 +312,11 @@ const SplitJoinInvariance = (
   meanStudentContribution: number,
   groupSpread: number,
 ) => {
-  // console.log(meanScore);
-  // console.log(
-  //   Math.pow(groupProductScore, Math.pow(groupSpread, meanStudentContribution)),
-  // );
+  console.log('meanScore : ', meanScore);
+  console.log(
+    'pow : ',
+    Math.pow(groupProductScore, Math.pow(groupSpread, meanStudentContribution)),
+  );
   if (
     meanScore !==
     Math.pow(groupProductScore, Math.pow(groupSpread, meanStudentContribution))

@@ -15,6 +15,11 @@ import { Group, User } from '../drizzle/schema';
 import { UserService } from '../user/user.service';
 import { generateCode } from '../utils/generate-code';
 import {
+  calculateStudentsScoresFromSpecificComponentByQASS,
+  QASSMode,
+} from '../utils/qass.model';
+import { webavalia } from '../utils/webavalia-model';
+import {
   AddGroupMemberRequest,
   CalculateScoresRequest,
   CreateGroupRequest,
@@ -451,4 +456,40 @@ export class GroupService {
       'Failed to generate a unique group code. Please try again.',
     );
   }
+
+  calcualteScoresByQASS = (
+    peerMatrix: number[][],
+    groupProductScore: number,
+    peerRatingImpact: number,
+    groupSpread: number,
+    tuningFactor: number,
+    peerRatingWeights: number[],
+    mode: QASSMode,
+  ): number[] => {
+    try {
+      const { studentScores } =
+        calculateStudentsScoresFromSpecificComponentByQASS(
+          peerMatrix,
+          groupProductScore,
+          peerRatingImpact,
+          groupSpread,
+          tuningFactor,
+          peerRatingWeights,
+          mode,
+        );
+      return studentScores;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+  calcualteScoresByWebavalia = (
+    peerRating: (number | null)[][],
+    groupScore: number,
+    saWeight: number,
+    paWeight: number,
+  ): number[] | null => {
+    return webavalia(peerRating, groupScore, saWeight, paWeight);
+  };
 }
