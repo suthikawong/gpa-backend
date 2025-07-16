@@ -300,19 +300,17 @@ export class GroupService {
       await this.db
         .delete(schema.groupScores)
         .where(eq(schema.groupScores.groupId, data.groupId));
-    } else {
-      if (currGroupScore) {
-        await this.db
-          .update(schema.groupScores)
-          .set({ score: data.groupScore, updatedDate: new Date() })
-          .where(eq(schema.groupScores.groupId, data.groupId));
-      } else {
-        await this.db.insert(schema.groupScores).values({
-          groupId: data.groupId,
-          score: data.groupScore,
-          createdDate: new Date(),
-        });
-      }
+    } else if (data?.groupScore && !currGroupScore) {
+      await this.db.insert(schema.groupScores).values({
+        groupId: data.groupId,
+        score: data.groupScore,
+        createdDate: new Date(),
+      });
+    } else if (data?.groupScore !== currGroupScore?.score) {
+      await this.db
+        .update(schema.groupScores)
+        .set({ score: data.groupScore, updatedDate: new Date() })
+        .where(eq(schema.groupScores.groupId, data.groupId));
     }
 
     const deleteScoreSet = new Set<schema.StudentScore['studentUserId']>(
