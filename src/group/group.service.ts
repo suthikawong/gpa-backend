@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Role } from '../app.config';
 import { AssessmentService } from '../assessment/assessment.service';
@@ -315,6 +315,12 @@ export class GroupService {
       }
     }
 
+    const deleteScoreSet = new Set<schema.StudentScore['studentUserId']>(
+      currStudentScores
+        .map((item) => item?.studentScore?.studentUserId)
+        .filter((item) => !!item),
+    );
+
     // upsert student scores
     const promises = data.studentScores.map(
       ({ studentUserId, score, remark }) => {
@@ -322,18 +328,9 @@ export class GroupService {
           (item) => item?.studentScore?.studentUserId === studentUserId,
         );
 
-        if (!score && currStudentScore?.studentScore?.score) {
-          return this.db
-            .delete(schema.studentScores)
-            .where(
-              and(
-                eq(schema.studentScores.groupId, data.groupId),
-                eq(schema.studentScores.studentUserId, studentUserId),
-              ),
-            );
-        }
-
         if (score && currStudentScore?.studentScore?.score) {
+          if (deleteScoreSet.has(studentUserId))
+            deleteScoreSet.delete(studentUserId);
           return this.db
             .update(schema.studentScores)
             .set({ score, remark: remark ?? null, updatedDate: new Date() })
@@ -346,6 +343,8 @@ export class GroupService {
         }
 
         if (score) {
+          if (deleteScoreSet.has(studentUserId))
+            deleteScoreSet.delete(studentUserId);
           return this.db.insert(schema.studentScores).values({
             groupId: data.groupId,
             studentUserId,
@@ -358,6 +357,14 @@ export class GroupService {
     );
 
     await Promise.all(promises);
+    await this.db
+      .delete(schema.studentScores)
+      .where(
+        and(
+          eq(schema.studentScores.groupId, data.groupId),
+          inArray(schema.studentScores.studentUserId, [...deleteScoreSet]),
+        ),
+      );
 
     return { groupId: data.groupId };
   }
