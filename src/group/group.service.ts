@@ -105,7 +105,7 @@ export class GroupService {
     const rows: { email: string; groupName: string }[] = [];
     sheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
       if (rowNumber === 1) return; // skip header
-      const email = String(row.getCell(1).value || '').trim();
+      const email = String(row.getCell(1).text || '').trim();
       const groupName = String(row.getCell(2).value || '').trim();
       rows.push({ email, groupName });
     });
@@ -133,7 +133,7 @@ export class GroupService {
       if (!studentsByEmail.has(row.email)) {
         errors.push({
           row: index + 2,
-          message: `Student email ${row.email} not found.`,
+          message: `Student email ${row.email} not found in this assessment.`,
         });
         return;
       }
@@ -169,6 +169,10 @@ export class GroupService {
     const { assessmentId } = data;
 
     const { errors, groupsMap } = await this.verifyImportGroups(data, file);
+
+    if (errors.length > 0) {
+      return { success: false, errors };
+    }
 
     await this.db.transaction(async (tx) => {
       const existingGroups = await tx.query.groups.findMany({
@@ -207,7 +211,7 @@ export class GroupService {
       }
     });
 
-    return { success: errors.length === 0, errors };
+    return { success: true, errors };
   }
 
   async createRandomGroups(
