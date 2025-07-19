@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { and, eq, inArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import ExcelJS from 'exceljs';
 import { Role } from '../app.config';
 import { AssessmentService } from '../assessment/assessment.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
@@ -23,23 +24,29 @@ import {
   AddGroupMemberRequest,
   CalculateScoresRequest,
   CreateGroupRequest,
+  CreateRandomGroupsRequest,
   DeleteGroupMemberRequest,
+  ImportGroupsRequest,
   UpdateGroupRequest,
   UpsertScoresRequest,
+  VerifyImportGroupsRequest,
 } from './dto/group.request';
 import {
   AddGroupMemberResponse,
   CalculateScoresResponse,
   CreateGroupResponse,
+  CreateRandomGroupsResponse,
   DeleteGroupMemberResponse,
   DeleteGroupResponse,
   GetGroupByIdResponse,
   GetGroupMembersResponse,
   GetScoresResponse,
+  ImportGroupsResponse,
   JoinGroupResponse,
   LeaveGroupResponse,
   UpdateGroupResponse,
   UpsertScoresResponse,
+  VerifyImportGroupsResponse,
 } from './dto/group.response';
 
 @Injectable()
@@ -82,6 +89,197 @@ export class GroupService {
       .returning();
 
     return group;
+  }
+
+  async verifyImportGroups(
+    data: VerifyImportGroupsRequest,
+    file: Express.Multer.File,
+  ): Promise<VerifyImportGroupsResponse> {
+    const { assessmentId } = data;
+    const errors: { row: number; message: string }[] = [];
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(file.buffer);
+    const sheet = workbook.worksheets[0];
+
+    const rows: { email: string; groupName: string }[] = [];
+    sheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+      if (rowNumber === 1) return; // skip header
+      const email = String(row.getCell(1).value || '').trim();
+      const groupName = String(row.getCell(2).value || '').trim();
+      rows.push({ email, groupName });
+    });
+
+    const students = await this.db
+      .select({
+        userId: schema.users.userId,
+        name: schema.users.name,
+        email: schema.users.email,
+        roleId: schema.users.roleId,
+      })
+      .from(schema.assessmentStudent)
+      .innerJoin(
+        schema.users,
+        eq(schema.assessmentStudent.studentUserId, schema.users.userId),
+      )
+      .where(eq(schema.assessmentStudent.assessmentId, assessmentId));
+
+    const studentsByEmail = new Map(students.map((s) => [s.email, s.userId]));
+
+    const missingEmails = new Set(studentsByEmail.keys());
+    const groupsMap = new Map<string, number[]>();
+
+    rows.forEach((row, index) => {
+      if (!studentsByEmail.has(row.email)) {
+        errors.push({
+          row: index + 2,
+          message: `Student email ${row.email} not found.`,
+        });
+        return;
+      }
+
+      missingEmails.delete(row.email);
+
+      if (!groupsMap.has(row.groupName)) {
+        groupsMap.set(row.groupName, []);
+      }
+      groupsMap.get(row.groupName)!.push(studentsByEmail.get(row.email)!);
+    });
+
+    if (missingEmails.size > 0) {
+      Array.from(missingEmails).forEach((email) => {
+        const student = students.find((s) => s.email === email);
+        if (student) {
+          errors.push({
+            row: -1,
+            message: `Student ${email} is missing in uploaded file.`,
+          });
+        }
+      });
+    }
+    errors.sort((a, b) => a.row - b.row);
+    return { errors, groupsMap };
+  }
+
+  async importGroups(
+    data: ImportGroupsRequest,
+    file: Express.Multer.File,
+    createdBy: schema.User['userId'],
+  ): Promise<ImportGroupsResponse> {
+    const { assessmentId } = data;
+
+    const { errors, groupsMap } = await this.verifyImportGroups(data, file);
+
+    await this.db.transaction(async (tx) => {
+      const existingGroups = await tx.query.groups.findMany({
+        where: eq(schema.groups.assessmentId, assessmentId),
+      });
+
+      const groupIds = existingGroups.map((g) => g.groupId);
+
+      if (groupIds.length > 0) {
+        await tx
+          .delete(schema.groups)
+          .where(inArray(schema.groups.groupId, groupIds));
+      }
+
+      for (const [groupName, userIds] of groupsMap.entries()) {
+        const groupCode = await this.generateUniqueCode();
+        const [group] = await tx
+          .insert(schema.groups)
+          .values({
+            assessmentId,
+            groupName,
+            groupCode,
+            createdBy,
+            createdDate: new Date(),
+          })
+          .returning();
+
+        await tx.insert(schema.groupMembers).values(
+          userIds.map((studentUserId) => ({
+            groupId: group.groupId,
+            studentUserId,
+            assessmentId,
+            createdDate: new Date(),
+          })),
+        );
+      }
+    });
+
+    return { success: errors.length === 0, errors };
+  }
+
+  async createRandomGroups(
+    data: CreateRandomGroupsRequest,
+    createdBy: schema.User['userId'],
+  ): Promise<CreateRandomGroupsResponse> {
+    const { assessmentId, groupSize } = data;
+
+    const students = await this.db.query.assessmentStudent.findMany({
+      where: eq(schema.assessmentStudent.assessmentId, assessmentId),
+    });
+
+    if (students.length === 0) {
+      throw new BadRequestException('There is no student to add to groups');
+    }
+
+    const shuffled = students
+      .map((s) => s.studentUserId)
+      .sort(() => Math.random() - 0.5);
+
+    const groups: {
+      groupName: string;
+      studentUserIds: number[];
+    }[] = [];
+
+    for (let i = 0; i < shuffled.length; i += groupSize) {
+      const members = shuffled.slice(i, i + groupSize);
+      groups.push({
+        groupName: `Group ${groups.length + 1}`,
+        studentUserIds: members,
+      });
+    }
+
+    await this.db.transaction(async (tx) => {
+      const existingGroups = await tx.query.groups.findMany({
+        where: eq(schema.groups.assessmentId, assessmentId),
+      });
+
+      const existingGroupIds = existingGroups.map((g) => g.groupId);
+
+      if (existingGroupIds.length > 0) {
+        await tx
+          .delete(schema.groups)
+          .where(inArray(schema.groups.groupId, existingGroupIds));
+      }
+
+      for (const g of groups) {
+        const groupCode = await this.generateUniqueCode();
+
+        const [group] = await tx
+          .insert(schema.groups)
+          .values({
+            assessmentId,
+            groupCode,
+            groupName: g.groupName,
+            createdBy,
+            createdDate: new Date(),
+          })
+          .returning();
+
+        await tx.insert(schema.groupMembers).values(
+          g.studentUserIds.map((studentUserId) => ({
+            studentUserId,
+            assessmentId,
+            groupId: group.groupId,
+            createdDate: new Date(),
+          })),
+        );
+      }
+    });
+
+    return { success: true };
   }
 
   async updateGroup(

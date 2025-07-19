@@ -7,7 +7,13 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Group, GroupScore, StudentScore, User } from '../../drizzle/schema';
+import {
+  Assessment,
+  Group,
+  GroupScore,
+  StudentScore,
+  User,
+} from '../../drizzle/schema';
 
 export class GetGroupByIdRequest {
   @Transform(({ value }) => parseInt(value))
@@ -22,6 +28,22 @@ export class CreateGroupRequest {
   @IsNumber()
   assessmentId: Group['assessmentId'];
 }
+
+export class CreateRandomGroupsRequest {
+  @IsNumber()
+  assessmentId: Group['assessmentId'];
+
+  @IsNumber()
+  groupSize: number;
+}
+
+export class ImportGroupsRequest {
+  @Type(() => Number)
+  @IsNumber()
+  assessmentId: Assessment['assessmentId'];
+}
+
+export class VerifyImportGroupsRequest extends ImportGroupsRequest {}
 
 export class UpdateGroupRequest {
   @IsNumber()

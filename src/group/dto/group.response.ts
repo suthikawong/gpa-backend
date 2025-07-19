@@ -5,6 +5,26 @@ export interface GetGroupByIdResponse extends Group {}
 
 export interface CreateGroupResponse extends Group {}
 
+export interface CreateRandomGroupsResponse {
+  success: boolean;
+}
+
+export interface ImportGroupsResponse {
+  success: boolean;
+  errors: {
+    row: number;
+    message: string;
+  }[];
+}
+
+export interface VerifyImportGroupsResponse {
+  groupsMap: Map<string, number[]>;
+  errors: {
+    row: number;
+    message: string;
+  }[];
+}
+
 export interface UpdateGroupResponse extends Group {}
 
 export type DeleteGroupResponse = Pick<Group, 'groupId'>;

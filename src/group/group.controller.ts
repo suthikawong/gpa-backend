@@ -6,8 +6,11 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { QASSMode } from 'src/utils/qass.model';
 import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
@@ -20,29 +23,35 @@ import {
   AddGroupMemberRequest,
   CalculateScoresRequest,
   CreateGroupRequest,
+  CreateRandomGroupsRequest,
   DeleteGroupMemberRequest,
   DeleteGroupRequest,
   GetGroupByIdRequest,
   GetGroupMembersRequest,
   GetScoresRequest,
+  ImportGroupsRequest,
   JoinGroupRequest,
   LeaveGroupRequest,
   UpdateGroupRequest,
   UpsertScoresRequest,
+  VerifyImportGroupsRequest,
 } from './dto/group.request';
 import {
   AddGroupMemberResponse,
   CalculateScoresResponse,
   CreateGroupResponse,
+  CreateRandomGroupsResponse,
   DeleteGroupMemberResponse,
   DeleteGroupResponse,
   GetGroupByIdResponse,
   GetGroupMembersResponse,
   GetScoresResponse,
+  ImportGroupsResponse,
   JoinGroupResponse,
   LeaveGroupResponse,
   UpdateGroupResponse,
   UpsertScoresResponse,
+  VerifyImportGroupsResponse,
 } from './dto/group.response';
 import { GroupService } from './group.service';
 
@@ -72,6 +81,46 @@ export class GroupController {
       user.roleId,
     );
     return { data: group };
+  }
+
+  @Post('import')
+  @Roles([Role.Instructor])
+  @UseInterceptors(FileInterceptor('file'))
+  async importGroups(
+    @Body() data: ImportGroupsRequest,
+    @UploadedFile() file: Express.Multer.File,
+    @LoggedInUser() user: User,
+  ): Promise<AppResponse<ImportGroupsResponse>> {
+    const result = await this.groupService.importGroups(
+      data,
+      file,
+      user.userId,
+    );
+    return { data: result };
+  }
+
+  @Post('verify-import')
+  @Roles([Role.Instructor])
+  @UseInterceptors(FileInterceptor('file'))
+  async verifyImportGroups(
+    @Body() data: VerifyImportGroupsRequest,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<AppResponse<VerifyImportGroupsResponse>> {
+    const result = await this.groupService.verifyImportGroups(data, file);
+    return { data: result };
+  }
+
+  @Post('random')
+  @Roles([Role.Instructor])
+  async createRandomGroups(
+    @Body() data: CreateRandomGroupsRequest,
+    @LoggedInUser() user: User,
+  ): Promise<AppResponse<CreateRandomGroupsResponse>> {
+    const result = await this.groupService.createRandomGroups(
+      data,
+      user.userId,
+    );
+    return { data: result };
   }
 
   @Put()
