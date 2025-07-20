@@ -27,6 +27,8 @@ export class SimulationService {
     peerRatingWeights,
   }: CalcualteScoresByQASSRequest): CalcualteScoresByQASSResponse => {
     const groupSize = peerMatrix.length;
+    const sumWeights = peerRatingWeights.reduce((prev, curr) => prev + curr, 0);
+    const weights = peerRatingWeights.map((w) => w / sumWeights);
 
     const {
       studentRatings,
@@ -42,7 +44,7 @@ export class SimulationService {
       peerRatingImpact,
       groupSpread,
       tuningFactor,
-      peerRatingWeights,
+      weights,
     );
 
     const result: {
