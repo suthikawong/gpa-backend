@@ -1,13 +1,13 @@
 export interface CalcualteScoresByQASSResponse {
   mean: {
-    score: number;
-    rating: number;
-    contribution: number;
+    score: string;
+    rating: string;
+    contribution: string;
   };
   studentScores: {
     student: number;
-    score: number;
-    rating: number;
-    contribution: number;
+    score: string;
+    rating: string;
+    contribution: string;
   }[];
 }

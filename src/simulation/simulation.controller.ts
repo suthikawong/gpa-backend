@@ -10,7 +10,7 @@ import { CalcualteScoresByQASSResponse } from './dto/simulation.response';
 export class SimulationController {
   constructor(private simulationService: SimulationService) {}
 
-  @Post('calculate-score/qass')
+  @Post('qass')
   @Roles([Role.Instructor])
   async calcualteScoresByQASS(
     @Body()
@@ -20,7 +20,7 @@ export class SimulationController {
     return { data: result };
   }
 
-  @Post('calculate-score/webavalia')
+  @Post('webavalia')
   @Roles([Role.Instructor])
   async calcualteScoresByWebavalia(
     @Body()

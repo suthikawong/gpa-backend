@@ -47,25 +47,25 @@ export class SimulationService {
 
     const result: {
       student: number;
-      score: number;
-      rating: number;
-      contribution: number;
+      score: string;
+      rating: string;
+      contribution: string;
     }[] = [];
 
     for (let i = 0; i < groupSize; i++) {
       result.push({
         student: i + 1,
-        score: studentScores[i],
-        rating: studentRatings[i],
-        contribution: studentContributions[i],
+        score: studentScores[i].toFixed(3),
+        rating: studentRatings[i].toFixed(3),
+        contribution: studentContributions[i].toFixed(3),
       });
     }
 
     return {
       mean: {
-        score: meanStudentScore,
-        rating: meanStudentRating,
-        contribution: meanStudentContribution,
+        score: meanStudentScore.toFixed(3),
+        rating: meanStudentRating.toFixed(3),
+        contribution: meanStudentContribution.toFixed(3),
       },
       studentScores: result,
     };

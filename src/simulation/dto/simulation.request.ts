@@ -4,7 +4,6 @@ import { QASSMode } from '../../utils/qass.model';
 
 export class CalcualteScoresByQASSRequest {
   @IsArray()
-  @ValidateNested({ each: true })
   peerMatrix: number[][];
 
   @IsEnum(QASSMode)
@@ -27,6 +26,5 @@ export class CalcualteScoresByQASSRequest {
   tuningFactor: number;
 
   @IsArray()
-  @ValidateNested({ each: true })
   peerRatingWeights: number[];
 }
