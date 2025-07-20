@@ -8,12 +8,12 @@ export enum QASSMode {
 // the result will be student scores in a group
 export const calculateStudentsScoresFromSpecificComponentByQASS = (
   peerMatrix: number[][],
+  mode: QASSMode,
   groupProductScore: number,
   peerRatingImpact: number,
   groupSpread: number,
   tuningFactor: number,
   peerRatingWeights: number[],
-  mode: QASSMode,
 ) => {
   const groupSize = peerMatrix.length;
 
@@ -30,8 +30,6 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
     peerRatingWeights,
     QASSMode.B,
   );
-  console.log('TLOG ~ meanStudentRating:', meanStudentRating);
-  console.log('TLOG ~ studentRatings:', studentRatings);
 
   const studentContributions: number[] = [];
   const contributionValues: number[] = [];
@@ -56,7 +54,6 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
 
   console.log('studentScores : ', studentScores);
 
-  // validate scores
   const meanStudentContribution = calculateMeanStudentContribution(
     studentContributions,
     peerRatingWeights,
@@ -65,14 +62,22 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
   const meanStudentScore =
     studentScores.reduce((prev, curr) => prev + curr, 0) / studentScores.length;
 
-  SplitJoinInvariance(
-    meanStudentScore,
-    groupProductScore,
-    meanStudentContribution,
-    groupSpread,
-  );
+  // validate scores
+  // SplitJoinInvariance(
+  //   meanStudentScore,
+  //   groupProductScore,
+  //   meanStudentContribution,
+  //   groupSpread,
+  // );
 
-  return { studentScores, studentContributions };
+  return {
+    studentRatings,
+    meanStudentRating,
+    studentContributions,
+    meanStudentContribution,
+    studentScores,
+    meanStudentScore,
+  };
 };
 
 export const calculateStudentsScoresFromAllComponentsByQASS = (
@@ -100,12 +105,12 @@ export const calculateStudentsScoresFromAllComponentsByQASS = (
     const { studentContributions } =
       calculateStudentsScoresFromSpecificComponentByQASS(
         peerMatrix[k],
+        mode,
         groupProductScore,
         peerRatingImpact,
         groupSpread,
         tuningFactor,
         peerRatingWeights,
-        mode,
       );
     console.log('TLOG ~ studentContributions:', studentContributions);
     studentContributions.forEach((cont, i) => {

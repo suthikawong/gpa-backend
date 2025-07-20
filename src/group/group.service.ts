@@ -677,12 +677,12 @@ export class GroupService {
       const { studentScores } =
         calculateStudentsScoresFromSpecificComponentByQASS(
           peerMatrix,
+          mode,
           groupProductScore,
           peerRatingImpact,
           groupSpread,
           tuningFactor,
           peerRatingWeights,
-          mode,
         );
       return studentScores;
     } catch (error) {
