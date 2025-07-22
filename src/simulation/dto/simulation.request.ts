@@ -4,7 +4,7 @@ import { QASSMode } from '../../utils/qass.model';
 
 export class CalcualteScoresByQASSRequest {
   @IsArray()
-  peerMatrix: number[][];
+  peerMatrix: (number | undefined)[][];
 
   @IsEnum(QASSMode)
   mode: QASSMode;

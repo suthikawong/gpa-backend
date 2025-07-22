@@ -4,10 +4,14 @@ export enum QASSMode {
   D = 'D',
 }
 
+const fillEmptyRating = (peerMatrix: (number | undefined)[][]) => {
+  return peerMatrix.map((row) => row.map((col) => col ?? 0.5));
+};
+
 // calculate student scores in a specific scoring component
 // the result will be student scores in a group
 export const calculateStudentsScoresFromSpecificComponentByQASS = (
-  peerMatrix: number[][],
+  peerMatrix: (number | undefined)[][],
   mode: QASSMode,
   groupProductScore: number,
   peerRatingImpact: number,
@@ -24,11 +28,13 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
     throw new Error('Peer rating weights do not match with peer rating matrix');
   }
 
+  const noEmptyPeerRating = fillEmptyRating(peerMatrix);
+
   const { studentRatings, meanStudentRating } = caluclateRatings(
     tuningFactor,
-    peerMatrix,
+    noEmptyPeerRating,
     peerRatingWeights,
-    QASSMode.B,
+    mode,
   );
 
   const studentContributions: number[] = [];
