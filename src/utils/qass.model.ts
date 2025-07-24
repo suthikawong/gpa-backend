@@ -1,3 +1,5 @@
+import { BadRequestException } from '@nestjs/common';
+
 export enum QASSMode {
   B = 'B',
   C = 'C',
@@ -22,10 +24,12 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
   const groupSize = peerMatrix.length;
 
   if (groupSize !== peerMatrix[0].length) {
-    throw new Error('Invalid peer rating matrix');
+    throw new BadRequestException('Invalid peer rating matrix');
   }
   if (peerRatingWeights.length !== peerMatrix[0].length) {
-    throw new Error('Peer rating weights do not match with peer rating matrix');
+    throw new BadRequestException(
+      'Peer rating weights do not match with peer rating matrix',
+    );
   }
 
   const noEmptyPeerRating = fillEmptyRating(peerMatrix);

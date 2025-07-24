@@ -11,3 +11,10 @@ export interface CalcualteScoresByQASSResponse {
     contribution: string;
   }[];
 }
+
+export interface CalcualteScoresByWebavaliaResponse {
+  studentScores: {
+    student: number;
+    score: string;
+  }[];
+}

@@ -664,39 +664,39 @@ export class GroupService {
     );
   }
 
-  calcualteScoresByQASS = (
-    peerMatrix: number[][],
-    groupProductScore: number,
-    peerRatingImpact: number,
-    groupSpread: number,
-    tuningFactor: number,
-    peerRatingWeights: number[],
-    mode: QASSMode,
-  ): number[] => {
-    try {
-      const { studentScores } =
-        calculateStudentsScoresFromSpecificComponentByQASS(
-          peerMatrix,
-          mode,
-          groupProductScore,
-          peerRatingImpact,
-          groupSpread,
-          tuningFactor,
-          peerRatingWeights,
-        );
-      return studentScores;
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  };
+  // calcualteScoresByQASS = (
+  //   peerMatrix: number[][],
+  //   groupProductScore: number,
+  //   peerRatingImpact: number,
+  //   groupSpread: number,
+  //   tuningFactor: number,
+  //   peerRatingWeights: number[],
+  //   mode: QASSMode,
+  // ): number[] => {
+  //   try {
+  //     const { studentScores } =
+  //       calculateStudentsScoresFromSpecificComponentByQASS(
+  //         peerMatrix,
+  //         mode,
+  //         groupProductScore,
+  //         peerRatingImpact,
+  //         groupSpread,
+  //         tuningFactor,
+  //         peerRatingWeights,
+  //       );
+  //     return studentScores;
+  //   } catch (error) {
+  //     console.log(error);
+  //     throw error;
+  //   }
+  // };
 
-  calcualteScoresByWebavalia = (
-    peerRating: (number | null)[][],
-    groupScore: number,
-    saWeight: number,
-    paWeight: number,
-  ): number[] | null => {
-    return webavalia(peerRating, groupScore, saWeight, paWeight);
-  };
+  // calcualteScoresByWebavalia = (
+  //   peerRating: (number | null)[][],
+  //   groupScore: number,
+  //   saWeight: number,
+  //   paWeight: number,
+  // ): number[] | null => {
+  //   return webavalia(peerRating, groupScore, saWeight, paWeight);
+  // };
 }

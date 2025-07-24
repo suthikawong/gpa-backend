@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsArray, IsEnum, IsNumber, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsNumber } from 'class-validator';
 import { QASSMode } from '../../utils/qass.model';
 
 export class CalcualteScoresByQASSRequest {
@@ -27,4 +27,21 @@ export class CalcualteScoresByQASSRequest {
 
   @IsArray()
   peerRatingWeights: number[];
+}
+
+export class CalcualteScoresByWebavaliaRequest {
+  @IsArray()
+  peerMatrix: (number | undefined)[][];
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  groupProductScore: number;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  selfWeight: number;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  peerWeight: number;
 }

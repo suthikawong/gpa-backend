@@ -2,13 +2,16 @@ import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
-import {
-  calculateStudentsScoresFromSpecificComponentByQASS,
-  QASSMode,
-} from '../utils/qass.model';
+import { calculateStudentsScoresFromSpecificComponentByQASS } from '../utils/qass.model';
 import { webavalia } from '../utils/webavalia-model';
-import { CalcualteScoresByQASSResponse } from './dto/simulation.response';
-import { CalcualteScoresByQASSRequest } from './dto/simulation.request';
+import {
+  CalcualteScoresByQASSRequest,
+  CalcualteScoresByWebavaliaRequest,
+} from './dto/simulation.request';
+import {
+  CalcualteScoresByQASSResponse,
+  CalcualteScoresByWebavaliaResponse,
+} from './dto/simulation.response';
 
 @Injectable()
 export class SimulationService {
@@ -73,12 +76,23 @@ export class SimulationService {
     };
   };
 
-  calcualteScoresByWebavalia = (
-    peerRating: (number | null)[][],
-    groupScore: number,
-    saWeight: number,
-    paWeight: number,
-  ): number[] | null => {
-    return webavalia(peerRating, groupScore, saWeight, paWeight);
+  calcualteScoresByWebavalia = ({
+    peerMatrix,
+    groupProductScore,
+    selfWeight,
+    peerWeight,
+  }: CalcualteScoresByWebavaliaRequest): CalcualteScoresByWebavaliaResponse => {
+    const studentScores = webavalia(
+      peerMatrix,
+      groupProductScore,
+      selfWeight,
+      peerWeight,
+    );
+    return {
+      studentScores: studentScores?.map((score, i) => ({
+        student: i + 1,
+        score: score.toString(),
+      })),
+    };
   };
 }

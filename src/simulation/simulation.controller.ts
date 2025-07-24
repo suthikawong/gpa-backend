@@ -2,9 +2,15 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { CalcualteScoresByQASSRequest } from './dto/simulation.request';
+import {
+  CalcualteScoresByQASSRequest,
+  CalcualteScoresByWebavaliaRequest,
+} from './dto/simulation.request';
+import {
+  CalcualteScoresByQASSResponse,
+  CalcualteScoresByWebavaliaResponse,
+} from './dto/simulation.response';
 import { SimulationService } from './simulation.service';
-import { CalcualteScoresByQASSResponse } from './dto/simulation.response';
 
 @Controller('simulation')
 export class SimulationController {
@@ -24,19 +30,9 @@ export class SimulationController {
   @Roles([Role.Instructor])
   async calcualteScoresByWebavalia(
     @Body()
-    data: {
-      peerRating: (number | null)[][];
-      groupScore: number;
-      saWeight: number;
-      paWeight: number;
-    },
-  ): Promise<AppResponse<number[] | null>> {
-    const result = this.simulationService.calcualteScoresByWebavalia(
-      data.peerRating,
-      data.groupScore,
-      data.saWeight,
-      data.paWeight,
-    );
+    data: CalcualteScoresByWebavaliaRequest,
+  ): Promise<AppResponse<CalcualteScoresByWebavaliaResponse>> {
+    const result = this.simulationService.calcualteScoresByWebavalia(data);
     return { data: result };
   }
 }

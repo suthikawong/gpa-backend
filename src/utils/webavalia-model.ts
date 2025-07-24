@@ -1,14 +1,15 @@
+import { BadRequestException } from '@nestjs/common';
+
 export const webavalia = (
-  peerRating: (number | null)[][],
+  peerRating: (number | undefined)[][],
   groupScore: number,
-  saWeight: number,
-  paWeight: number,
-): number[] | null => {
+  selfWeight: number,
+  peerWeight: number,
+): number[] => {
   const groupSize = peerRating.length;
 
   if (groupSize !== peerRating[0].length) {
-    console.log('Invalid peer rating matrix');
-    return null;
+    throw new BadRequestException('Invalid peer rating matrix');
   }
 
   const tempScores: number[] = [];
@@ -24,8 +25,8 @@ export const webavalia = (
       }
     });
     const rating =
-      (saWeight * selfRating + paWeight * sumOtherRating) /
-      (saWeight + paWeight * (groupSize - 1));
+      (selfWeight * selfRating + peerWeight * sumOtherRating) /
+      (selfWeight + peerWeight * (groupSize - 1));
     tempScores.push(rating);
   });
 

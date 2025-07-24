@@ -226,49 +226,49 @@ export class GroupController {
     return { data: result };
   }
 
-  @Post('calculate-score/qass')
-  // @Roles([Role.Instructor])
-  async calcualteScoresByQASS(
-    @Body()
-    data: {
-      peerMatrix: number[][];
-      groupProductScore: number;
-      peerRatingImpact: number;
-      groupSpread: number;
-      tuningFactor: number;
-      peerRatingWeights: number[];
-      mode: QASSMode;
-    },
-  ): Promise<AppResponse<number[]>> {
-    const result = this.groupService.calcualteScoresByQASS(
-      data.peerMatrix,
-      data.groupProductScore,
-      data.peerRatingImpact,
-      data.groupSpread,
-      data.tuningFactor,
-      data.peerRatingWeights,
-      data.mode,
-    );
-    return { data: result };
-  }
+  // @Post('calculate-score/qass')
+  // // @Roles([Role.Instructor])
+  // async calcualteScoresByQASS(
+  //   @Body()
+  //   data: {
+  //     peerMatrix: number[][];
+  //     groupProductScore: number;
+  //     peerRatingImpact: number;
+  //     groupSpread: number;
+  //     tuningFactor: number;
+  //     peerRatingWeights: number[];
+  //     mode: QASSMode;
+  //   },
+  // ): Promise<AppResponse<number[]>> {
+  //   const result = this.groupService.calcualteScoresByQASS(
+  //     data.peerMatrix,
+  //     data.groupProductScore,
+  //     data.peerRatingImpact,
+  //     data.groupSpread,
+  //     data.tuningFactor,
+  //     data.peerRatingWeights,
+  //     data.mode,
+  //   );
+  //   return { data: result };
+  // }
 
-  @Post('calculate-score/webavalia')
-  // @Roles([Role.Instructor])
-  async calcualteScoresByWebavalia(
-    @Body()
-    data: {
-      peerRating: (number | null)[][];
-      groupScore: number;
-      saWeight: number;
-      paWeight: number;
-    },
-  ): Promise<AppResponse<number[] | null>> {
-    const result = this.groupService.calcualteScoresByWebavalia(
-      data.peerRating,
-      data.groupScore,
-      data.saWeight,
-      data.paWeight,
-    );
-    return { data: result };
-  }
+  // @Post('calculate-score/webavalia')
+  // // @Roles([Role.Instructor])
+  // async calcualteScoresByWebavalia(
+  //   @Body()
+  //   data: {
+  //     peerRating: (number | null)[][];
+  //     groupScore: number;
+  //     saWeight: number;
+  //     paWeight: number;
+  //   },
+  // ): Promise<AppResponse<number[] | null>> {
+  //   const result = this.groupService.calcualteScoresByWebavalia(
+  //     data.peerRating,
+  //     data.groupScore,
+  //     data.saWeight,
+  //     data.paWeight,
+  //   );
+  //   return { data: result };
+  // }
 }
