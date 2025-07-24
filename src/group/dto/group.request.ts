@@ -126,7 +126,20 @@ export class UpsertScoresRequest {
   studentScores: StudentScoreItem[];
 }
 
-export class CalculateScoresRequest {
+export class WeightItem {
+  @IsNumber()
+  userId: User['userId'];
+
+  @IsNumber()
+  weight: number;
+}
+
+export class CalculateScoreByQassRequest {
   @IsNumber()
   groupId: GroupScore['groupId'];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WeightItem)
+  weights: WeightItem[];
 }
