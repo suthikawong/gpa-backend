@@ -1,5 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
-
 export const webavalia = (
   peerRating: (number | undefined)[][],
   groupScore: number,
@@ -9,7 +7,7 @@ export const webavalia = (
   const groupSize = peerRating.length;
 
   if (groupSize !== peerRating[0].length) {
-    throw new BadRequestException('Invalid peer rating matrix');
+    throw new Error('Invalid peer rating matrix');
   }
 
   const tempScores: number[] = [];
