@@ -11,7 +11,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { QASSMode } from 'src/utils/qass.model';
 import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
 import { LoggedInUser } from '../auth/decorators/logged-in-user.decorator';
