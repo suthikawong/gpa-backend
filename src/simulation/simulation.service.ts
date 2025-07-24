@@ -80,13 +80,11 @@ export class SimulationService {
     peerMatrix,
     groupProductScore,
     selfWeight,
-    peerWeight,
   }: CalcualteScoresByWebavaliaRequest): CalcualteScoresByWebavaliaResponse => {
     const { studentScores, meanStudentScore } = webavalia(
       peerMatrix,
       groupProductScore,
       selfWeight,
-      peerWeight,
     );
     return {
       studentScores: studentScores?.map((score, i) => ({

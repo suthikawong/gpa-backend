@@ -2,13 +2,14 @@ export const webavalia = (
   peerRating: (number | undefined)[][],
   groupScore: number,
   selfWeight: number,
-  peerWeight: number,
 ) => {
   const groupSize = peerRating.length;
 
   if (groupSize !== peerRating[0].length) {
     throw new Error('Invalid peer rating matrix');
   }
+
+  const peerWeight = (1 - selfWeight) / (groupSize - 1);
 
   const tempScores: number[] = [];
 
