@@ -3,7 +3,7 @@ export const webavalia = (
   groupScore: number,
   selfWeight: number,
   peerWeight: number,
-): number[] => {
+) => {
   const groupSize = peerRating.length;
 
   if (groupSize !== peerRating[0].length) {
@@ -36,5 +36,9 @@ export const webavalia = (
     studentScores.push(finalScore);
   });
 
-  return studentScores;
+  return {
+    studentScores,
+    meanStudentScore:
+      studentScores.reduce((prev, curr) => prev + curr, 0) / groupSize,
+  };
 };

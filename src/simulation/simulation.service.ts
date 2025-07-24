@@ -82,7 +82,7 @@ export class SimulationService {
     selfWeight,
     peerWeight,
   }: CalcualteScoresByWebavaliaRequest): CalcualteScoresByWebavaliaResponse => {
-    const studentScores = webavalia(
+    const { studentScores, meanStudentScore } = webavalia(
       peerMatrix,
       groupProductScore,
       selfWeight,
@@ -91,10 +91,10 @@ export class SimulationService {
     return {
       studentScores: studentScores?.map((score, i) => ({
         student: i + 1,
-        score: score.toString(),
+        score: score.toFixed(3),
       })),
       mean: {
-        score: studentScores.reduce((prev, curr) => prev + curr, 0).toString(),
+        score: meanStudentScore.toFixed(3),
       },
     };
   };
