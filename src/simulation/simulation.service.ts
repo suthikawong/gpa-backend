@@ -93,6 +93,9 @@ export class SimulationService {
         student: i + 1,
         score: score.toString(),
       })),
+      mean: {
+        score: studentScores.reduce((prev, curr) => prev + curr, 0).toString(),
+      },
     };
   };
 }

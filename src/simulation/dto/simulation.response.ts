@@ -13,6 +13,9 @@ export interface CalcualteScoresByQASSResponse {
 }
 
 export interface CalcualteScoresByWebavaliaResponse {
+  mean: {
+    score: string;
+  };
   studentScores: {
     student: number;
     score: string;
