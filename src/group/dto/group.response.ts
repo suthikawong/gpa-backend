@@ -57,3 +57,5 @@ export interface GetScoresResponse {
 export type UpsertScoresResponse = Pick<Group, 'groupId'>;
 
 export type CalculateScoreByQassResponse = Pick<Group, 'groupId'>;
+
+export type CalculateScoreByWebavaliaResponse = Pick<Group, 'groupId'>;

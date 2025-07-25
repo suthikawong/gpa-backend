@@ -105,11 +105,11 @@ export class StudentScoreItem {
 
   @IsOptional()
   @IsNumber()
-  score: StudentScore['score'];
+  score?: StudentScore['score'];
 
   @IsOptional()
   @IsString()
-  remark: StudentScore['remark'];
+  remark?: StudentScore['remark'];
 }
 
 export class UpsertScoresRequest {
@@ -142,4 +142,15 @@ export class CalculateScoreByQassRequest {
   @ValidateNested({ each: true })
   @Type(() => WeightItem)
   weights: WeightItem[];
+}
+
+export class CalculateScoreByWebavaliaRequest {
+  @IsNumber()
+  groupId: GroupScore['groupId'];
+
+  @IsNumber()
+  selfWeight: number;
+
+  @IsNumber()
+  peerWeight: number;
 }
