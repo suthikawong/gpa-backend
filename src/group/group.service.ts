@@ -594,6 +594,7 @@ export class GroupService {
     const userIds = peerRatingWeights.map((item) => item.userId);
     const { peerMatrix, groupScore, scoringComponentWeights } =
       await this.prepareData({
+        assessment,
         group,
         scoringComponents,
       });
@@ -644,6 +645,7 @@ export class GroupService {
     const userIds = members.map((item) => item.userId);
     const { peerMatrix, groupScore, scoringComponentWeights } =
       await this.prepareData({
+        assessment,
         group,
         scoringComponents,
       });
@@ -686,9 +688,11 @@ export class GroupService {
   }
 
   async prepareData({
+    assessment,
     group,
     scoringComponents,
   }: {
+    assessment: schema.Assessment;
     group: schema.Group;
     scoringComponents: schema.ScoringComponent[];
   }) {
@@ -712,7 +716,13 @@ export class GroupService {
       sc.peerRating.forEach((ratee) => {
         const row: (number | undefined)[] = [];
         ratee.ratings.forEach((rater) => {
-          row.push(rater.score);
+          row.push(
+            assessment.modelId === AssessmentModel.QASS
+              ? rater.score
+                ? rater.score / 100 // convert peer rating for QASS
+                : undefined
+              : rater.score,
+          );
         });
         component.push(row);
       });
@@ -765,7 +775,13 @@ export class GroupService {
       );
     }
 
-    // All scoring component must be done???
+    // All scoring components must be done
+    scoringComponents.forEach((sc) => {
+      if (new Date() < new Date(sc.endDate))
+        throw new ForbiddenException(
+          'All scoring components must be finished before you can calculate student scores.',
+        );
+    });
 
     return { assessment, group, scoringComponents };
   }
@@ -826,40 +842,4 @@ export class GroupService {
       'Failed to generate a unique group code. Please try again.',
     );
   }
-
-  // calcualteScoresByQASS = (
-  //   peerMatrix: number[][],
-  //   groupProductScore: number,
-  //   peerRatingImpact: number,
-  //   groupSpread: number,
-  //   tuningFactor: number,
-  //   peerRatingWeights: number[],
-  //   mode: QASSMode,
-  // ): number[] => {
-  //   try {
-  //     const { studentScores } =
-  //       calculateStudentsScoresFromSpecificComponentByQASS(
-  //         peerMatrix,
-  //         mode,
-  //         groupProductScore,
-  //         peerRatingImpact,
-  //         groupSpread,
-  //         tuningFactor,
-  //         peerRatingWeights,
-  //       );
-  //     return studentScores;
-  //   } catch (error) {
-  //     console.log(error);
-  //     throw error;
-  //   }
-  // };
-
-  // calcualteScoresByWebavalia = (
-  //   peerRating: (number | null)[][],
-  //   groupScore: number,
-  //   saWeight: number,
-  //   paWeight: number,
-  // ): number[] | null => {
-  //   return webavalia(peerRating, groupScore, saWeight, paWeight);
-  // };
 }
