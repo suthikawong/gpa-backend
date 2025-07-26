@@ -143,6 +143,12 @@ export class AssessmentService {
 
     if (!existing) throw new NotFoundException('Assessment not found');
 
+    if (data.isPublished && !data.modelId && !data.modelConfig) {
+      throw new BadRequestException(
+        'Assessment model must be specify before publish assessment.',
+      );
+    }
+
     const [assessment] = await this.db
       .update(schema.assessments)
       .set({
