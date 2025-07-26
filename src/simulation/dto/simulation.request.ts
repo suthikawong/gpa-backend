@@ -40,8 +40,4 @@ export class CalcualteScoresByWebavaliaRequest {
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()
   selfWeight: number;
-
-  @Transform(({ value }) => parseFloat(value))
-  @IsNumber()
-  peerWeight: number;
 }

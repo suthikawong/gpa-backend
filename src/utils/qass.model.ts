@@ -58,8 +58,6 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
     groupSpread,
   );
 
-  console.log('studentScores : ', studentScores);
-
   const meanStudentContribution = calculateMeanStudentContribution(
     studentContributions,
     peerRatingWeights,
@@ -86,16 +84,25 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
   };
 };
 
-export const calculateStudentsScoresFromAllComponentsByQASS = (
-  peerMatrix: number[][][],
-  groupProductScore: number,
-  peerRatingImpact: number,
-  groupSpread: number,
-  tuningFactor: number,
-  peerRatingWeights: number[],
-  scoringComponentWeights: number[],
-  mode: QASSMode,
-) => {
+export const calculateStudentsScoresFromAllComponentsByQASS = ({
+  peerMatrix,
+  mode,
+  groupProductScore,
+  peerRatingImpact,
+  groupSpread,
+  tuningFactor,
+  peerRatingWeights,
+  scoringComponentWeights,
+}: {
+  peerMatrix: (number | undefined)[][][];
+  mode: QASSMode;
+  groupProductScore: number;
+  peerRatingImpact: number;
+  groupSpread: number;
+  tuningFactor: number;
+  peerRatingWeights: number[];
+  scoringComponentWeights: number[];
+}) => {
   const scoringComponentSize = scoringComponentWeights.length;
 
   if (scoringComponentWeights.length !== peerMatrix.length) {
@@ -118,7 +125,6 @@ export const calculateStudentsScoresFromAllComponentsByQASS = (
         tuningFactor,
         peerRatingWeights,
       );
-    console.log('TLOG ~ studentContributions:', studentContributions);
     studentContributions.forEach((cont, i) => {
       studentContributionsFromAllComponents[i].push(cont);
     });
@@ -132,15 +138,10 @@ export const calculateStudentsScoresFromAllComponentsByQASS = (
         studentContributionsInComponent,
         scoringComponentWeights,
       );
-      console.log(
-        'TLOG ~ totalStudentContributions:',
-        totalStudentContributions,
-      );
       const score = Math.pow(
         groupProductScore,
         Math.pow(groupSpread, totalStudentContributions),
       );
-      console.log('TLOG ~ score:', score);
       studentScores.push(score);
     },
   );
@@ -269,7 +270,6 @@ const caluclateComponentStudentContributions = (
     impact,
   );
   const studentContribution = formulas[mode]['C1-2'](contributionValue);
-  console.log('TLOG ~ studentContribution:', studentContribution);
   return { studentContribution, contributionValue };
 };
 

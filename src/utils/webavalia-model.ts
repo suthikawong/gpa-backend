@@ -1,11 +1,15 @@
-export const webavalia = (
-  peerRating: (number | undefined)[][],
-  groupScore: number,
-  selfWeight: number,
-) => {
-  const groupSize = peerRating.length;
+export const calculateStudentsScoresFromSpecificComponentByWebavalia = ({
+  peerMatrix,
+  groupProductScore,
+  selfWeight,
+}: {
+  peerMatrix: (number | undefined)[][];
+  groupProductScore: number;
+  selfWeight: number;
+}) => {
+  const groupSize = peerMatrix.length;
 
-  if (groupSize !== peerRating[0].length) {
+  if (groupSize !== peerMatrix[0].length) {
     throw new Error('Invalid peer rating matrix');
   }
 
@@ -13,7 +17,7 @@ export const webavalia = (
 
   const tempScores: number[] = [];
 
-  peerRating.forEach((scores, currStudent) => {
+  peerMatrix.forEach((scores, currStudent) => {
     let selfRating = 0;
     let sumOtherRating = 0;
     scores.forEach((score, i) => {
@@ -33,7 +37,7 @@ export const webavalia = (
   const studentScores: number[] = [];
 
   tempScores.forEach((score) => {
-    const finalScore = groupScore * Math.sqrt(score / maxScore);
+    const finalScore = groupProductScore * Math.sqrt(score / maxScore);
     studentScores.push(finalScore);
   });
 
@@ -42,4 +46,54 @@ export const webavalia = (
     meanStudentScore:
       studentScores.reduce((prev, curr) => prev + curr, 0) / groupSize,
   };
+};
+
+export const calculateStudentsScoresFromAllComponentsByWebavalia = ({
+  peerMatrix,
+  groupProductScore,
+  selfWeight,
+  scoringComponentWeights,
+}: {
+  peerMatrix: (number | undefined)[][][];
+  groupProductScore: number;
+  selfWeight: number;
+  scoringComponentWeights: number[];
+}) => {
+  const scoringComponentSize = scoringComponentWeights.length;
+
+  if (scoringComponentSize !== peerMatrix.length) {
+    throw new Error(
+      'scoring component weights do not match with peer rating matrix',
+    );
+  }
+
+  scoringComponentSize;
+  const sumWeightedStudentScores: number[] =
+    Array(scoringComponentSize).fill(0);
+  // let sumMeanStudentScore = 0;
+  const sumWeight = scoringComponentWeights.reduce(
+    (prev, curr) => prev + curr,
+    0,
+  );
+
+  for (let i = 0; i < scoringComponentSize; i++) {
+    const { studentScores } =
+      calculateStudentsScoresFromSpecificComponentByWebavalia({
+        peerMatrix: peerMatrix[i],
+        groupProductScore: groupProductScore!,
+        selfWeight,
+      });
+    for (let j = 0; j < studentScores.length; j++) {
+      sumWeightedStudentScores[i] +=
+        studentScores[i] * scoringComponentWeights[i];
+    }
+    // sumMeanStudentScore += meanStudentScore * scoringComponentWeights[i];
+  }
+
+  const finalStudentScores = sumWeightedStudentScores.map(
+    (item) => item / sumWeight,
+  );
+  // const finalMeanStudentScore = sumMeanStudentScore / sumWeight;
+
+  return finalStudentScores;
 };

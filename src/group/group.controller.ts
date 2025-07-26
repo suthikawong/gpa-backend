@@ -20,7 +20,8 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { User } from '../drizzle/schema';
 import {
   AddGroupMemberRequest,
-  CalculateScoresRequest,
+  CalculateScoreByQassRequest,
+  CalculateScoreByWebavaliaRequest,
   CreateGroupRequest,
   CreateRandomGroupsRequest,
   DeleteGroupMemberRequest,
@@ -37,7 +38,8 @@ import {
 } from './dto/group.request';
 import {
   AddGroupMemberResponse,
-  CalculateScoresResponse,
+  CalculateScoreByQassResponse,
+  CalculateScoreByWebavaliaResponse,
   CreateGroupResponse,
   CreateRandomGroupsResponse,
   DeleteGroupMemberResponse,
@@ -216,58 +218,21 @@ export class GroupController {
     return { data: result };
   }
 
-  @Post('calculate-score')
+  @Post('calculate/qass')
   @Roles([Role.Instructor])
-  async calculateScore(
-    @Body() data: CalculateScoresRequest,
-  ): Promise<AppResponse<CalculateScoresResponse>> {
-    const result = await this.groupService.calculateScore(data);
+  async calculateScoreByQass(
+    @Body() data: CalculateScoreByQassRequest,
+  ): Promise<AppResponse<CalculateScoreByQassResponse>> {
+    const result = await this.groupService.calculateScoreByQass(data);
     return { data: result };
   }
 
-  // @Post('calculate-score/qass')
-  // // @Roles([Role.Instructor])
-  // async calcualteScoresByQASS(
-  //   @Body()
-  //   data: {
-  //     peerMatrix: number[][];
-  //     groupProductScore: number;
-  //     peerRatingImpact: number;
-  //     groupSpread: number;
-  //     tuningFactor: number;
-  //     peerRatingWeights: number[];
-  //     mode: QASSMode;
-  //   },
-  // ): Promise<AppResponse<number[]>> {
-  //   const result = this.groupService.calcualteScoresByQASS(
-  //     data.peerMatrix,
-  //     data.groupProductScore,
-  //     data.peerRatingImpact,
-  //     data.groupSpread,
-  //     data.tuningFactor,
-  //     data.peerRatingWeights,
-  //     data.mode,
-  //   );
-  //   return { data: result };
-  // }
-
-  // @Post('calculate-score/webavalia')
-  // // @Roles([Role.Instructor])
-  // async calcualteScoresByWebavalia(
-  //   @Body()
-  //   data: {
-  //     peerRating: (number | null)[][];
-  //     groupScore: number;
-  //     saWeight: number;
-  //     paWeight: number;
-  //   },
-  // ): Promise<AppResponse<number[] | null>> {
-  //   const result = this.groupService.calcualteScoresByWebavalia(
-  //     data.peerRating,
-  //     data.groupScore,
-  //     data.saWeight,
-  //     data.paWeight,
-  //   );
-  //   return { data: result };
-  // }
+  @Post('calculate/webavalia')
+  @Roles([Role.Instructor])
+  async calculateScoreByWebavalia(
+    @Body() data: CalculateScoreByWebavaliaRequest,
+  ): Promise<AppResponse<CalculateScoreByWebavaliaResponse>> {
+    const result = await this.groupService.calculateScoreByWebavalia(data);
+    return { data: result };
+  }
 }

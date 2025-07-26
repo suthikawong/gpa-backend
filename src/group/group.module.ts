@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AssessmentModule } from '../assessment/assessment.module';
-import { UserModule } from '../user/user.module';
 import { DrizzleModule } from '../drizzle/drizzle.module';
+import { PeerRatingModule } from '../peer-rating/peer-rating.module';
+import { UserModule } from '../user/user.module';
 import { GroupController } from './group.controller';
 import { GroupService } from './group.service';
 
@@ -12,6 +13,7 @@ import { GroupService } from './group.service';
     ConfigModule.forRoot({ isGlobal: true }),
     AssessmentModule,
     UserModule,
+    PeerRatingModule,
   ],
   providers: [GroupService],
   controllers: [GroupController],

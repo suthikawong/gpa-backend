@@ -162,7 +162,7 @@ export const studentScores = pgTable('student_scores', {
       onDelete: 'cascade',
     })
     .notNull(),
-  score: integer('score').notNull(),
+  score: doublePrecision('score').notNull(),
   remark: text('remark'),
   createdDate: timestamp('created_date').notNull(),
   updatedDate: timestamp('updated_date'),
@@ -205,7 +205,7 @@ export const peerRatings = pgTable(
     raterStudentUserId: integer('rater_student_user_id')
       .references(() => users.userId)
       .notNull(),
-    score: integer('score').notNull(),
+    score: doublePrecision('score').notNull(),
     comment: text('comment'),
     createdDate: timestamp('created_date').notNull(),
     updatedDate: timestamp('updated_date'),

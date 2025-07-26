@@ -3,7 +3,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { calculateStudentsScoresFromSpecificComponentByQASS } from '../utils/qass.model';
-import { webavalia } from '../utils/webavalia-model';
+import { calculateStudentsScoresFromSpecificComponentByWebavalia } from '../utils/webavalia-model';
 import {
   CalcualteScoresByQASSRequest,
   CalcualteScoresByWebavaliaRequest,
@@ -81,11 +81,12 @@ export class SimulationService {
     groupProductScore,
     selfWeight,
   }: CalcualteScoresByWebavaliaRequest): CalcualteScoresByWebavaliaResponse => {
-    const { studentScores, meanStudentScore } = webavalia(
-      peerMatrix,
-      groupProductScore,
-      selfWeight,
-    );
+    const { studentScores, meanStudentScore } =
+      calculateStudentsScoresFromSpecificComponentByWebavalia({
+        peerMatrix,
+        groupProductScore,
+        selfWeight,
+      });
     return {
       studentScores: studentScores?.map((score, i) => ({
         student: i + 1,

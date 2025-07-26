@@ -5,24 +5,27 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { format } from 'date-fns';
 import { and, eq, inArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import ExcelJS from 'exceljs';
-import { Role } from '../app.config';
+import { AssessmentModel, Role } from '../app.config';
 import { AssessmentService } from '../assessment/assessment.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { Group, User } from '../drizzle/schema';
+import { PeerRatingService } from '../peer-rating/peer-rating.service';
 import { UserService } from '../user/user.service';
 import { generateCode } from '../utils/generate-code';
 import {
-  calculateStudentsScoresFromSpecificComponentByQASS,
+  calculateStudentsScoresFromAllComponentsByQASS,
   QASSMode,
 } from '../utils/qass.model';
-import { webavalia } from '../utils/webavalia-model';
+import { calculateStudentsScoresFromAllComponentsByWebavalia } from '../utils/webavalia-model';
 import {
   AddGroupMemberRequest,
-  CalculateScoresRequest,
+  CalculateScoreByQassRequest,
+  CalculateScoreByWebavaliaRequest,
   CreateGroupRequest,
   CreateRandomGroupsRequest,
   DeleteGroupMemberRequest,
@@ -33,7 +36,8 @@ import {
 } from './dto/group.request';
 import {
   AddGroupMemberResponse,
-  CalculateScoresResponse,
+  CalculateScoreByQassResponse,
+  CalculateScoreByWebavaliaResponse,
   CreateGroupResponse,
   CreateRandomGroupsResponse,
   DeleteGroupMemberResponse,
@@ -49,6 +53,15 @@ import {
   VerifyImportGroupsResponse,
 } from './dto/group.response';
 
+type QassModelConfig = {
+  mode: string;
+  groupSpread: number;
+  tuningFactor: number;
+  peerRatingImpact: number;
+};
+
+type WebavaliaModelConfig = { selfWeight: number };
+
 @Injectable()
 export class GroupService {
   constructor(
@@ -57,6 +70,7 @@ export class GroupService {
 
     private readonly assessmentService: AssessmentService,
     private readonly userService: UserService,
+    private readonly peerRatingService: PeerRatingService,
   ) {}
 
   async getGroupById(
@@ -392,7 +406,8 @@ export class GroupService {
         schema.users,
         eq(schema.groupMembers.studentUserId, schema.users.userId),
       )
-      .where(eq(schema.groupMembers.groupId, groupId));
+      .where(eq(schema.groupMembers.groupId, groupId))
+      .orderBy(schema.users.userId);
 
     return members;
   }
@@ -569,10 +584,159 @@ export class GroupService {
     return { groupId: data.groupId };
   }
 
-  async calculateScore(
-    data: CalculateScoresRequest,
-  ): Promise<CalculateScoresResponse> {
+  async calculateScoreByQass(
+    data: CalculateScoreByQassRequest,
+  ): Promise<CalculateScoreByQassResponse> {
     const groupId = data.groupId;
+    const { assessment, group, scoringComponents } =
+      await this.validateParameters({ model: AssessmentModel.QASS, groupId });
+    const peerRatingWeights = data.weights.sort((a, b) => a.userId - b.userId);
+    const userIds = peerRatingWeights.map((item) => item.userId);
+    const { peerMatrix, groupScore, scoringComponentWeights } =
+      await this.prepareData({
+        group,
+        scoringComponents,
+      });
+    const { mode, groupSpread, tuningFactor, peerRatingImpact } =
+      assessment?.modelConfig as QassModelConfig;
+
+    const sumWeights = peerRatingWeights.reduce(
+      (prev, curr) => prev + curr.weight,
+      0,
+    );
+    const weights = peerRatingWeights.map((item) => item.weight / sumWeights);
+
+    const studentScores = calculateStudentsScoresFromAllComponentsByQASS({
+      peerMatrix,
+      peerRatingImpact,
+      groupSpread,
+      tuningFactor,
+      scoringComponentWeights,
+      mode: mode as QASSMode,
+      groupProductScore: groupScore!,
+      peerRatingWeights: weights,
+    });
+
+    const updatedScores = userIds.map((userId, i) => ({
+      studentUserId: userId,
+      score: parseFloat(studentScores[i].toFixed(4))!,
+    }));
+
+    await this.upsertScore({
+      groupId,
+      groupScore: groupScore!,
+      studentScores: updatedScores,
+    });
+
+    return { groupId: data.groupId };
+  }
+
+  async calculateScoreByWebavalia(
+    data: CalculateScoreByWebavaliaRequest,
+  ): Promise<CalculateScoreByWebavaliaResponse> {
+    const groupId = data.groupId;
+    const { assessment, group, scoringComponents } =
+      await this.validateParameters({
+        model: AssessmentModel.WebAVALIA,
+        groupId,
+      });
+    const members = await this.getMembersByGroupId(groupId);
+    const userIds = members.map((item) => item.userId);
+    const { peerMatrix, groupScore, scoringComponentWeights } =
+      await this.prepareData({
+        group,
+        scoringComponents,
+      });
+    const { selfWeight } = assessment?.modelConfig as WebavaliaModelConfig;
+
+    // validate sum scores form each rater must sum up to 100
+    scoringComponents.forEach((sc, k) => {
+      for (let i = 0; i < peerMatrix[k].length; i++) {
+        let sum = 0;
+        for (let j = 0; j < peerMatrix[k].length; j++) {
+          sum += peerMatrix[k][j][i] ?? 0;
+        }
+        if (sum !== 100) {
+          throw new BadRequestException(
+            `Some student voting is invalid. Please check their voting in component ${format(sc.startDate, 'dd/MM/y')} - ${format(sc.endDate, 'dd/MM/y')}.`,
+          );
+        }
+      }
+    });
+
+    const studentScores = calculateStudentsScoresFromAllComponentsByWebavalia({
+      peerMatrix,
+      groupProductScore: groupScore!,
+      selfWeight,
+      scoringComponentWeights,
+    });
+
+    const updatedScores = userIds.map((userId, i) => ({
+      studentUserId: userId,
+      score: parseFloat(studentScores[i].toFixed(4))!,
+    }));
+
+    await this.upsertScore({
+      groupId,
+      groupScore: groupScore!,
+      studentScores: updatedScores,
+    });
+
+    return { groupId: data.groupId };
+  }
+
+  async prepareData({
+    group,
+    scoringComponents,
+  }: {
+    group: schema.Group;
+    scoringComponents: schema.ScoringComponent[];
+  }) {
+    const groupId = group.groupId;
+
+    const promises = scoringComponents.map(async (item) => ({
+      ...item,
+      peerRating:
+        await this.peerRatingService.getPeerRatingsByScoringComponentId(
+          item.scoringComponentId,
+          groupId,
+        ),
+    }));
+
+    const peerRatingList = await Promise.all(promises);
+
+    const peerMatrix: (number | undefined)[][][] = [];
+
+    peerRatingList.forEach((sc) => {
+      const component: (number | undefined)[][] = [];
+      sc.peerRating.forEach((ratee) => {
+        const row: (number | undefined)[] = [];
+        ratee.ratings.forEach((rater) => {
+          row.push(rater.score);
+        });
+        component.push(row);
+      });
+      peerMatrix.push(component);
+    });
+
+    const groupScore = await this.db.query.groupScores.findFirst({
+      where: eq(schema.groupScores.groupId, groupId),
+    });
+
+    return {
+      peerMatrix,
+      groupScore: groupScore?.score,
+      scoringComponentWeights: scoringComponents.map((item) => item.weight),
+    };
+  }
+
+  async validateParameters({
+    model,
+    groupId,
+  }: {
+    model: AssessmentModel;
+    groupId: number;
+  }) {
     // check group exist
     const group = await this.getGroupById(groupId);
 
@@ -582,8 +746,11 @@ export class GroupService {
     );
 
     if (!assessment?.modelId || !assessment.modelConfig) {
-      throw new BadRequestException(
-        'Assessment model was not selected. Please choose model to proceed.',
+      throw new BadRequestException('Assessment model was not selected.');
+    }
+    if (model !== assessment?.modelId) {
+      throw new ForbiddenException(
+        'Not allow to calculate by this assessment model.',
       );
     }
 
@@ -600,11 +767,7 @@ export class GroupService {
 
     // All scoring component must be done???
 
-    // All student in the group must done peer rating in every existing scoring component???
-
-    // calculate scores
-
-    return { groupId: data.groupId };
+    return { assessment, group, scoringComponents };
   }
 
   async checkUserRole(

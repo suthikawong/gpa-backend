@@ -1,10 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { and, eq, inArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { PeerRating } from '../drizzle/schema';
-import { GroupService } from '../group/group.service';
 import { ScoringComponentService } from '../scoring-component/scoring-component.service';
 import { RatePeerRequest } from './dto/peer-rating.request';
 import {
@@ -18,7 +17,6 @@ export class PeerRatingService {
   constructor(
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof schema>,
-    private readonly groupService: GroupService,
     private readonly scoringComponentService: ScoringComponentService,
   ) {}
 
@@ -26,15 +24,14 @@ export class PeerRatingService {
     scoringComponentId: schema.ScoringComponent['scoringComponentId'],
     groupId: schema.Group['groupId'],
   ): Promise<GetPeerRatingsByScoringComponentIdResponse> {
-    const group = await this.groupService.getGroupById(groupId);
+    const group = await this.db.query.groups.findFirst({
+      where: eq(schema.groups.groupId, groupId),
+    });
+    if (!group) throw new NotFoundException('Group not found');
+
     await this.scoringComponentService.getScoringComponentById(
       scoringComponentId,
     );
-    const assessment = await this.db.query.assessments.findFirst({
-      where: eq(schema.assessments.assessmentId, group.assessmentId),
-    });
-    const modelConfig = assessment?.modelConfig as { selfRating: boolean };
-    const selfRating = modelConfig?.selfRating;
 
     const members = await this.db
       .select({ studentUserId: schema.groupMembers.studentUserId })
@@ -55,7 +52,7 @@ export class PeerRatingService {
       })
       .from(schema.users)
       .where(inArray(schema.users.userId, studentIds))
-      .orderBy(schema.users.name);
+      .orderBy(schema.users.userId);
 
     const peerRating = await this.db
       .select()
@@ -86,9 +83,6 @@ export class PeerRatingService {
     for (let ratee of users) {
       const ratings: PeerRatingItem[] = [];
       for (let rater of users) {
-        if (ratee.userId === rater.userId && !selfRating) {
-          continue;
-        }
         if (peerRatingObject?.[ratee.userId]?.[rater.userId]) {
           ratings.push(peerRatingObject[ratee.userId][rater.userId]);
         } else {
