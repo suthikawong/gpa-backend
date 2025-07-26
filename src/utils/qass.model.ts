@@ -317,21 +317,21 @@ const calculateStudentScores = (
 };
 
 // validate scores with Split-Join-Invariance
-const SplitJoinInvariance = (
-  meanScore: number,
-  groupProductScore: number,
-  meanStudentContribution: number,
-  groupSpread: number,
-) => {
-  console.log('meanScore : ', meanScore);
-  console.log(
-    'pow : ',
-    Math.pow(groupProductScore, Math.pow(groupSpread, meanStudentContribution)),
-  );
-  if (
-    meanScore !==
-    Math.pow(groupProductScore, Math.pow(groupSpread, meanStudentContribution))
-  ) {
-    throw new Error('Fail Split-Join-Invariance validation');
-  }
-};
+// const SplitJoinInvariance = (
+//   meanScore: number,
+//   groupProductScore: number,
+//   meanStudentContribution: number,
+//   groupSpread: number,
+// ) => {
+//   console.log('meanScore : ', meanScore);
+//   console.log(
+//     'pow : ',
+//     Math.pow(groupProductScore, Math.pow(groupSpread, meanStudentContribution)),
+//   );
+//   if (
+//     meanScore !==
+//     Math.pow(groupProductScore, Math.pow(groupSpread, meanStudentContribution))
+//   ) {
+//     throw new Error('Fail Split-Join-Invariance validation');
+//   }
+// };
