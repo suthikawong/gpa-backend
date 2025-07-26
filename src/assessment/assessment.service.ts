@@ -236,7 +236,10 @@ export class AssessmentService {
     studentUserId: schema.AssessmentStudent['studentUserId'],
   ): Promise<StudentJoinAssessmentResponse> {
     const assessment = await this.db.query.assessments.findFirst({
-      where: eq(schema.assessments.assessmentCode, data.assessmentCode),
+      where: and(
+        eq(schema.assessments.assessmentCode, data.assessmentCode),
+        eq(schema.assessments.isPublished, true),
+      ),
     });
 
     if (!assessment) {
