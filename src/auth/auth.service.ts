@@ -183,9 +183,11 @@ export class AuthService {
     });
     if (!user) throw new NotFoundException('Invalid token');
 
-    user.isVerified = true;
-    user.verificationToken = null;
-    await this.userService.updateUser(user);
+    await this.userService.updateUser({
+      userId: user.userId,
+      isVerified: true,
+      verificationToken: null,
+    });
 
     return { userId: user.userId };
   }

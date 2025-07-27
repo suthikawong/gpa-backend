@@ -71,7 +71,7 @@ export class AuthController {
 
   @Get('verify-email')
   async verifyEmail(
-    @Query('token') query: VerifyEmailRequest,
+    @Query() query: VerifyEmailRequest,
   ): Promise<AppResponse<VerifyEmailResponse>> {
     const result = await this.authService.verifyEmail(query);
     return { data: result };
