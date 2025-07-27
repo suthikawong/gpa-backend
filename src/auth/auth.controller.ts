@@ -17,6 +17,7 @@ import {
   GetLoggedInUserResponse,
   LoginResponse,
   RegisterResponse,
+  VerifyEmailResponse,
 } from './dto/auth.response';
 import { LocalAuthGuard } from './guards/auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -69,7 +70,9 @@ export class AuthController {
   }
 
   @Get('verify-email')
-  async verifyEmail(@Query('token') query: VerifyEmailRequest) {
+  async verifyEmail(
+    @Query('token') query: VerifyEmailRequest,
+  ): Promise<AppResponse<VerifyEmailResponse>> {
     const result = await this.authService.verifyEmail(query);
     return { data: result };
   }

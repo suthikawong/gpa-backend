@@ -8,3 +8,7 @@ export interface GetLoggedInUserResponse extends UserProtected {}
 export interface RegisterResponse {
   userId: User['userId'];
 }
+
+export interface VerifyEmailResponse {
+  userId: User['userId'];
+}
