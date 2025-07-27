@@ -41,7 +41,7 @@ export class UpdateUserRequest {
 
   @IsString()
   @IsOptional()
-  name: User['name'];
+  name?: User['name'];
 
   @IsString()
   @IsOptional()

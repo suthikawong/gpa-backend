@@ -108,7 +108,7 @@ export class AuthService {
     if (!user.isVerified) {
       const verificationToken = randomBytes(32).toString('hex');
       await this.userService.updateUser({
-        ...user,
+        userId: user.userId,
         isVerified: false,
         verificationToken,
       });
