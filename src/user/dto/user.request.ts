@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import { User } from '../../drizzle/schema';
 
 export class CreateUserRequest {
@@ -14,6 +14,14 @@ export class CreateUserRequest {
 
   @IsNumber()
   roleId: User['roleId'];
+
+  @IsBoolean()
+  @IsOptional()
+  isVerified?: User['isVerified'];
+
+  @IsString()
+  @IsOptional()
+  verificationToken?: User['verificationToken'];
 }
 
 export class GetUserByIdRequest {
@@ -45,5 +53,13 @@ export class UpdateUserRequest {
 
   @IsNumber()
   @IsOptional()
-  roleId: User['roleId'];
+  roleId?: User['roleId'];
+
+  @IsBoolean()
+  @IsOptional()
+  isVerified?: User['isVerified'];
+
+  @IsString()
+  @IsOptional()
+  verificationToken?: User['verificationToken'];
 }

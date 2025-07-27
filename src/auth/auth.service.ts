@@ -1,20 +1,24 @@
 import {
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Response } from 'express';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { User } from '../drizzle/schema';
+import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
-import { RegisterRequest } from './dto/auth.request';
+import { RegisterRequest, VerifyEmailRequest } from './dto/auth.request';
 import { LoginResponse } from './dto/auth.response';
 import { TokenPayload } from './token-payload.interface';
 
@@ -27,6 +31,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async login(user: User, response: Response): Promise<LoginResponse> {
@@ -90,16 +95,29 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<any> {
+    let user: schema.User | null = null;
     try {
-      const user = await this.userService.getUserByEmail({ email });
-      const authenticated = await compare(password, user.password);
-      if (!authenticated) {
-        throw new UnauthorizedException();
-      }
-      return user;
+      user = await this.userService.getUserByEmail({ email });
     } catch (error) {
       throw new UnauthorizedException('Incorrect email or password.');
     }
+    const authenticated = await compare(password, user.password);
+    if (!authenticated) {
+      throw new UnauthorizedException('Incorrect email or password.');
+    }
+    if (!user.isVerified) {
+      const verificationToken = randomBytes(32).toString('hex');
+      await this.userService.updateUser({
+        ...user,
+        isVerified: false,
+        verificationToken,
+      });
+      await this.sendVerificationEmail(user.email, verificationToken);
+      throw new ForbiddenException(
+        'Your email is not verified. Please verify your email before sign in',
+      );
+    }
+    return user;
   }
 
   async verifyRefreshToken(refreshToken: string, userId: number) {
@@ -147,7 +165,49 @@ export class AuthService {
       throw new ConflictException('Email already in use');
     }
 
-    const user = await this.userService.createUser(data);
+    const verificationToken = randomBytes(32).toString('hex');
+    const user = await this.userService.createUser({
+      ...data,
+      isVerified: false,
+      verificationToken,
+    });
+    await this.sendVerificationEmail(user.email, verificationToken);
     return { userId: user.userId };
+  }
+
+  async verifyEmail(data: VerifyEmailRequest) {
+    if (!data?.token) throw new NotFoundException('Invalid token');
+
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.verificationToken, data.token),
+    });
+    if (!user) throw new NotFoundException('Invalid token');
+
+    user.isVerified = true;
+    user.verificationToken = null;
+    await this.userService.updateUser(user);
+
+    return { userId: user.userId };
+  }
+
+  async sendVerificationEmail(email: string, token: string) {
+    const sendTo = [email];
+    const subject = 'Verify Your Email Address';
+    const url = `${process.env.FRONTEND_APP_URL}/verify-email?token=${token}`;
+    const html = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; background-color: #f9f9f9;">
+      <h2 style="color: #333;">Welcome to ScoreUnity!</h2>
+      <p style="font-size: 16px; color: #555;">
+        Thank you for signing up. To complete your registration, please verify your email address by clicking the button below:
+      </p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${url}" style="background-color: #007BFF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-size: 16px;">
+          Verify Email
+        </a>
+      </div>
+      <p style="font-size: 14px; color: #777;">
+        If you did not create an account, no further action is required.
+      </p>
+    </div>`;
+    await this.mailService.sendEmail({ sendTo, subject, html });
   }
 }

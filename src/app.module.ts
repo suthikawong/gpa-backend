@@ -3,6 +3,7 @@ import { AssessmentModule } from './assessment/assessment.module';
 import { AuthModule } from './auth/auth.module';
 import { GroupModule } from './group/group.module';
 import { LookupModule } from './lookup/lookup.module';
+import { MailModule } from './mail/mail.module';
 import { PeerRatingModule } from './peer-rating/peer-rating.module';
 import { ScoringComponentModule } from './scoring-component/scoring-component.module';
 import { SimulationModule } from './simulation/simulation.module';
@@ -18,6 +19,7 @@ import { UserModule } from './user/user.module';
     PeerRatingModule,
     LookupModule,
     SimulationModule,
+    MailModule,
   ],
   providers: [],
   controllers: [],

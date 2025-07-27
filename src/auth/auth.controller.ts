@@ -1,10 +1,18 @@
-import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { AppResponse } from '../app.response';
 import { User } from '../drizzle/schema';
 import { AuthService } from './auth.service';
 import { LoggedInUser } from './decorators/logged-in-user.decorator';
-import { RegisterRequest } from './dto/auth.request';
+import { RegisterRequest, VerifyEmailRequest } from './dto/auth.request';
 import {
   GetLoggedInUserResponse,
   LoginResponse,
@@ -57,6 +65,12 @@ export class AuthController {
     @Body() data: RegisterRequest,
   ): Promise<AppResponse<RegisterResponse>> {
     const result = await this.authService.register(data);
+    return { data: result };
+  }
+
+  @Get('verify-email')
+  async verifyEmail(@Query('token') query: VerifyEmailRequest) {
+    const result = await this.authService.verifyEmail(query);
     return { data: result };
   }
 }

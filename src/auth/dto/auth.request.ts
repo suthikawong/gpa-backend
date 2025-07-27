@@ -15,3 +15,8 @@ export class RegisterRequest {
   @IsNumber()
   roleId: User['roleId'];
 }
+
+export class VerifyEmailRequest {
+  @IsString()
+  token: User['verificationToken'];
+}

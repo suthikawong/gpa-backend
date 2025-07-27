@@ -29,6 +29,8 @@ export const users = pgTable('users', {
     .references(() => roles.roleId)
     .notNull(),
   refreshToken: text('refreshToken'),
+  isVerified: boolean('is_verified').default(false).notNull(),
+  verificationToken: varchar('verification_token', { length: 64 }),
   createdDate: timestamp('created_date').notNull(),
   updatedDate: timestamp('updated_date'),
 });
