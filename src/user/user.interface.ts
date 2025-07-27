@@ -6,6 +6,7 @@ export type UserProtected = Omit<
   | 'refreshToken'
   | 'isVerified'
   | 'verificationToken'
+  | 'resetPasswordToken'
   | 'createdDate'
   | 'updatedDate'
 >;

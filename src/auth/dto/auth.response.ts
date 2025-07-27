@@ -12,3 +12,11 @@ export interface RegisterResponse {
 export interface VerifyEmailResponse {
   userId: User['userId'];
 }
+
+export interface ForgotPasswordResponse {
+  userId: User['userId'];
+}
+
+export interface ResetPasswordResponse {
+  userId: User['userId'];
+}

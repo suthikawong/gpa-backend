@@ -62,4 +62,8 @@ export class UpdateUserRequest {
   @IsString()
   @IsOptional()
   verificationToken?: User['verificationToken'];
+
+  @IsString()
+  @IsOptional()
+  resetPasswordToken?: User['resetPasswordToken'];
 }

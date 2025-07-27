@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Inject,
@@ -18,7 +19,12 @@ import * as schema from '../drizzle/schema';
 import { User } from '../drizzle/schema';
 import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
-import { RegisterRequest, VerifyEmailRequest } from './dto/auth.request';
+import {
+  ForgotPasswordRequest,
+  RegisterRequest,
+  ResetPasswordRequest,
+  VerifyEmailRequest,
+} from './dto/auth.request';
 import { LoginResponse } from './dto/auth.response';
 import { TokenPayload } from './token-payload.interface';
 
@@ -192,6 +198,57 @@ export class AuthService {
     return { userId: user.userId };
   }
 
+  async forgotPassword(data: ForgotPasswordRequest) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.email, data.email),
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const token = this.jwtService.sign(
+      { email: data.email },
+      {
+        secret: this.configService.get('JWT_RESET_TOKEN_SECRET'),
+        expiresIn: `${this.configService.get('JWT_RESET_TOKEN_EXPIRATION_MS')}s`,
+      },
+    );
+
+    await this.userService.updateUser({
+      userId: user.userId,
+      resetPasswordToken: token,
+    });
+
+    await this.sendResetPasswordEmail(user.email, token);
+    return { userId: user.userId };
+  }
+
+  async resetPassword(data: ResetPasswordRequest) {
+    if (!data?.token) throw new NotFoundException('Invalid token');
+
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.resetPasswordToken, data.token),
+    });
+
+    if (!user) throw new NotFoundException('Invalid token');
+
+    const payload = await this.decodeJwtToken(
+      data.token,
+      this.configService.get('JWT_RESET_TOKEN_SECRET')!,
+    );
+
+    if (!payload?.email) throw new NotFoundException('Invalid token');
+
+    await this.userService.updateUser({
+      userId: user.userId,
+      password: data.password,
+      resetPasswordToken: null,
+    });
+
+    return { userId: user.userId };
+  }
+
   async sendVerificationEmail(email: string, token: string) {
     const sendTo = [email];
     const subject = 'Verify Your Email Address';
@@ -211,5 +268,37 @@ export class AuthService {
       </p>
     </div>`;
     await this.mailService.sendEmail({ sendTo, subject, html });
+  }
+
+  async sendResetPasswordEmail(email: string, token: string) {
+    const sendTo = [email];
+    const subject = 'Reset Your Password';
+    const url = `${process.env.FRONTEND_APP_URL}/reset-password?token=${token}`;
+    const html = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; background-color: #f9f9f9;">
+      <h2 style="color: #333;">Reset Your Password - ScoreUnity</h2>
+      <p style="font-size: 16px; color: #555;">
+        We received a request to reset your password. Click the button below to reset your password:
+      </p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${url}" style="background-color: #007BFF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-size: 16px;">
+          Reset Password
+        </a>
+      </div>
+      <p style="font-size: 14px; color: #777;">
+        If you did not request this, please ignore this email. This link will expire in 1 hour for security reasons.
+      </p>
+    </div>`;
+    await this.mailService.sendEmail({ sendTo, subject, html });
+  }
+
+  public async decodeJwtToken(token: string, secret: string) {
+    try {
+      return await this.jwtService.verify(token, { secret });
+    } catch (error) {
+      if (error?.name === 'TokenExpiredError') {
+        throw new BadRequestException('Token expired');
+      }
+      throw new BadRequestException('Invalid token');
+    }
   }
 }

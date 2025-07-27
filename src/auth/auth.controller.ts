@@ -12,11 +12,18 @@ import { AppResponse } from '../app.response';
 import { User } from '../drizzle/schema';
 import { AuthService } from './auth.service';
 import { LoggedInUser } from './decorators/logged-in-user.decorator';
-import { RegisterRequest, VerifyEmailRequest } from './dto/auth.request';
 import {
+  ForgotPasswordRequest,
+  RegisterRequest,
+  ResetPasswordRequest,
+  VerifyEmailRequest,
+} from './dto/auth.request';
+import {
+  ForgotPasswordResponse,
   GetLoggedInUserResponse,
   LoginResponse,
   RegisterResponse,
+  ResetPasswordResponse,
   VerifyEmailResponse,
 } from './dto/auth.response';
 import { LocalAuthGuard } from './guards/auth.guard';
@@ -74,6 +81,22 @@ export class AuthController {
     @Query() query: VerifyEmailRequest,
   ): Promise<AppResponse<VerifyEmailResponse>> {
     const result = await this.authService.verifyEmail(query);
+    return { data: result };
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(
+    @Body() data: ForgotPasswordRequest,
+  ): Promise<AppResponse<ForgotPasswordResponse>> {
+    const result = await this.authService.forgotPassword(data);
+    return { data: result };
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body() data: ResetPasswordRequest,
+  ): Promise<AppResponse<ResetPasswordResponse>> {
+    const result = await this.authService.resetPassword(data);
     return { data: result };
   }
 }
