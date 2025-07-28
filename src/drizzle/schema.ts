@@ -61,6 +61,7 @@ export const assessments = pgTable('assessments', {
   instructorUserId: integer('instructor_user_id')
     .references(() => users.userId)
     .notNull(),
+  isGroupable: boolean('is_groupable').default(false).notNull(),
   createdDate: timestamp('created_date').notNull(),
   updatedDate: timestamp('updated_date'),
 });
