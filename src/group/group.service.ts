@@ -724,10 +724,16 @@ export class GroupService {
       where: eq(schema.groupScores.groupId, groupId),
     });
 
+    const sumWeights = scoringComponents.reduce(
+      (prev, curr) => prev + curr.weight,
+      0,
+    );
+    const weights = scoringComponents.map((item) => item.weight / sumWeights);
+
     return {
       peerMatrix,
       groupScore: groupScore?.score,
-      scoringComponentWeights: scoringComponents.map((item) => item.weight),
+      scoringComponentWeights: weights,
     };
   }
 
