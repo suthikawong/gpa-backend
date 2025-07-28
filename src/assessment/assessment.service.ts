@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { and, count, eq, gte, ilike, lte } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import ExcelJS from 'exceljs';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { generateCode } from '../utils/generate-code';
@@ -481,6 +482,67 @@ export class AssessmentService {
       scoringComponentId: scoringComponent.scoringComponentId,
       rated: !!peerRating,
     };
+  }
+
+  async exportAssessmentScores(
+    assessmentId: schema.Assessment['assessmentId'],
+  ): Promise<{ filename: string; buffer: ExcelJS.Buffer }> {
+    const assessment = await this.db.query.assessments.findFirst({
+      where: eq(schema.assessments.assessmentId, assessmentId),
+    });
+
+    if (!assessment) {
+      throw new NotFoundException('Assessment not found');
+    }
+
+    const data = await this.db
+      .select({
+        studentUserId: schema.studentScores.studentUserId,
+        score: schema.studentScores.score,
+        name: schema.users.name,
+        email: schema.users.email,
+      })
+      .from(schema.studentScores)
+      .innerJoin(
+        schema.users,
+        eq(schema.users.userId, schema.studentScores.studentUserId),
+      )
+      .innerJoin(
+        schema.groups,
+        eq(schema.groups.groupId, schema.studentScores.groupId),
+      )
+      .innerJoin(
+        schema.assessments,
+        eq(schema.assessments.assessmentId, schema.groups.assessmentId),
+      )
+      .where(eq(schema.assessments.assessmentId, assessmentId));
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(
+      `${assessment?.assessmentName} - Summary`,
+    );
+
+    worksheet.columns = [
+      { header: 'Student Name', key: 'name', width: 40 },
+      { header: 'Score', key: 'score', width: 10 },
+    ];
+
+    data.forEach((s) => {
+      worksheet.addRow({
+        name: s.name,
+        score: s.score,
+      });
+    });
+
+    worksheet.insertRow(1, [`Scores for ${assessment.assessmentName}`]);
+    worksheet.mergeCells('A1:C1');
+    worksheet.getCell('A1').font = { size: 14, bold: true };
+    worksheet.getCell('A1').alignment = { horizontal: 'center' };
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const filename = `${assessment.assessmentName.toLowerCase().replace(/ /g, '-')}-scores.xlsx`;
+
+    return { filename, buffer };
   }
 
   async generateUniqueCode(length = 8): Promise<string> {

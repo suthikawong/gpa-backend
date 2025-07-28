@@ -7,8 +7,10 @@ import {
   Post,
   Put,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
 import { LoggedInUser } from '../auth/decorators/logged-in-user.decorator';
@@ -22,6 +24,7 @@ import {
   ConfirmStudentJoinAssessmentRequest,
   CreateAssessmentRequest,
   DeleteAssessmentRequest,
+  ExportAssessmentScoresRequest,
   GetAssessmentByIdRequest,
   GetGroupsByAssessmentIdRequest,
   GetMyScoreRequest,
@@ -216,5 +219,25 @@ export class AssessmentController {
       user.userId,
     );
     return { data };
+  }
+
+  @Get(':assessmentId/export')
+  @Roles([Role.Instructor])
+  async exportAssessmentScores(
+    @Param() params: ExportAssessmentScoresRequest,
+    @Res() res: Response,
+  ) {
+    const result = await this.assessmentService.exportAssessmentScores(
+      params.assessmentId,
+    );
+
+    res.header(
+      'Content-Disposition',
+      `attachment; filename=${result.filename}`,
+    );
+    res.type(
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.send(result.buffer);
   }
 }

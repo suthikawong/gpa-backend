@@ -115,3 +115,9 @@ export class CheckScoringComponentActiveRequest {
   @IsNumber()
   assessmentId: Assessment['assessmentId'];
 }
+
+export class ExportAssessmentScoresRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  assessmentId: Assessment['assessmentId'];
+}
