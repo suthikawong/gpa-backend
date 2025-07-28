@@ -5,6 +5,7 @@ import {
   AssessmentStudent,
   Group,
   ScoringComponent,
+  User,
 } from '../../drizzle/schema';
 
 export class GetAssessmentByIdRequest {
@@ -63,6 +64,14 @@ export class SearchStudentsInAssessmentRequest {
 export class StudentJoinAssessmentRequest {
   @IsString()
   assessmentCode: Assessment['assessmentCode'];
+}
+
+export class AddStudentByEmailRequest {
+  @IsNumber()
+  assessmentId: AssessmentStudent['assessmentId'];
+
+  @IsString()
+  email: User['email'];
 }
 
 export class ConfirmStudentJoinAssessmentRequest {

@@ -20,6 +20,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { User } from '../drizzle/schema';
 import { AssessmentService } from './assessment.service';
 import {
+  AddStudentByEmailRequest,
   CheckScoringComponentActiveRequest,
   ConfirmStudentJoinAssessmentRequest,
   CreateAssessmentRequest,
@@ -36,6 +37,7 @@ import {
   UpdateAssessmentRequest,
 } from './dto/assessment.request';
 import {
+  AddStudentByEmailResponse,
   CheckScoringComponentActiveResponse,
   ConfirmStudentJoinAssessmentResponse,
   CreateAssessmentResponse,
@@ -142,6 +144,15 @@ export class AssessmentController {
       data,
       user.userId,
     );
+    return { data: result };
+  }
+
+  @Post('add-student')
+  @Roles([Role.Instructor])
+  async addStudentByEmail(
+    @Body() data: AddStudentByEmailRequest,
+  ): Promise<AppResponse<AddStudentByEmailResponse>> {
+    const result = await this.assessmentService.addStudentByEmail(data);
     return { data: result };
   }
 

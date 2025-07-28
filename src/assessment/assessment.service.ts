@@ -13,6 +13,7 @@ import * as schema from '../drizzle/schema';
 import { UserProtected } from '../user/user.interface';
 import { generateCode } from '../utils/generate-code';
 import {
+  AddStudentByEmailRequest,
   CheckScoringComponentActiveRequest,
   ConfirmStudentJoinAssessmentRequest,
   CreateAssessmentRequest,
@@ -25,6 +26,7 @@ import {
   UpdateAssessmentRequest,
 } from './dto/assessment.request';
 import {
+  AddStudentByEmailResponse,
   CheckScoringComponentActiveResponse,
   ConfirmStudentJoinAssessmentResponse,
   CreateAssessmentResponse,
@@ -278,6 +280,49 @@ export class AssessmentService {
         assessmentId: assessment.assessmentId,
         studentUserId: studentUserId,
         isConfirmed: false,
+        createdDate: new Date(),
+      })
+      .returning();
+
+    return { studentUserId: assessmentStudent.studentUserId };
+  }
+
+  async addStudentByEmail(
+    data: AddStudentByEmailRequest,
+  ): Promise<AddStudentByEmailResponse> {
+    const assessment = await this.db.query.assessments.findFirst({
+      where: eq(schema.assessments.assessmentId, data.assessmentId),
+    });
+
+    if (!assessment) {
+      throw new NotFoundException('Assessment not found');
+    }
+
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.email, data.email),
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const existing = await this.db.query.assessmentStudent.findFirst({
+      where: and(
+        eq(schema.assessmentStudent.assessmentId, assessment.assessmentId),
+        eq(schema.assessmentStudent.studentUserId, user.userId),
+      ),
+    });
+
+    if (existing) {
+      throw new BadRequestException('Student already joined this assessment');
+    }
+
+    const [assessmentStudent] = await this.db
+      .insert(schema.assessmentStudent)
+      .values({
+        assessmentId: assessment.assessmentId,
+        studentUserId: user.userId,
+        isConfirmed: true,
         createdDate: new Date(),
       })
       .returning();

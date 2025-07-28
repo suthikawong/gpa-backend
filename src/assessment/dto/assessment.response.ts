@@ -1,4 +1,3 @@
-import { UserProtected } from '../../user/user.interface';
 import {
   Assessment,
   AssessmentStudent,
@@ -6,6 +5,7 @@ import {
   ScoringComponent,
   StudentScore,
 } from '../../drizzle/schema';
+import { UserProtected } from '../../user/user.interface';
 
 export interface AssessmentWithInstructor extends Assessment {
   instructor: UserProtected;
@@ -40,6 +40,11 @@ export interface SearchStudentsInAssessmentResponse
   extends Array<StudentWithIsConfirmed> {}
 
 export type StudentJoinAssessmentResponse = Pick<
+  AssessmentStudent,
+  'studentUserId'
+>;
+
+export type AddStudentByEmailResponse = Pick<
   AssessmentStudent,
   'studentUserId'
 >;
