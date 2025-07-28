@@ -203,15 +203,13 @@ export class AuthService {
       where: eq(schema.users.email, data.email),
     });
 
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    if (!user) throw new NotFoundException('Email not found');
 
     const token = this.jwtService.sign(
       { email: data.email },
       {
-        secret: this.configService.get('JWT_RESET_TOKEN_SECRET'),
-        expiresIn: `${this.configService.get('JWT_RESET_TOKEN_EXPIRATION_MS')}s`,
+        secret: this.configService.getOrThrow('JWT_RESET_TOKEN_SECRET'),
+        expiresIn: `${this.configService.getOrThrow('JWT_RESET_TOKEN_EXPIRATION_MS')}ms`,
       },
     );
 
@@ -275,7 +273,7 @@ export class AuthService {
     const subject = 'Reset Your Password';
     const url = `${process.env.FRONTEND_APP_URL}/reset-password?token=${token}`;
     const html = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; background-color: #f9f9f9;">
-      <h2 style="color: #333;">Reset Your Password - ScoreUnity</h2>
+      <h2 style="color: #333;">Reset Your Password</h2>
       <p style="font-size: 16px; color: #555;">
         We received a request to reset your password. Click the button below to reset your password:
       </p>
@@ -293,7 +291,8 @@ export class AuthService {
 
   public async decodeJwtToken(token: string, secret: string) {
     try {
-      return await this.jwtService.verify(token, { secret });
+      const payload = await this.jwtService.verify(token, { secret });
+      return payload;
     } catch (error) {
       if (error?.name === 'TokenExpiredError') {
         throw new BadRequestException('Token expired');
