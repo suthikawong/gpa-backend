@@ -149,7 +149,10 @@ export class AssessmentService {
 
     if (!existing) throw new NotFoundException('Assessment not found');
 
-    if (data.isPublished && !data.modelId && !data.modelConfig) {
+    const hasModelId = data.modelId || existing.modelId;
+    const hasModelConfig = data.modelConfig || existing.modelConfig;
+
+    if (data.isPublished && !hasModelId && !hasModelConfig) {
       throw new BadRequestException(
         'Assessment model must be specify before publish assessment.',
       );
@@ -437,11 +440,7 @@ export class AssessmentService {
         ),
       );
 
-    if (!result?.groups) {
-      throw new NotFoundException(
-        'Student is not in any group of this assessment',
-      );
-    }
+    if (!result?.groups) return null;
 
     const { groups: group } = result;
 
