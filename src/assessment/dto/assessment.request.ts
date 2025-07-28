@@ -34,9 +34,6 @@ export class UpdateAssessmentRequest {
 
   @IsBoolean()
   isPublished: Assessment['isPublished'];
-
-  @IsBoolean()
-  isGroupable: Assessment['isGroupable'];
 }
 
 export class DeleteAssessmentRequest {
