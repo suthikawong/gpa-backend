@@ -7,9 +7,11 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { Response } from 'express';
 import { AppResponse } from '../app.response';
 import { User } from '../drizzle/schema';
+import { UserProtected } from '../user/user.interface';
 import { AuthService } from './auth.service';
 import { LoggedInUser } from './decorators/logged-in-user.decorator';
 import {
@@ -64,8 +66,7 @@ export class AuthController {
   async getLoggedInUser(
     @LoggedInUser() user: User,
   ): Promise<AppResponse<GetLoggedInUserResponse>> {
-    const data = { ...user, password: undefined, refreshToken: undefined };
-    return { data };
+    return { data: plainToInstance(UserProtected, user) };
   }
 
   @Post('register')

@@ -1,5 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { hash } from 'bcryptjs';
+import { plainToInstance } from 'class-transformer';
 import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
@@ -14,6 +15,7 @@ import {
   GetUserByEmailResponse,
   GetUserByIdResponse,
 } from './dto/user.response';
+import { UserProtected } from './user.interface';
 
 @Injectable()
 export class UserService {
@@ -32,11 +34,7 @@ export class UserService {
       })
       .returning();
 
-    const result = {
-      ...user,
-      password: undefined,
-      refreshToken: undefined,
-    };
+    const result = plainToInstance(UserProtected, user);
     return result;
   }
 
@@ -70,11 +68,7 @@ export class UserService {
       .where(eq(schema.users.userId, data.userId))
       .returning();
 
-    const result = {
-      ...user,
-      password: undefined,
-      refreshToken: undefined,
-    };
+    const result = plainToInstance(UserProtected, user);
     return result;
   }
 }

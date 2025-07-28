@@ -4,11 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { and, count, eq, gte, ilike, lte } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import ExcelJS from 'exceljs';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
+import { UserProtected } from '../user/user.interface';
 import { generateCode } from '../utils/generate-code';
 import {
   CheckScoringComponentActiveRequest,
@@ -70,8 +72,11 @@ export class AssessmentService {
       ),
     });
 
-    const { refreshToken, password, ...instructor } = result?.users ?? null;
-    return { ...result?.assessments, instructor, canEdit: !exist };
+    return {
+      ...result?.assessments,
+      instructor: plainToInstance(UserProtected, result?.users) ?? null,
+      canEdit: !exist,
+    };
   }
 
   async getAssessmentsByInstructor(

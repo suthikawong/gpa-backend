@@ -10,6 +10,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
+import { plainToInstance } from 'class-transformer';
 import { randomBytes } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -18,6 +19,7 @@ import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { User } from '../drizzle/schema';
 import { MailService } from '../mail/mail.service';
+import { UserProtected } from '../user/user.interface';
 import { UserService } from '../user/user.service';
 import {
   ForgotPasswordRequest,
@@ -96,7 +98,7 @@ export class AuthService {
       expires: expireRefreshToken,
       path: '/',
     });
-    const result = { ...user, password: undefined, refreshToken: undefined };
+    const result = plainToInstance(UserProtected, user);
     return result;
   }
 

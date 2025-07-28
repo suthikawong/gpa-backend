@@ -468,15 +468,6 @@ export class GroupService {
       where: eq(schema.studentScores.groupId, groupId),
     });
 
-    // const studentScores = await this.db
-    //   .select()
-    //   .from(schema.studentScores)
-    //   .innerJoin(
-    //     schema.users,
-    //     eq(schema.studentScores.studentUserId, schema.users.userId),
-    //   )
-    //   .where(eq(schema.studentScores.groupId, groupId));
-
     const members = await this.db
       .select({
         userId: schema.users.userId,
