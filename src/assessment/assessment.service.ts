@@ -303,7 +303,9 @@ export class AssessmentService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(
+        'No account was found with this email address',
+      );
     }
 
     const existing = await this.db.query.assessmentStudent.findFirst({
