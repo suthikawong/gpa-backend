@@ -498,7 +498,8 @@ export class AssessmentService {
     const data = await this.db
       .select({
         studentUserId: schema.studentScores.studentUserId,
-        score: schema.studentScores.score,
+        groupScore: schema.groupScores.score,
+        studentScore: schema.studentScores.score,
         name: schema.users.name,
         email: schema.users.email,
       })
@@ -512,35 +513,63 @@ export class AssessmentService {
         eq(schema.groups.groupId, schema.studentScores.groupId),
       )
       .innerJoin(
+        schema.groupScores,
+        eq(schema.groupScores.groupId, schema.studentScores.groupId),
+      )
+      .innerJoin(
         schema.assessments,
         eq(schema.assessments.assessmentId, schema.groups.assessmentId),
       )
-      .where(eq(schema.assessments.assessmentId, assessmentId));
+      .where(eq(schema.assessments.assessmentId, assessmentId))
+      .orderBy(schema.groups.groupId, schema.users.userId);
 
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(
-      `${assessment?.assessmentName} - Summary`,
-    );
+    const worksheet = workbook.addWorksheet('Result');
 
     worksheet.columns = [
-      { header: 'Student Name', key: 'name', width: 40 },
-      { header: 'Score', key: 'score', width: 10 },
+      {
+        header: 'Student Name',
+        key: 'name',
+        width: 30,
+      },
+      {
+        header: 'Student Email',
+        key: 'email',
+        width: 30,
+      },
+      {
+        header: 'Group Score',
+        key: 'groupScore',
+        width: 20,
+      },
+      {
+        header: 'Student Score',
+        key: 'studentScore',
+        width: 20,
+      },
     ];
 
     data.forEach((s) => {
       worksheet.addRow({
         name: s.name,
-        score: s.score,
+        email: s.email,
+        groupScore: s.groupScore,
+        studentScore: s.studentScore,
       });
     });
 
-    worksheet.insertRow(1, [`Scores for ${assessment.assessmentName}`]);
-    worksheet.mergeCells('A1:C1');
+    worksheet.insertRow(1, [assessment.assessmentName]);
+    worksheet.mergeCells('A1:D1');
     worksheet.getCell('A1').font = { size: 14, bold: true };
     worksheet.getCell('A1').alignment = { horizontal: 'center' };
+    worksheet.insertRow(2, '');
+    worksheet.getCell('A3').font = { size: 11, bold: true };
+    worksheet.getCell('B3').font = { size: 11, bold: true };
+    worksheet.getCell('C3').font = { size: 11, bold: true };
+    worksheet.getCell('D3').font = { size: 11, bold: true };
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const filename = `${assessment.assessmentName.toLowerCase().replace(/ /g, '-')}-scores.xlsx`;
+    const filename = 'export-scores.xlsx';
 
     return { filename, buffer };
   }
