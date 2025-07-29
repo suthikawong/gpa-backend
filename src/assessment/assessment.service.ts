@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { and, count, eq, gte, ilike, lte } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, ilike, lte } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import ExcelJS from 'exceljs';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
@@ -86,6 +86,7 @@ export class AssessmentService {
   ): Promise<GetAssessmentsByInstructorResponse> {
     const assessments = await this.db.query.assessments.findMany({
       where: eq(schema.assessments.instructorUserId, instructorUserId),
+      orderBy: [desc(schema.assessments.createdDate)],
     });
 
     const data = assessments.map(({ modelId, modelConfig, ...data }) => data);
@@ -112,7 +113,8 @@ export class AssessmentService {
           eq(schema.assessmentStudent.isConfirmed, true),
           eq(schema.assessments.isPublished, true),
         ),
-      );
+      )
+      .orderBy(desc(schema.assessments.createdDate));
 
     const data = entries.map(({ assessments }) => {
       const { modelId, modelConfig, ...data } = assessments;
@@ -227,7 +229,8 @@ export class AssessmentService {
           ),
         ),
       )
-      .where(and(...condition));
+      .where(and(...condition))
+      .orderBy(asc(schema.users.userId));
 
     if (data.limit !== undefined && data.offset !== undefined) {
       query.limit(data.limit).offset(data.offset);
@@ -420,6 +423,7 @@ export class AssessmentService {
     await this.getAssessmentById(data.assessmentId);
     const result = await this.db.query.scoringComponents.findMany({
       where: eq(schema.scoringComponents.assessmentId, data.assessmentId),
+      orderBy: [asc(schema.scoringComponents.startDate)],
     });
     return result;
   }
@@ -465,6 +469,7 @@ export class AssessmentService {
     await this.getAssessmentById(data.assessmentId);
     const result = await this.db.query.groups.findMany({
       where: eq(schema.groups.assessmentId, data.assessmentId),
+      orderBy: asc(schema.groups.groupId),
     });
     return result;
   }

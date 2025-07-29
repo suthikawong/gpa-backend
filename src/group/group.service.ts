@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { format } from 'date-fns';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import ExcelJS from 'exceljs';
 import { AssessmentModel, Role } from '../app.config';
@@ -480,7 +480,8 @@ export class GroupService {
         schema.users,
         eq(schema.groupMembers.studentUserId, schema.users.userId),
       )
-      .where(eq(schema.groupMembers.groupId, groupId));
+      .where(eq(schema.groupMembers.groupId, groupId))
+      .orderBy(asc(schema.users.userId));
 
     const studentScoreMapping = {};
 
