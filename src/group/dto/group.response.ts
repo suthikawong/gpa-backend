@@ -45,6 +45,10 @@ export interface DeleteGroupMemberResponse {
   studentUserId: User['userId'];
 }
 
+export interface DeleteAllGroupMembersResponse {
+  groupId: Group['groupId'];
+}
+
 export interface StudentScoreItem extends UserProtected {
   studentScore: StudentScore;
 }

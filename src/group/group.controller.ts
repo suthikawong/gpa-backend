@@ -24,6 +24,7 @@ import {
   CalculateScoreByWebavaliaRequest,
   CreateGroupRequest,
   CreateRandomGroupsRequest,
+  DeleteAllGroupMembersRequest,
   DeleteGroupMemberRequest,
   DeleteGroupRequest,
   GetGroupByIdRequest,
@@ -42,6 +43,7 @@ import {
   CalculateScoreByWebavaliaResponse,
   CreateGroupResponse,
   CreateRandomGroupsResponse,
+  DeleteAllGroupMembersResponse,
   DeleteGroupMemberResponse,
   DeleteGroupResponse,
   GetGroupByIdResponse,
@@ -197,6 +199,15 @@ export class GroupController {
     @Param() params: DeleteGroupMemberRequest,
   ): Promise<AppResponse<DeleteGroupMemberResponse>> {
     const result = await this.groupService.deleteGroupMember(params);
+    return { data: result };
+  }
+
+  @Delete(':groupId')
+  @Roles([Role.Instructor])
+  async deleteAllGroupMembers(
+    @Param() data: DeleteAllGroupMembersRequest,
+  ): Promise<AppResponse<DeleteAllGroupMembersResponse>> {
+    const result = await this.groupService.deleteAllGroupMembers(data);
     return { data: result };
   }
 

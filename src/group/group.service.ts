@@ -28,6 +28,7 @@ import {
   CalculateScoreByWebavaliaRequest,
   CreateGroupRequest,
   CreateRandomGroupsRequest,
+  DeleteAllGroupMembersRequest,
   DeleteGroupMemberRequest,
   ImportGroupsRequest,
   UpdateGroupRequest,
@@ -453,6 +454,19 @@ export class GroupService {
         ),
       );
     return { studentUserId: data.studentUserId };
+  }
+
+  async deleteAllGroupMembers(
+    data: DeleteAllGroupMembersRequest,
+  ): Promise<DeleteGroupResponse> {
+    const group = await this.getGroupById(data.groupId);
+    await this.checkScoringComponentStarted(group.assessmentId);
+
+    await this.db
+      .delete(schema.groupMembers)
+      .where(eq(schema.groupMembers.groupId, data.groupId));
+
+    return { groupId: group.groupId };
   }
 
   async getScores(

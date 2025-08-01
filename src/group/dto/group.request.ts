@@ -93,6 +93,12 @@ export class DeleteGroupMemberRequest {
   studentUserId: User['userId'];
 }
 
+export class DeleteAllGroupMembersRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  groupId: Group['groupId'];
+}
+
 export class GetScoresRequest {
   @Transform(({ value }) => parseInt(value))
   @IsNumber()
