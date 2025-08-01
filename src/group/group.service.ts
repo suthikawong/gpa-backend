@@ -21,7 +21,7 @@ import {
   calculateStudentsScoresFromAllComponentsByQASS,
   QASSMode,
 } from '../utils/qass.model';
-import { calculateStudentsScoresFromAllComponentsByWebavalia } from '../utils/webavalia-model';
+import { calculateStudentGradesFromAllComponentsByWebavalia } from '../utils/webavalia-model';
 import {
   AddGroupMemberRequest,
   CalculateScoreByQassRequest,
@@ -677,9 +677,9 @@ export class GroupService {
       }
     });
 
-    const studentScores = calculateStudentsScoresFromAllComponentsByWebavalia({
+    const studentScores = calculateStudentGradesFromAllComponentsByWebavalia({
       peerMatrix,
-      groupProductScore: groupScore!,
+      groupGrade: groupScore!,
       selfWeight,
       scoringComponentWeights,
     });

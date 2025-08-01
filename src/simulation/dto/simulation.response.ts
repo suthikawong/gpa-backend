@@ -16,7 +16,7 @@ export interface CalcualteScoresByWebavaliaResponse {
   mean: {
     score: string;
   };
-  studentScores: {
+  studentGrades: {
     student: number;
     score: string;
   }[];

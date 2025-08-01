@@ -35,7 +35,7 @@ export class CalcualteScoresByWebavaliaRequest {
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()
-  groupProductScore: number;
+  groupGrade: number;
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()

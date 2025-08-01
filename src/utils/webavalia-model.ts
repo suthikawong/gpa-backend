@@ -1,10 +1,10 @@
-export const calculateStudentsScoresFromSpecificComponentByWebavalia = ({
+export const calculateStudentGradesFromSpecificComponentByWebavalia = ({
   peerMatrix,
-  groupProductScore,
+  groupGrade,
   selfWeight,
 }: {
   peerMatrix: (number | undefined)[][];
-  groupProductScore: number;
+  groupGrade: number;
   selfWeight: number;
 }) => {
   const groupSize = peerMatrix.length;
@@ -14,48 +14,48 @@ export const calculateStudentsScoresFromSpecificComponentByWebavalia = ({
   }
 
   const peerWeight = (1 - selfWeight) / (groupSize - 1);
+  const tempGrades: number[] = [];
+  const weightMatrix: number[][] = [];
 
-  const tempScores: number[] = [];
+  for (let i = 0; i < groupSize; i++) {
+    weightMatrix.push([]);
+    for (let j = 0; j < groupSize; j++) {
+      if (i === j) weightMatrix[i].push(selfWeight);
+      else weightMatrix[i].push(peerWeight);
+    }
+  }
 
-  peerMatrix.forEach((scores, currStudent) => {
-    let selfRating = 0;
-    let sumOtherRating = 0;
-    scores.forEach((score, i) => {
-      if (currStudent === i) {
-        selfRating = score ?? 0;
-      } else {
-        sumOtherRating += score ?? 0;
-      }
-    });
-    const rating =
-      (selfWeight * selfRating + peerWeight * sumOtherRating) /
-      (selfWeight + peerWeight * (groupSize - 1));
-    tempScores.push(rating);
-  });
+  for (let i = 0; i < groupSize; i++) {
+    let sum = 0;
+    for (let j = 0; j < groupSize; j++) {
+      sum += weightMatrix[i][j] * (peerMatrix[i][j] ?? 0);
+    }
+    tempGrades.push(sum / 100);
+  }
 
-  const maxScore = Math.max(...tempScores);
-  const studentScores: number[] = [];
+  const maxScore = Math.max(...tempGrades);
+  const studentGrades: number[] = [];
 
-  tempScores.forEach((score) => {
-    const finalScore = groupProductScore * Math.sqrt(score / maxScore);
-    studentScores.push(finalScore);
+  tempGrades.forEach((score) => {
+    const studentGrade = (score / maxScore) * groupGrade;
+    studentGrades.push(studentGrade);
   });
 
   return {
-    studentScores,
-    meanStudentScore:
-      studentScores.reduce((prev, curr) => prev + curr, 0) / groupSize,
+    studentGrades,
+    meanStudentGrade:
+      studentGrades.reduce((prev, curr) => prev + curr, 0) / groupSize,
   };
 };
 
-export const calculateStudentsScoresFromAllComponentsByWebavalia = ({
+export const calculateStudentGradesFromAllComponentsByWebavalia = ({
   peerMatrix,
-  groupProductScore,
+  groupGrade,
   selfWeight,
   scoringComponentWeights,
 }: {
   peerMatrix: (number | undefined)[][][];
-  groupProductScore: number;
+  groupGrade: number;
   selfWeight: number;
   scoringComponentWeights: number[];
 }) => {
@@ -68,32 +68,24 @@ export const calculateStudentsScoresFromAllComponentsByWebavalia = ({
   }
 
   scoringComponentSize;
-  const sumWeightedStudentScores: number[] =
-    Array(scoringComponentSize).fill(0);
-  // let sumMeanStudentScore = 0;
+  const finalStudentGrades: number[] = Array(scoringComponentSize).fill(0);
   const sumWeight = scoringComponentWeights.reduce(
     (prev, curr) => prev + curr,
     0,
   );
+  const momentWeights = scoringComponentWeights.map((w) => w / sumWeight);
 
-  for (let i = 0; i < scoringComponentSize; i++) {
-    const { studentScores } =
-      calculateStudentsScoresFromSpecificComponentByWebavalia({
-        peerMatrix: peerMatrix[i],
-        groupProductScore: groupProductScore!,
+  for (let k = 0; k < scoringComponentSize; k++) {
+    const { studentGrades } =
+      calculateStudentGradesFromSpecificComponentByWebavalia({
+        peerMatrix: peerMatrix[k],
+        groupGrade: groupGrade!,
         selfWeight,
       });
-    for (let j = 0; j < studentScores.length; j++) {
-      sumWeightedStudentScores[i] +=
-        studentScores[i] * scoringComponentWeights[i];
+    for (let i = 0; i < studentGrades.length; i++) {
+      finalStudentGrades[i] += momentWeights[k] * studentGrades[i];
     }
-    // sumMeanStudentScore += meanStudentScore * scoringComponentWeights[i];
   }
 
-  const finalStudentScores = sumWeightedStudentScores.map(
-    (item) => item / sumWeight,
-  );
-  // const finalMeanStudentScore = sumMeanStudentScore / sumWeight;
-
-  return finalStudentScores;
+  return finalStudentGrades;
 };
