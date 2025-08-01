@@ -210,14 +210,19 @@ export class AssessmentController {
     return { data: groups };
   }
 
-  @Get(':assessmentId/groups')
+  @Delete(':assessmentId/groups')
   @Roles([Role.Instructor])
   async deleteAllGroupsByAssessmentId(
     @Param() data: DeleteAllGroupsByAssessmentIdRequest,
   ): Promise<AppResponse<DeleteAllGroupsByAssessmentIdResponse>> {
-    const groups =
-      await this.assessmentService.deleteAllGroupsByAssessmentId(data);
-    return { data: groups };
+    try {
+      const groups =
+        await this.assessmentService.deleteAllGroupsByAssessmentId(data);
+      return { data: groups };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   @Get(':assessmentId/my-score')

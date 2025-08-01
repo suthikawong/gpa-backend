@@ -486,7 +486,7 @@ export class AssessmentService {
     await this.getAssessmentById(data.assessmentId);
     await this.db
       .delete(schema.groups)
-      .where(eq(schema.assessments.assessmentId, data.assessmentId));
+      .where(eq(schema.groups.assessmentId, data.assessmentId));
     return { assessmentId: data.assessmentId };
   }
 
