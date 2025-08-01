@@ -427,12 +427,12 @@ export class GroupService {
 
     const existing = await this.db.query.groupMembers.findFirst({
       where: and(
-        eq(schema.groupMembers.groupId, group.groupId),
+        eq(schema.groupMembers.assessmentId, group.assessmentId),
         eq(schema.groupMembers.studentUserId, data.studentUserId),
       ),
     });
     if (existing) {
-      throw new BadRequestException('This student already joined this group.');
+      throw new BadRequestException('This student already joined group.');
     }
 
     await this.db.insert(schema.groupMembers).values({
