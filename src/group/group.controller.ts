@@ -202,7 +202,7 @@ export class GroupController {
     return { data: result };
   }
 
-  @Delete(':groupId')
+  @Delete(':groupId/member')
   @Roles([Role.Instructor])
   async deleteAllGroupMembers(
     @Param() data: DeleteAllGroupMembersRequest,
