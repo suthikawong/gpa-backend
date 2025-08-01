@@ -214,7 +214,7 @@ export class AssessmentService {
         email: schema.users.email,
         roleId: schema.users.roleId,
         isConfirmed: schema.assessmentStudent.isConfirmed,
-        joinedGroupId: schema.groupMembers.groupId,
+        group: schema.groups,
       })
       .from(schema.assessmentStudent)
       .innerJoin(
@@ -230,6 +230,10 @@ export class AssessmentService {
             schema.assessmentStudent.assessmentId,
           ),
         ),
+      )
+      .leftJoin(
+        schema.groups,
+        eq(schema.groupMembers.groupId, schema.groups.groupId),
       )
       .where(and(...condition))
       .orderBy(asc(schema.users.userId));
