@@ -113,6 +113,12 @@ export class GetGroupsByAssessmentIdRequest {
   assessmentId: Group['assessmentId'];
 }
 
+export class DeleteAllGroupsByAssessmentIdRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  assessmentId: Group['assessmentId'];
+}
+
 export class GetMyScoreRequest {
   @Transform(({ value }) => parseInt(value))
   @IsNumber()

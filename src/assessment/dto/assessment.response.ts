@@ -70,6 +70,11 @@ export type GetStudentJoinedGroupResponse = GroupWithGroupMembers | null;
 
 export interface GetGroupsByAssessmentIdResponse extends Array<Group> {}
 
+export type DeleteAllGroupsByAssessmentIdResponse = Pick<
+  Assessment,
+  'assessmentId'
+>;
+
 export type GetMyScoreResponse = Pick<
   StudentScore,
   'studentUserId' | 'score'

@@ -17,6 +17,7 @@ import {
   CheckScoringComponentActiveRequest,
   ConfirmStudentJoinAssessmentRequest,
   CreateAssessmentRequest,
+  DeleteAllGroupsByAssessmentIdRequest,
   DeleteAssessmentRequest,
   GetGroupsByAssessmentIdRequest,
   GetScoringComponentsByAssessmentIdRequest,
@@ -30,6 +31,7 @@ import {
   CheckScoringComponentActiveResponse,
   ConfirmStudentJoinAssessmentResponse,
   CreateAssessmentResponse,
+  DeleteAllGroupsByAssessmentIdResponse,
   DeleteAssessmentResponse,
   GetAssessmentByIdResponse,
   GetAssessmentsByInstructorResponse,
@@ -472,6 +474,16 @@ export class AssessmentService {
       orderBy: asc(schema.groups.groupId),
     });
     return result;
+  }
+
+  async deleteAllGroupsByAssessmentId(
+    data: DeleteAllGroupsByAssessmentIdRequest,
+  ): Promise<DeleteAllGroupsByAssessmentIdResponse> {
+    await this.getAssessmentById(data.assessmentId);
+    await this.db
+      .delete(schema.groups)
+      .where(eq(schema.assessments.assessmentId, data.assessmentId));
+    return { assessmentId: data.assessmentId };
   }
 
   async getMyScore(

@@ -24,6 +24,7 @@ import {
   CheckScoringComponentActiveRequest,
   ConfirmStudentJoinAssessmentRequest,
   CreateAssessmentRequest,
+  DeleteAllGroupsByAssessmentIdRequest,
   DeleteAssessmentRequest,
   ExportAssessmentScoresRequest,
   GetAssessmentByIdRequest,
@@ -41,6 +42,7 @@ import {
   CheckScoringComponentActiveResponse,
   ConfirmStudentJoinAssessmentResponse,
   CreateAssessmentResponse,
+  DeleteAllGroupsByAssessmentIdResponse,
   DeleteAssessmentResponse,
   GetAssessmentByIdResponse,
   GetAssessmentsByInstructorResponse,
@@ -205,6 +207,16 @@ export class AssessmentController {
     @Param() data: GetGroupsByAssessmentIdRequest,
   ): Promise<AppResponse<GetGroupsByAssessmentIdResponse>> {
     const groups = await this.assessmentService.getGroupsByAssessmentId(data);
+    return { data: groups };
+  }
+
+  @Get(':assessmentId/groups')
+  @Roles([Role.Instructor])
+  async deleteAllGroupsByAssessmentId(
+    @Param() data: DeleteAllGroupsByAssessmentIdRequest,
+  ): Promise<AppResponse<DeleteAllGroupsByAssessmentIdResponse>> {
+    const groups =
+      await this.assessmentService.deleteAllGroupsByAssessmentId(data);
     return { data: groups };
   }
 
