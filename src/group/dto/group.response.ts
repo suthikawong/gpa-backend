@@ -1,7 +1,9 @@
 import { Group, GroupScore, StudentScore, User } from '../../drizzle/schema';
 import { UserProtected } from '../../user/user.interface';
 
-export interface GetGroupByIdResponse extends Group {}
+export interface GetGroupByIdResponse extends Group {
+  memberCount: number;
+}
 
 export interface CreateGroupResponse extends Group {}
 

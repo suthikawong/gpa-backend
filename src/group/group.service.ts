@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { format } from 'date-fns';
-import { and, asc, eq, inArray } from 'drizzle-orm';
+import { and, asc, count, eq, inArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import ExcelJS from 'exceljs';
 import { AssessmentModel, Role } from '../app.config';
@@ -85,7 +85,12 @@ export class GroupService {
       throw new NotFoundException('Group not found');
     }
 
-    return group;
+    const [result] = await this.db
+      .select({ count: count(schema.groupMembers.studentUserId) })
+      .from(schema.groupMembers)
+      .where(eq(schema.groupMembers.groupId, groupId));
+
+    return { ...group, memberCount: result.count };
   }
 
   async createGroup(
