@@ -26,7 +26,7 @@ export class SimulationService {
     groupProductScore,
     peerRatingImpact,
     groupSpread,
-    tuningFactor,
+    polishingFactor,
     peerRatingWeights,
   }: CalcualteScoresByQASSRequest): CalcualteScoresByQASSResponse => {
     const groupSize = peerMatrix.length;
@@ -46,7 +46,7 @@ export class SimulationService {
       groupProductScore,
       peerRatingImpact,
       groupSpread,
-      tuningFactor,
+      polishingFactor,
       weights,
     );
 

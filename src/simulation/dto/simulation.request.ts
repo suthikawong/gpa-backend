@@ -23,7 +23,7 @@ export class CalcualteScoresByQASSRequest {
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()
-  tuningFactor: number;
+  polishingFactor: number;
 
   @IsArray()
   peerRatingWeights: number[];

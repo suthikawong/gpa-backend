@@ -57,7 +57,7 @@ import {
 type QassModelConfig = {
   mode: string;
   groupSpread: number;
-  tuningFactor: number;
+  polishingFactor: number;
   peerRatingImpact: number;
 };
 
@@ -609,7 +609,7 @@ export class GroupService {
         group,
         scoringComponents,
       });
-    const { mode, groupSpread, tuningFactor, peerRatingImpact } =
+    const { mode, groupSpread, polishingFactor, peerRatingImpact } =
       assessment?.modelConfig as QassModelConfig;
 
     const sumWeights = peerRatingWeights.reduce(
@@ -622,7 +622,7 @@ export class GroupService {
       peerMatrix,
       peerRatingImpact,
       groupSpread,
-      tuningFactor,
+      polishingFactor,
       scoringComponentWeights,
       mode: mode as QASSMode,
       groupProductScore: groupScore!,

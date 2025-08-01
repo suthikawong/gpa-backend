@@ -16,7 +16,7 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
   groupProductScore: number,
   peerRatingImpact: number,
   groupSpread: number,
-  tuningFactor: number,
+  polishingFactor: number,
   peerRatingWeights: number[],
 ) => {
   const groupSize = peerMatrix.length;
@@ -31,7 +31,7 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
   const noEmptyPeerRating = fillEmptyRating(peerMatrix);
 
   const { studentRatings, meanStudentRating } = caluclateRatings(
-    tuningFactor,
+    polishingFactor,
     noEmptyPeerRating,
     peerRatingWeights,
     mode,
@@ -90,7 +90,7 @@ export const calculateStudentsScoresFromAllComponentsByQASS = ({
   groupProductScore,
   peerRatingImpact,
   groupSpread,
-  tuningFactor,
+  polishingFactor,
   peerRatingWeights,
   scoringComponentWeights,
 }: {
@@ -99,7 +99,7 @@ export const calculateStudentsScoresFromAllComponentsByQASS = ({
   groupProductScore: number;
   peerRatingImpact: number;
   groupSpread: number;
-  tuningFactor: number;
+  polishingFactor: number;
   peerRatingWeights: number[];
   scoringComponentWeights: number[];
 }) => {
@@ -122,7 +122,7 @@ export const calculateStudentsScoresFromAllComponentsByQASS = ({
         groupProductScore,
         peerRatingImpact,
         groupSpread,
-        tuningFactor,
+        polishingFactor,
         peerRatingWeights,
       );
     studentContributions.forEach((cont, i) => {
@@ -149,12 +149,15 @@ export const calculateStudentsScoresFromAllComponentsByQASS = ({
   return studentScores;
 };
 
-const calculateRescaledPeerRating = (tuningFactor: number, rating: number) => {
-  return (1 - tuningFactor) * rating + tuningFactor * (1 - rating);
+const calculateRescaledPeerRating = (
+  polishingFactor: number,
+  rating: number,
+) => {
+  return (1 - polishingFactor) * rating + polishingFactor * (1 - rating);
 };
 
 const caluclateRatings = (
-  tuningFactor: number,
+  polishingFactor: number,
   peerMatrix: number[][],
   peerRatingWeights: number[],
   mode: QASSMode,
@@ -205,11 +208,11 @@ const caluclateRatings = (
     let jSum = 1;
     for (let j = 0; j < groupSize; j++) {
       const peerRating = calculateRescaledPeerRating(
-        tuningFactor,
+        polishingFactor,
         peerMatrix[i][j],
       ); // Step 1
       const selfRating = calculateRescaledPeerRating(
-        tuningFactor,
+        polishingFactor,
         peerMatrix[j][j],
       );
       jSum *= formulas[mode]['R2-1'](
