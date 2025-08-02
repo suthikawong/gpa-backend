@@ -1,12 +1,14 @@
 import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
+  IsEnum,
   IsInt,
   IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { QASSMode } from 'src/utils/qass.model';
 import {
   Assessment,
   Group,
@@ -144,6 +146,25 @@ export class CalculateScoreByQassRequest {
   @IsNumber()
   groupId: GroupScore['groupId'];
 
+  @IsEnum(QASSMode)
+  mode: QASSMode;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  polishingFactor: number;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  peerRatingImpact: number;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  groupSpread: number;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  groupScore: GroupScore['score'];
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => WeightItem)
@@ -154,9 +175,15 @@ export class CalculateScoreByWebavaliaRequest {
   @IsNumber()
   groupId: GroupScore['groupId'];
 
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  groupScore: GroupScore['score'];
+
+  @Transform(({ value }) => parseFloat(value))
   @IsNumber()
   selfWeight: number;
 
+  @Transform(({ value }) => parseFloat(value))
   @IsNumber()
   peerWeight: number;
 }

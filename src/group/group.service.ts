@@ -607,19 +607,23 @@ export class GroupService {
   async calculateScoreByQass(
     data: CalculateScoreByQassRequest,
   ): Promise<CalculateScoreByQassResponse> {
-    const groupId = data.groupId;
+    const {
+      groupId,
+      groupScore,
+      mode,
+      groupSpread,
+      polishingFactor,
+      peerRatingImpact,
+    } = data;
     const { assessment, group, scoringComponents } =
       await this.validateParameters({ model: AssessmentModel.QASS, groupId });
     const peerRatingWeights = data.weights.sort((a, b) => a.userId - b.userId);
     const userIds = peerRatingWeights.map((item) => item.userId);
-    const { peerMatrix, groupScore, scoringComponentWeights } =
-      await this.prepareData({
-        assessment,
-        group,
-        scoringComponents,
-      });
-    const { mode, groupSpread, polishingFactor, peerRatingImpact } =
-      assessment?.modelConfig as QassModelConfig;
+    const { peerMatrix, scoringComponentWeights } = await this.prepareData({
+      assessment,
+      group,
+      scoringComponents,
+    });
 
     const sumWeights = peerRatingWeights.reduce(
       (prev, curr) => prev + curr.weight,
@@ -634,7 +638,7 @@ export class GroupService {
       polishingFactor,
       scoringComponentWeights,
       mode: mode as QASSMode,
-      groupProductScore: groupScore!,
+      groupProductScore: groupScore,
       peerRatingWeights: weights,
     });
 
@@ -645,7 +649,7 @@ export class GroupService {
 
     await this.upsertScore({
       groupId,
-      groupScore: groupScore!,
+      groupScore,
       studentScores: updatedScores,
     });
 
@@ -663,12 +667,11 @@ export class GroupService {
       });
     const members = await this.getMembersByGroupId(groupId);
     const userIds = members.map((item) => item.userId);
-    const { peerMatrix, groupScore, scoringComponentWeights } =
-      await this.prepareData({
-        assessment,
-        group,
-        scoringComponents,
-      });
+    const { peerMatrix, scoringComponentWeights } = await this.prepareData({
+      assessment,
+      group,
+      scoringComponents,
+    });
     const { selfWeight } = assessment?.modelConfig as WebavaliaModelConfig;
 
     // validate sum scores form each rater must sum up to 100
@@ -688,7 +691,7 @@ export class GroupService {
 
     const studentScores = calculateStudentGradesFromAllComponentsByWebavalia({
       peerMatrix,
-      groupGrade: groupScore!,
+      groupGrade: data.groupScore,
       selfWeight,
       scoringComponentWeights,
     });
@@ -700,7 +703,7 @@ export class GroupService {
 
     await this.upsertScore({
       groupId,
-      groupScore: groupScore!,
+      groupScore: data.groupScore,
       studentScores: updatedScores,
     });
 
@@ -749,10 +752,6 @@ export class GroupService {
       peerMatrix.push(component);
     });
 
-    const groupScore = await this.db.query.groupScores.findFirst({
-      where: eq(schema.groupScores.groupId, groupId),
-    });
-
     const sumWeights = scoringComponents.reduce(
       (prev, curr) => prev + curr.weight,
       0,
@@ -761,7 +760,6 @@ export class GroupService {
 
     return {
       peerMatrix,
-      groupScore: groupScore?.score,
       scoringComponentWeights: weights,
     };
   }
