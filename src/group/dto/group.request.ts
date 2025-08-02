@@ -8,7 +8,6 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { QASSMode } from 'src/utils/qass.model';
 import {
   Assessment,
   Group,
@@ -16,6 +15,7 @@ import {
   StudentScore,
   User,
 } from '../../drizzle/schema';
+import { QASSMode } from '../../utils/qass.model';
 
 export class GetGroupByIdRequest {
   @Transform(({ value }) => parseInt(value))
