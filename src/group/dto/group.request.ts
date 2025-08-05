@@ -177,7 +177,7 @@ export class CalculateScoreByWebavaliaRequest {
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()
-  groupScore: GroupScore['score'];
+  groupGrade: GroupScore['score'];
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()

@@ -691,7 +691,7 @@ export class GroupService {
 
     const studentScores = calculateStudentGradesFromAllComponentsByWebavalia({
       peerMatrix,
-      groupGrade: data.groupScore,
+      groupGrade: data.groupGrade,
       selfWeight,
       scoringComponentWeights,
     });
@@ -703,7 +703,7 @@ export class GroupService {
 
     await this.upsertScore({
       groupId,
-      groupScore: data.groupScore,
+      groupScore: data.groupGrade,
       studentScores: updatedScores,
     });
 
