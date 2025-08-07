@@ -8,6 +8,7 @@ import { plainToInstance } from 'class-transformer';
 import { and, asc, count, desc, eq, gte, ilike, lte } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import ExcelJS from 'exceljs';
+import { AssessmentModel } from '../app.config';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { UserProtected } from '../user/user.interface';
@@ -164,15 +165,56 @@ export class AssessmentService {
       );
     }
 
-    const [assessment] = await this.db
-      .update(schema.assessments)
-      .set({
-        ...data,
-        updatedDate: new Date(),
-      })
-      .where(eq(schema.assessments.assessmentId, data.assessmentId))
-      .returning();
+    const assessment = await this.db.transaction(async (tx) => {
+      // update group scores when modelId was changed
+      if (hasModelId && data.modelId !== existing.modelId) {
+        let newGroupScores: schema.GroupScore[] = [];
+        const groupScores = await this.db
+          .select()
+          .from(schema.groups)
+          .innerJoin(
+            schema.groupScores,
+            eq(schema.groups.groupId, schema.groupScores.groupId),
+          )
+          .where(eq(schema.groups.assessmentId, data.assessmentId));
 
+        if (data.modelId === AssessmentModel.QASS) {
+          newGroupScores = groupScores.map((item) => ({
+            ...item.group_scores,
+            score: item.group_scores?.score * 0.05,
+          }));
+        } else if (data.modelId === AssessmentModel.WebAVALIA) {
+          newGroupScores = groupScores.map((item) => ({
+            ...item.group_scores,
+            score: Math.round(item.group_scores?.score * 20),
+          }));
+        }
+        if (newGroupScores.length > 0) {
+          const promises = newGroupScores.map((item) =>
+            tx
+              .update(schema.groupScores)
+              .set({
+                ...item,
+                updatedDate: new Date(),
+              })
+              .where(eq(schema.groupScores.groupScoreId, item.groupScoreId)),
+          );
+          await Promise.all(promises);
+        }
+      }
+
+      // update assessment
+      const [assessment] = await tx
+        .update(schema.assessments)
+        .set({
+          ...data,
+          updatedDate: new Date(),
+        })
+        .where(eq(schema.assessments.assessmentId, data.assessmentId))
+        .returning();
+
+      return assessment;
+    });
     return assessment;
   }
 
