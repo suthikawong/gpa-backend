@@ -146,7 +146,8 @@ export const groupScores = pgTable('group_scores', {
     .references(() => groups.groupId, {
       onDelete: 'cascade',
     })
-    .notNull(),
+    .notNull()
+    .unique(),
   score: doublePrecision('score').notNull(),
   createdDate: timestamp('created_date').notNull(),
   updatedDate: timestamp('updated_date'),
