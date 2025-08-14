@@ -64,7 +64,11 @@ export class UserService {
 
     const [user] = await this.db
       .update(schema.users)
-      .set({ ...data, updatedDate: new Date() })
+      .set({
+        ...data,
+        userNumber: data?.userNumber ?? null,
+        updatedDate: new Date(),
+      })
       .where(eq(schema.users.userId, data.userId))
       .returning();
 
