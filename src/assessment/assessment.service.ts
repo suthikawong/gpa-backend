@@ -254,6 +254,7 @@ export class AssessmentService {
         userId: schema.users.userId,
         name: schema.users.name,
         email: schema.users.email,
+        userNumber: schema.users.userNumber,
         roleId: schema.users.roleId,
         isConfirmed: schema.assessmentStudent.isConfirmed,
         group: schema.groups,
@@ -499,6 +500,7 @@ export class AssessmentService {
         userId: schema.users.userId,
         name: schema.users.name,
         email: schema.users.email,
+        userNumber: schema.users.userNumber,
         roleId: schema.users.roleId,
       })
       .from(schema.groupMembers)

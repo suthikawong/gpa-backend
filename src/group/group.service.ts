@@ -405,6 +405,7 @@ export class GroupService {
         userId: schema.users.userId,
         name: schema.users.name,
         email: schema.users.email,
+        userNumber: schema.users.userNumber,
         roleId: schema.users.roleId,
       })
       .from(schema.groupMembers)
@@ -501,6 +502,7 @@ export class GroupService {
         userId: schema.users.userId,
         name: schema.users.name,
         email: schema.users.email,
+        userNumber: schema.users.userNumber,
         roleId: schema.users.roleId,
       })
       .from(schema.groupMembers)

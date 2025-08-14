@@ -1,5 +1,6 @@
 import { IsNumber, IsString, MinLength } from 'class-validator';
 import { User } from '../../drizzle/schema';
+import { Optional } from '@nestjs/common';
 
 export class RegisterRequest {
   @IsString()
@@ -11,6 +12,10 @@ export class RegisterRequest {
   @IsString()
   @MinLength(8)
   password: User['password'];
+
+  @Optional()
+  @IsString()
+  userNumber?: User['userNumber'];
 
   @IsNumber()
   roleId: User['roleId'];

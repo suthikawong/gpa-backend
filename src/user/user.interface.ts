@@ -5,6 +5,7 @@ export class UserProtected {
   userId: User['userId'];
   name: User['name'];
   email: User['email'];
+  userNumber: User['userNumber'];
   roleId: User['roleId'];
 
   @Exclude()

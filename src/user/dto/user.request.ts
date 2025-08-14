@@ -15,6 +15,10 @@ export class CreateUserRequest {
   @IsNumber()
   roleId: User['roleId'];
 
+  @IsString()
+  @IsOptional()
+  userNumber?: User['userNumber'];
+
   @IsBoolean()
   @IsOptional()
   isVerified?: User['isVerified'];
@@ -50,6 +54,10 @@ export class UpdateUserRequest {
   @IsString()
   @IsOptional()
   password?: User['password'];
+
+  @IsString()
+  @IsOptional()
+  userNumber?: User['userNumber'];
 
   @IsNumber()
   @IsOptional()
