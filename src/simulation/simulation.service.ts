@@ -60,17 +60,20 @@ export class SimulationService {
     for (let i = 0; i < groupSize; i++) {
       result.push({
         student: i + 1,
-        score: studentScores[i].toFixed(3),
-        rating: studentRatings[i].toFixed(3),
-        contribution: studentContributions[i].toFixed(3),
+        score: studentScores[i].toFixed(2),
+        rating: studentRatings[i].toFixed(2),
+        contribution: studentContributions[i].toFixed(2),
       });
     }
 
     return {
       mean: {
-        score: meanStudentScore.toFixed(3),
-        rating: meanStudentRating.toFixed(3),
-        contribution: meanStudentContribution.toFixed(3),
+        score: meanStudentScore.toFixed(2),
+        rating: meanStudentRating.toFixed(2),
+        contribution:
+          meanStudentContribution.toFixed(2) === '-0.00'
+            ? '0.00'
+            : meanStudentContribution.toFixed(2),
       },
       studentScores: result,
     };
@@ -90,10 +93,10 @@ export class SimulationService {
     return {
       studentGrades: studentGrades?.map((score, i) => ({
         student: i + 1,
-        score: score.toFixed(3),
+        score: score.toFixed(2),
       })),
       mean: {
-        score: meanStudentGrade.toFixed(3),
+        score: meanStudentGrade.toFixed(2),
       },
     };
   };

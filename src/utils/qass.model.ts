@@ -63,8 +63,11 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
     peerRatingWeights,
   );
 
-  const meanStudentScore =
-    studentScores.reduce((prev, curr) => prev + curr, 0) / studentScores.length;
+  const meanStudentScore = calculateMeanStudentScore(
+    groupProductScore,
+    groupSpread,
+    meanStudentContribution,
+  );
 
   // validate scores
   // SplitJoinInvariance(
@@ -317,6 +320,17 @@ const calculateStudentScores = (
     studentScores.push(studentScore);
   });
   return studentScores;
+};
+
+const calculateMeanStudentScore = (
+  groupProductScore: number,
+  groupSpread: number,
+  meanStudentContribution: number,
+) => {
+  return Math.pow(
+    groupProductScore,
+    Math.pow(groupSpread, meanStudentContribution),
+  );
 };
 
 // validate scores with Split-Join-Invariance
