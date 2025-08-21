@@ -616,6 +616,8 @@ export class GroupService {
       groupSpread,
       polishingFactor,
       peerRatingImpact,
+      lowerBound,
+      upperBound,
     } = data;
     const { assessment, group, scoringComponents } =
       await this.validateParameters({ model: AssessmentModel.QASS, groupId });
@@ -642,6 +644,8 @@ export class GroupService {
       mode: mode as QASSMode,
       groupProductScore: groupScore,
       peerRatingWeights: weights,
+      lowerBound,
+      upperBound,
     });
 
     const updatedScores = userIds.map((userId, i) => ({

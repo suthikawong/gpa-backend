@@ -169,6 +169,14 @@ export class CalculateScoreByQassRequest {
   @ValidateNested({ each: true })
   @Type(() => WeightItem)
   weights: WeightItem[];
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  lowerBound: number;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  upperBound: number;
 }
 
 export class CalculateScoreByWebavaliaRequest {

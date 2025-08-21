@@ -4,8 +4,13 @@ export enum QASSMode {
   D = 'D',
 }
 
-const fillEmptyRating = (peerMatrix: (number | undefined)[][]) => {
-  return peerMatrix.map((row) => row.map((col) => col ?? 0.5));
+const fillEmptyRating = (
+  peerMatrix: (number | undefined)[][],
+  lowerBound: number,
+  upperBound: number,
+) => {
+  const neutral = (upperBound - lowerBound) / 2 + lowerBound;
+  return peerMatrix.map((row) => row.map((col) => col ?? neutral));
 };
 
 // calculate student scores in a specific scoring component
@@ -18,6 +23,8 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
   groupSpread: number,
   polishingFactor: number,
   peerRatingWeights: number[],
+  lowerBound: number,
+  upperBound: number,
 ) => {
   const groupSize = peerMatrix.length;
 
@@ -27,12 +34,22 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
   if (peerRatingWeights.length !== peerMatrix[0].length) {
     throw new Error('Peer rating weights do not match with peer rating matrix');
   }
+  const noEmptyPeerRating = fillEmptyRating(peerMatrix, lowerBound, upperBound);
+  const isOutOfBound = noEmptyPeerRating.some((row) =>
+    row.some((col) => col > upperBound || col < lowerBound),
+  );
 
-  const noEmptyPeerRating = fillEmptyRating(peerMatrix);
+  if (isOutOfBound) {
+    throw new Error('Some peer rating are out of bound');
+  }
+
+  const standardizedPeerRating = noEmptyPeerRating.map((row) =>
+    row.map((col) => (col - lowerBound) / (upperBound - lowerBound)),
+  );
 
   const { studentRatings, meanStudentRating } = caluclateRatings(
     polishingFactor,
-    noEmptyPeerRating,
+    standardizedPeerRating,
     peerRatingWeights,
     mode,
   );
@@ -96,6 +113,8 @@ export const calculateStudentsScoresFromAllComponentsByQASS = ({
   polishingFactor,
   peerRatingWeights,
   scoringComponentWeights,
+  lowerBound,
+  upperBound,
 }: {
   peerMatrix: (number | undefined)[][][];
   mode: QASSMode;
@@ -105,6 +124,8 @@ export const calculateStudentsScoresFromAllComponentsByQASS = ({
   polishingFactor: number;
   peerRatingWeights: number[];
   scoringComponentWeights: number[];
+  lowerBound: number;
+  upperBound: number;
 }) => {
   const scoringComponentSize = scoringComponentWeights.length;
 
@@ -127,6 +148,8 @@ export const calculateStudentsScoresFromAllComponentsByQASS = ({
         groupSpread,
         polishingFactor,
         peerRatingWeights,
+        lowerBound,
+        upperBound,
       );
     studentContributions.forEach((cont, i) => {
       studentContributionsFromAllComponents[i].push(cont);

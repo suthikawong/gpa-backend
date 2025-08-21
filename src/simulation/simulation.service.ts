@@ -28,6 +28,8 @@ export class SimulationService {
     groupSpread,
     polishingFactor,
     peerRatingWeights,
+    lowerBound,
+    upperBound,
   }: CalcualteScoresByQASSRequest): CalcualteScoresByQASSResponse => {
     const groupSize = peerMatrix.length;
     const sumWeights = peerRatingWeights.reduce((prev, curr) => prev + curr, 0);
@@ -48,6 +50,8 @@ export class SimulationService {
       groupSpread,
       polishingFactor,
       weights,
+      lowerBound,
+      upperBound,
     );
 
     const result: {

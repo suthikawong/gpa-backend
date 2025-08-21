@@ -27,6 +27,14 @@ export class CalcualteScoresByQASSRequest {
 
   @IsArray()
   peerRatingWeights: number[];
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  lowerBound: number;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  upperBound: number;
 }
 
 export class CalcualteScoresByWebavaliaRequest {
