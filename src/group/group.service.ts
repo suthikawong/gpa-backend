@@ -748,7 +748,7 @@ export class GroupService {
           row.push(
             assessment.modelId === AssessmentModel.QASS
               ? rater.score
-                ? rater.score / 100 // convert peer rating for QASS
+                ? rater.score
                 : undefined
               : rater.score,
           );

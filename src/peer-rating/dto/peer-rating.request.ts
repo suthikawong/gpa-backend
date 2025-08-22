@@ -2,6 +2,7 @@ import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   Max,
@@ -24,9 +25,8 @@ class RatingItem {
   @IsInt()
   rateeStudentUserId: PeerRating['rateeStudentUserId'];
 
-  @IsInt()
+  @IsNumber()
   @Min(0)
-  @Max(100)
   score: PeerRating['score'];
 
   @IsOptional()
