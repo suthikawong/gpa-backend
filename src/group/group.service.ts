@@ -704,7 +704,7 @@ export class GroupService {
 
     const updatedScores = userIds.map((userId, i) => ({
       studentUserId: userId,
-      score: parseFloat(studentScores[i].toFixed(4))!,
+      score: studentScores[i],
     }));
 
     await this.upsertScore({

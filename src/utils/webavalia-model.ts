@@ -38,7 +38,7 @@ export const calculateStudentGradesFromSpecificComponentByWebavalia = ({
 
   tempGrades.forEach((score) => {
     const studentGrade = (score / maxScore) * groupGrade;
-    studentGrades.push(studentGrade);
+    studentGrades.push(Math.round(studentGrade));
   });
 
   return {
@@ -87,5 +87,5 @@ export const calculateStudentGradesFromAllComponentsByWebavalia = ({
     }
   }
 
-  return finalStudentGrades;
+  return finalStudentGrades.map((grade) => Math.round(grade));
 };

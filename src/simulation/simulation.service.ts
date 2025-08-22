@@ -97,10 +97,10 @@ export class SimulationService {
     return {
       studentGrades: studentGrades?.map((score, i) => ({
         student: i + 1,
-        score: score.toFixed(2),
+        score: score.toString(),
       })),
       mean: {
-        score: meanStudentGrade.toFixed(2),
+        score: meanStudentGrade.toString(),
       },
     };
   };
