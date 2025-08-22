@@ -254,7 +254,7 @@ export class AuthService {
     const subject = 'Verify Your Email Address';
     const url = `${process.env.FRONTEND_APP_URL}/verify-email?token=${token}`;
     const html = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; background-color: #f9f9f9;">
-      <h2 style="color: #333;">Welcome to ScoreUnity!</h2>
+      <h2 style="color: #333;">Welcome to UT-GPA!</h2>
       <p style="font-size: 16px; color: #555;">
         Thank you for signing up. To complete your registration, please verify your email address by clicking the button below:
       </p>
