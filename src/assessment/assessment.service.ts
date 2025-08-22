@@ -489,7 +489,12 @@ export class AssessmentService {
         schema.groupMembers,
         eq(schema.groups.groupId, schema.groupMembers.groupId),
       )
-      .where(eq(schema.groupMembers.studentUserId, studentUserId));
+      .where(
+        and(
+          eq(schema.groups.assessmentId, assessmentId),
+          eq(schema.groupMembers.studentUserId, studentUserId),
+        ),
+      );
 
     if (!result) return null;
 
