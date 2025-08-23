@@ -8,7 +8,7 @@ import { plainToInstance } from 'class-transformer';
 import { and, asc, count, desc, eq, gte, ilike, lte } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import ExcelJS from 'exceljs';
-import { AssessmentModel } from '../app.config';
+import { AssessmentModel, Role } from '../app.config';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import { UserProtected } from '../user/user.interface';
@@ -377,7 +377,10 @@ export class AssessmentService {
     }
 
     const user = await this.db.query.users.findFirst({
-      where: eq(schema.users.email, data.email),
+      where: and(
+        eq(schema.users.email, data.email),
+        eq(schema.users.roleId, parseInt(Role.Student)),
+      ),
     });
 
     if (!user) {
