@@ -649,6 +649,7 @@ export class AssessmentService {
         studentScore: schema.studentScores.score,
         name: schema.users.name,
         email: schema.users.email,
+        userNumber: schema.users.userNumber,
       })
       .from(schema.studentScores)
       .innerJoin(
@@ -680,6 +681,11 @@ export class AssessmentService {
         width: 30,
       },
       {
+        header: 'Student ID',
+        key: 'userNumber',
+        width: 20,
+      },
+      {
         header: 'Student Email',
         key: 'email',
         width: 30,
@@ -699,6 +705,7 @@ export class AssessmentService {
     data.forEach((s) => {
       worksheet.addRow({
         name: s.name,
+        userNumber: s.userNumber,
         email: s.email,
         groupScore: s.groupScore,
         studentScore: s.studentScore,
@@ -706,7 +713,7 @@ export class AssessmentService {
     });
 
     worksheet.insertRow(1, [assessment.assessmentName]);
-    worksheet.mergeCells('A1:D1');
+    worksheet.mergeCells('A1:E1');
     worksheet.getCell('A1').font = { size: 14, bold: true };
     worksheet.getCell('A1').alignment = { horizontal: 'center' };
     worksheet.insertRow(2, '');
@@ -714,6 +721,7 @@ export class AssessmentService {
     worksheet.getCell('B3').font = { size: 11, bold: true };
     worksheet.getCell('C3').font = { size: 11, bold: true };
     worksheet.getCell('D3').font = { size: 11, bold: true };
+    worksheet.getCell('E3').font = { size: 11, bold: true };
 
     const buffer = await workbook.xlsx.writeBuffer();
     const filename = 'export-scores.xlsx';
