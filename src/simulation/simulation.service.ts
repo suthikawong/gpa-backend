@@ -1,7 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
-import * as schema from '../drizzle/schema';
+import { Injectable } from '@nestjs/common';
 import { calculateStudentsScoresFromSpecificComponentByQASS } from '../utils/qass.model';
 import { calculateStudentGradesFromSpecificComponentByWebavalia } from '../utils/webavalia-model';
 import {
@@ -15,11 +12,6 @@ import {
 
 @Injectable()
 export class SimulationService {
-  constructor(
-    @Inject(DrizzleAsyncProvider)
-    private db: NodePgDatabase<typeof schema>,
-  ) {}
-
   calcualteScoresByQASS = ({
     peerMatrix,
     mode,
@@ -28,6 +20,7 @@ export class SimulationService {
     groupSpread,
     polishingFactor,
     peerRatingWeights,
+    isTotalScoreConstrained,
     lowerBound,
     upperBound,
   }: CalcualteScoresByQASSRequest): CalcualteScoresByQASSResponse => {
@@ -50,6 +43,7 @@ export class SimulationService {
       groupSpread,
       polishingFactor,
       weights,
+      isTotalScoreConstrained,
       lowerBound,
       upperBound,
     );

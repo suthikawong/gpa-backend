@@ -1,6 +1,7 @@
 import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNumber,
@@ -169,6 +170,13 @@ export class CalculateScoreByQassRequest {
   @ValidateNested({ each: true })
   @Type(() => WeightItem)
   weights: WeightItem[];
+
+  @IsBoolean()
+  isTotalScoreConstrained: boolean;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  scoreConstraint: number;
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()

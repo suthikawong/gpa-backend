@@ -616,6 +616,7 @@ export class GroupService {
       groupSpread,
       polishingFactor,
       peerRatingImpact,
+      isTotalScoreConstrained,
       lowerBound,
       upperBound,
     } = data;
@@ -644,6 +645,7 @@ export class GroupService {
       mode: mode as QASSMode,
       groupProductScore: groupScore,
       peerRatingWeights: weights,
+      isTotalScoreConstrained,
       lowerBound,
       upperBound,
     });
