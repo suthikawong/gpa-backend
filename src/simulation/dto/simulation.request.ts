@@ -1,5 +1,11 @@
 import { Transform } from 'class-transformer';
-import { IsArray, IsBoolean, IsEnum, IsNumber } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
 import { QASSMode } from '../../utils/qass.model';
 
 export class CalcualteScoresByQASSRequest {
@@ -31,9 +37,10 @@ export class CalcualteScoresByQASSRequest {
   @IsBoolean()
   isTotalScoreConstrained: boolean;
 
+  @IsOptional()
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()
-  scoreConstraint: number;
+  scoreConstraint?: number;
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()

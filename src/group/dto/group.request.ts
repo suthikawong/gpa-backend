@@ -174,9 +174,10 @@ export class CalculateScoreByQassRequest {
   @IsBoolean()
   isTotalScoreConstrained: boolean;
 
+  @IsOptional()
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()
-  scoreConstraint: number;
+  scoreConstraint?: number;
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()
