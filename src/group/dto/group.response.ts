@@ -1,4 +1,10 @@
-import { Group, GroupScore, StudentScore, User } from '../../drizzle/schema';
+import {
+  Group,
+  GroupScore,
+  ScoringComponent,
+  StudentScore,
+  User,
+} from '../../drizzle/schema';
 import { UserProtected } from '../../user/user.interface';
 
 export interface GetGroupByIdResponse extends Group {
@@ -65,3 +71,14 @@ export type UpsertScoresResponse = Pick<Group, 'groupId'>;
 export type CalculateScoreByQassResponse = Pick<Group, 'groupId'>;
 
 export type CalculateScoreByWebavaliaResponse = Pick<Group, 'groupId'>;
+
+export interface ScoringComponentWithStudents
+  extends Pick<
+    ScoringComponent,
+    'scoringComponentId' | 'startDate' | 'endDate'
+  > {
+  noRatingStudents: Array<UserProtected>;
+}
+
+export type GetStudentsWithoutPeerAssessmentResponse =
+  Array<ScoringComponentWithStudents>;

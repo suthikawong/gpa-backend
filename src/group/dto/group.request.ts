@@ -203,3 +203,9 @@ export class CalculateScoreByWebavaliaRequest {
   @IsNumber()
   peerWeight: number;
 }
+
+export class GetStudentsWithoutPeerAssessmentRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  groupId: Group['groupId'];
+}

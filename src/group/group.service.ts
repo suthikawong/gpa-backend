@@ -30,6 +30,7 @@ import {
   CreateRandomGroupsRequest,
   DeleteAllGroupMembersRequest,
   DeleteGroupMemberRequest,
+  GetStudentsWithoutPeerAssessmentRequest,
   ImportGroupsRequest,
   UpdateGroupRequest,
   UpsertScoresRequest,
@@ -46,6 +47,7 @@ import {
   GetGroupByIdResponse,
   GetGroupMembersResponse,
   GetScoresResponse,
+  GetStudentsWithoutPeerAssessmentResponse,
   ImportGroupsResponse,
   JoinGroupResponse,
   LeaveGroupResponse,
@@ -873,5 +875,74 @@ export class GroupService {
     throw new Error(
       'Failed to generate a unique group code. Please try again.',
     );
+  }
+
+  async getStudentsWithoutPeerAssessment(
+    data: GetStudentsWithoutPeerAssessmentRequest,
+  ): Promise<GetStudentsWithoutPeerAssessmentResponse> {
+    const group = await this.getGroupById(data.groupId);
+
+    const groupMembers = await this.getMembersByGroupId(data.groupId);
+    const userIdList: number[] = [];
+    const userIdObj = {};
+    groupMembers.map((member) => {
+      userIdList.push(member.userId);
+      userIdObj[member.userId] = member;
+    });
+
+    const peerRatings = await this.db
+      .selectDistinct({
+        scoringComponentId: schema.scoringComponents.scoringComponentId,
+        startDate: schema.scoringComponents.startDate,
+        endDate: schema.scoringComponents.endDate,
+        raterStudentUserId: schema.peerRatings.raterStudentUserId,
+      })
+      .from(schema.scoringComponents)
+      .leftJoin(
+        schema.peerRatings,
+        eq(
+          schema.peerRatings.scoringComponentId,
+          schema.scoringComponents.scoringComponentId,
+        ),
+      )
+      .where(and(eq(schema.scoringComponents.assessmentId, group.assessmentId)))
+      .groupBy(
+        schema.scoringComponents.scoringComponentId,
+        schema.scoringComponents.startDate,
+        schema.scoringComponents.endDate,
+        schema.peerRatings.raterStudentUserId,
+      )
+      .orderBy(schema.scoringComponents.scoringComponentId);
+
+    const result = {};
+
+    let noRatingStudentsObj = { ...userIdObj };
+    for (let i = 0; i < peerRatings.length; i++) {
+      if (!result[peerRatings[i].scoringComponentId]) {
+        // prepare next component
+        result[peerRatings[i].scoringComponentId] = {
+          scoringComponentId: peerRatings[i].scoringComponentId,
+          startDate: peerRatings[i].startDate,
+          endDate: peerRatings[i].endDate,
+          noRatingStudents: [],
+        };
+        noRatingStudentsObj = { ...userIdObj };
+      }
+
+      if (peerRatings[i].raterStudentUserId) {
+        delete noRatingStudentsObj[peerRatings[i].raterStudentUserId!];
+      }
+
+      // store no rating students in array format
+      if (
+        (i + 1 < peerRatings.length &&
+          !result[peerRatings[i + 1].scoringComponentId]) ||
+        i === peerRatings.length - 1
+      ) {
+        result[peerRatings[i].scoringComponentId].noRatingStudents =
+          Object.values(noRatingStudentsObj);
+      }
+    }
+    return Object.values(result);
   }
 }

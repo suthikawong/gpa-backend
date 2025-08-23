@@ -30,6 +30,7 @@ import {
   GetGroupByIdRequest,
   GetGroupMembersRequest,
   GetScoresRequest,
+  GetStudentsWithoutPeerAssessmentRequest,
   ImportGroupsRequest,
   JoinGroupRequest,
   LeaveGroupRequest,
@@ -49,6 +50,7 @@ import {
   GetGroupByIdResponse,
   GetGroupMembersResponse,
   GetScoresResponse,
+  GetStudentsWithoutPeerAssessmentResponse,
   ImportGroupsResponse,
   JoinGroupResponse,
   LeaveGroupResponse,
@@ -245,5 +247,15 @@ export class GroupController {
   ): Promise<AppResponse<CalculateScoreByWebavaliaResponse>> {
     const result = await this.groupService.calculateScoreByWebavalia(data);
     return { data: result };
+  }
+
+  @Get(':groupId/students/no-rating')
+  @Roles([Role.Instructor])
+  async getStudentsWithoutPeerAssessment(
+    @Param() params: GetStudentsWithoutPeerAssessmentRequest,
+  ): Promise<AppResponse<GetStudentsWithoutPeerAssessmentResponse>> {
+    const data =
+      await this.groupService.getStudentsWithoutPeerAssessment(params);
+    return { data };
   }
 }
