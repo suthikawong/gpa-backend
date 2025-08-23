@@ -707,8 +707,9 @@ export class AssessmentService {
         name: s.name,
         userNumber: s.userNumber,
         email: s.email,
-        groupScore: s.groupScore,
-        studentScore: s.studentScore,
+        groupScore: s.groupScore > 1 ? s.groupScore : s.groupScore * 100,
+        studentScore:
+          s.studentScore > 1 ? s.studentScore : s.studentScore * 100,
       });
     });
 
