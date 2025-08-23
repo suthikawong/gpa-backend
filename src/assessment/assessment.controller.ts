@@ -73,7 +73,7 @@ export class AssessmentController {
     return { data: result.students, total: result.total };
   }
 
-  @Get('assessment/search/instructor')
+  @Get('instructor')
   @Roles([Role.Instructor])
   async searchAssessmentsByInstructor(
     @Query() query: SearchAssessmentsByInstructorRequest,
