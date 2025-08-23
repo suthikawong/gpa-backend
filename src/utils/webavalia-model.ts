@@ -1,9 +1,20 @@
+const fillEmptyVoting = (peerMatrix: (number | undefined | null)[][]) => {
+  const groupSize = peerMatrix.length;
+  return peerMatrix.map((row, i) =>
+    row.map((col, j) => {
+      if (typeof col === 'number') return col;
+      if (i === j) return 0;
+      return 20 / (groupSize - 1);
+    }),
+  );
+};
+
 export const calculateStudentGradesFromSpecificComponentByWebavalia = ({
   peerMatrix,
   groupGrade,
   selfWeight,
 }: {
-  peerMatrix: (number | undefined)[][];
+  peerMatrix: (number | undefined | null)[][];
   groupGrade: number;
   selfWeight: number;
 }) => {
@@ -12,6 +23,8 @@ export const calculateStudentGradesFromSpecificComponentByWebavalia = ({
   if (groupSize !== peerMatrix[0].length) {
     throw new Error('Invalid peer rating matrix');
   }
+
+  const noEmptyPeerVoting = fillEmptyVoting(peerMatrix);
 
   const peerWeight = (1 - selfWeight) / (groupSize - 1);
   const tempGrades: number[] = [];
@@ -28,7 +41,7 @@ export const calculateStudentGradesFromSpecificComponentByWebavalia = ({
   for (let i = 0; i < groupSize; i++) {
     let sum = 0;
     for (let j = 0; j < groupSize; j++) {
-      sum += weightMatrix[i][j] * (peerMatrix[i][j] ?? 0);
+      sum += weightMatrix[i][j] * (noEmptyPeerVoting[i][j] ?? 0);
     }
     tempGrades.push(sum / 100);
   }
@@ -67,7 +80,6 @@ export const calculateStudentGradesFromAllComponentsByWebavalia = ({
     );
   }
 
-  scoringComponentSize;
   const finalStudentGrades: number[] = Array(scoringComponentSize).fill(0);
   const sumWeight = scoringComponentWeights.reduce(
     (prev, curr) => prev + curr,
