@@ -43,6 +43,20 @@ export class DeleteAssessmentRequest {
   assessmentId: Assessment['assessmentId'];
 }
 
+export class SearchAssessmentsByInstructorRequest {
+  @IsOptional()
+  @IsString()
+  keyword?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  limit?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  offset?: number;
+}
+
 export class SearchStudentsInAssessmentRequest {
   @Transform(({ value }) => parseInt(value))
   @IsNumber()

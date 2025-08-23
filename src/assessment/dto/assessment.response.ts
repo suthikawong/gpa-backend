@@ -15,7 +15,7 @@ export interface GetAssessmentByIdResponse extends AssessmentWithInstructor {
   canEdit: boolean;
 }
 
-export type GetAssessmentsByInstructorResponse = Omit<
+export type SearchAssessmentsByInstructorResponse = Omit<
   Assessment,
   'modelId' | 'modelConfig'
 >[];

@@ -33,6 +33,7 @@ import {
   GetScoringComponentsByAssessmentIdRequest,
   GetStudentJoinedGroupRequest,
   RemoveStudentFromAssessmentRequest,
+  SearchAssessmentsByInstructorRequest,
   SearchStudentsInAssessmentRequest,
   StudentJoinAssessmentRequest,
   UpdateAssessmentRequest,
@@ -45,13 +46,13 @@ import {
   DeleteAllGroupsByAssessmentIdResponse,
   DeleteAssessmentResponse,
   GetAssessmentByIdResponse,
-  GetAssessmentsByInstructorResponse,
   GetAssessmentsByStudentResponse,
   GetGroupsByAssessmentIdResponse,
   GetMyScoreResponse,
   GetScoringComponentsByAssessmentIdResponse,
   GetStudentJoinedGroupResponse,
   RemoveStudentFromAssessmentResponse,
+  SearchAssessmentsByInstructorResponse,
   SearchStudentsInAssessmentResponse,
   StudentJoinAssessmentResponse,
   UpdateAssessmentResponse,
@@ -72,15 +73,17 @@ export class AssessmentController {
     return { data: result.students, total: result.total };
   }
 
-  @Get('instructor')
+  @Get('assessment/search/instructor')
   @Roles([Role.Instructor])
-  async getAssessmentsByInstructor(
+  async searchAssessmentsByInstructor(
+    @Query() query: SearchAssessmentsByInstructorRequest,
     @LoggedInUser() user: User,
-  ): Promise<AppResponse<GetAssessmentsByInstructorResponse>> {
-    const assessments = await this.assessmentService.getAssessmentsByInstructor(
+  ): Promise<AppResponse<SearchAssessmentsByInstructorResponse>> {
+    const result = await this.assessmentService.searchAssessmentsByInstructor(
+      query,
       user.userId,
     );
-    return { data: assessments };
+    return { data: result.assessments, total: result.total };
   }
 
   @Get('student')

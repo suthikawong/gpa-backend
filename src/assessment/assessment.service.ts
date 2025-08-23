@@ -23,6 +23,7 @@ import {
   GetGroupsByAssessmentIdRequest,
   GetScoringComponentsByAssessmentIdRequest,
   RemoveStudentFromAssessmentRequest,
+  SearchAssessmentsByInstructorRequest,
   SearchStudentsInAssessmentRequest,
   StudentJoinAssessmentRequest,
   UpdateAssessmentRequest,
@@ -35,13 +36,13 @@ import {
   DeleteAllGroupsByAssessmentIdResponse,
   DeleteAssessmentResponse,
   GetAssessmentByIdResponse,
-  GetAssessmentsByInstructorResponse,
   GetAssessmentsByStudentResponse,
   GetGroupsByAssessmentIdResponse,
   GetMyScoreResponse,
   GetScoringComponentsByAssessmentIdResponse,
   GetStudentJoinedGroupResponse,
   RemoveStudentFromAssessmentResponse,
+  SearchAssessmentsByInstructorResponse,
   SearchStudentsInAssessmentResponse,
   StudentJoinAssessmentResponse,
   UpdateAssessmentResponse,
@@ -84,17 +85,42 @@ export class AssessmentService {
     };
   }
 
-  async getAssessmentsByInstructor(
-    instructorUserId: schema.Assessment['instructorUserId'],
-  ): Promise<GetAssessmentsByInstructorResponse> {
-    const assessments = await this.db.query.assessments.findMany({
-      where: eq(schema.assessments.instructorUserId, instructorUserId),
-      orderBy: [desc(schema.assessments.createdDate)],
-    });
+  async searchAssessmentsByInstructor(
+    data: SearchAssessmentsByInstructorRequest,
+    instructorUserId: schema.User['userId'],
+  ): Promise<{
+    assessments: SearchAssessmentsByInstructorResponse;
+    total: number;
+  }> {
+    const condition = [
+      eq(schema.assessments.instructorUserId, instructorUserId),
+    ];
 
-    const data = assessments.map(({ modelId, modelConfig, ...data }) => data);
+    if (data.keyword) {
+      condition.push(
+        ilike(schema.assessments.assessmentName, `%${data.keyword}%`),
+      );
+    }
 
-    return data;
+    const query = this.db
+      .select()
+      .from(schema.assessments)
+      .where(and(...condition))
+      .orderBy(desc(schema.assessments.createdDate));
+
+    if (data.limit !== undefined && data.offset !== undefined) {
+      query.limit(data.limit).offset(data.offset);
+    }
+
+    const assessments = await query;
+
+    const [{ total }] = await this.db
+      .select({ total: count() })
+      .from(schema.assessments)
+      .where(and(...condition))
+      .limit(1);
+
+    return { assessments, total };
   }
 
   async getAssessmentsByStudent(
