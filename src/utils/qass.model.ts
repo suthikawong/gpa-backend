@@ -67,6 +67,17 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
     throw new Error('Peer rating weights do not match with peer rating matrix');
   }
 
+  const isOutOfBound = peerMatrix.some((row) =>
+    row.some(
+      (col) =>
+        typeof col === 'number' && (col > upperBound || col < lowerBound),
+    ),
+  );
+
+  if (isOutOfBound) {
+    throw new Error('Some peer rating are out of bound');
+  }
+
   const standardizedPeerRating = peerMatrix.map((row) =>
     row.map((col) =>
       typeof col === 'number'
@@ -82,14 +93,6 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
     lowerBound,
     upperBound,
   );
-
-  const isOutOfBound = noEmptyPeerRating.some((row) =>
-    row.some((col) => col > upperBound || col < lowerBound),
-  );
-
-  if (isOutOfBound) {
-    throw new Error('Some peer rating are out of bound');
-  }
 
   const { studentRatings, meanStudentRating } = caluclateRatings(
     polishingFactor,
