@@ -20,7 +20,6 @@ export class SimulationService {
     groupSpread,
     polishingFactor,
     peerRatingWeights,
-    isTotalScoreConstrained,
     lowerBound,
     upperBound,
   }: CalcualteScoresByQASSRequest): CalcualteScoresByQASSResponse => {
@@ -43,7 +42,6 @@ export class SimulationService {
       groupSpread,
       polishingFactor,
       weights,
-      isTotalScoreConstrained,
       lowerBound,
       upperBound,
     );

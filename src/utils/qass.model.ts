@@ -23,25 +23,15 @@ const fillEmptyRatingsWithUnconstraint = (
 const fillEmptyRating = (
   peerMatrix: (number | undefined | null)[][],
   polishingFactor: number,
-  isTotalScoreConstrained: boolean,
   lowerBound: number,
   upperBound: number,
 ): number[][] => {
-  if (isTotalScoreConstrained) {
-    return fillEmptyRatingsWithUnconstraint(
-      peerMatrix,
-      polishingFactor,
-      lowerBound,
-      upperBound,
-    );
-  } else {
-    return fillEmptyRatingsWithUnconstraint(
-      peerMatrix,
-      polishingFactor,
-      lowerBound,
-      upperBound,
-    );
-  }
+  return fillEmptyRatingsWithUnconstraint(
+    peerMatrix,
+    polishingFactor,
+    lowerBound,
+    upperBound,
+  );
 };
 
 // calculate student scores in a specific scoring component
@@ -54,7 +44,6 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
   groupSpread: number,
   polishingFactor: number,
   peerRatingWeights: number[],
-  isTotalScoreConstrained: boolean,
   lowerBound: number,
   upperBound: number,
 ) => {
@@ -89,7 +78,6 @@ export const calculateStudentsScoresFromSpecificComponentByQASS = (
   const noEmptyPeerRating = fillEmptyRating(
     standardizedPeerRating,
     polishingFactor,
-    isTotalScoreConstrained,
     lowerBound,
     upperBound,
   );
@@ -160,7 +148,6 @@ export const calculateStudentsScoresFromAllComponentsByQASS = ({
   polishingFactor,
   peerRatingWeights,
   scoringComponentWeights,
-  isTotalScoreConstrained,
   lowerBound,
   upperBound,
 }: {
@@ -172,7 +159,6 @@ export const calculateStudentsScoresFromAllComponentsByQASS = ({
   polishingFactor: number;
   peerRatingWeights: number[];
   scoringComponentWeights: number[];
-  isTotalScoreConstrained: boolean;
   lowerBound: number;
   upperBound: number;
 }) => {
@@ -197,7 +183,6 @@ export const calculateStudentsScoresFromAllComponentsByQASS = ({
         groupSpread,
         polishingFactor,
         peerRatingWeights,
-        isTotalScoreConstrained,
         lowerBound,
         upperBound,
       );

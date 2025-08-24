@@ -647,7 +647,6 @@ export class GroupService {
       mode: mode as QASSMode,
       groupProductScore: groupScore,
       peerRatingWeights: weights,
-      isTotalScoreConstrained,
       lowerBound,
       upperBound,
     });
