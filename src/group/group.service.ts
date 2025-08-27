@@ -179,6 +179,16 @@ export class GroupService {
         }
       });
     }
+
+    // validate every group must have at least 2 students
+    groupsMap.forEach((value, key) => {
+      if (value.length < 2)
+        errors.push({
+          row: -1,
+          message: `"${key}" must have at least 2 members.`,
+        });
+    });
+
     errors.sort((a, b) => a.row - b.row);
     return { errors, groupsMap };
   }
@@ -254,18 +264,20 @@ export class GroupService {
       .map((s) => s.studentUserId)
       .sort(() => Math.random() - 0.5);
 
+    const totalStudents = shuffled.length;
+    const numGroups = Math.ceil(totalStudents / groupSize);
+
     const groups: {
       groupName: string;
       studentUserIds: number[];
-    }[] = [];
+    }[] = Array.from({ length: numGroups }, (_, i) => ({
+      groupName: `Group ${i + 1}`,
+      studentUserIds: [],
+    }));
 
-    for (let i = 0; i < shuffled.length; i += groupSize) {
-      const members = shuffled.slice(i, i + groupSize);
-      groups.push({
-        groupName: `Group ${groups.length + 1}`,
-        studentUserIds: members,
-      });
-    }
+    shuffled.forEach((studentId, index) => {
+      groups[index % numGroups].studentUserIds.push(studentId);
+    });
 
     await this.db.transaction(async (tx) => {
       const existingGroups = await tx.query.groups.findMany({
