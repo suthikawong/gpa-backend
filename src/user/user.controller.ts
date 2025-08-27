@@ -5,18 +5,23 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AppResponse } from '../app.response';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   CreateUserRequest,
   GetUserByIdRequest,
+  UpdateProfileRequest,
   UpdateUserRequest,
 } from './dto/user.request';
 import {
   CreateUserResponse,
   GetUserByIdResponse,
+  UpdateProfileResponse,
   UpdateUserResponse,
 } from './dto/user.response';
 import { UserService } from './user.service';
@@ -48,5 +53,15 @@ export class UserController {
   ): Promise<AppResponse<UpdateUserResponse>> {
     const user = await this.userService.updateUser(data);
     return { data: user };
+  }
+
+  @Put('profile')
+  @UseInterceptors(FileInterceptor('file'))
+  async importGroups(
+    @Body() data: UpdateProfileRequest,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<AppResponse<UpdateProfileResponse>> {
+    const result = await this.userService.updateProfile(data, file);
+    return { data: result };
   }
 }

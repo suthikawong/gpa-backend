@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AssessmentModule } from './assessment/assessment.module';
 import { AuthModule } from './auth/auth.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { GroupModule } from './group/group.module';
 import { LookupModule } from './lookup/lookup.module';
 import { MailModule } from './mail/mail.module';
@@ -20,6 +21,7 @@ import { UserModule } from './user/user.module';
     LookupModule,
     SimulationModule,
     MailModule,
+    CloudinaryModule,
   ],
   providers: [],
   controllers: [],

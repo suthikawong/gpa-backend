@@ -26,6 +26,7 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 255 }).notNull().unique(),
   password: varchar('password', { length: 255 }).notNull(),
   userNumber: varchar('user_number', { length: 20 }),
+  image: text('image'),
   roleId: integer('role_id')
     .references(() => roles.roleId)
     .notNull(),

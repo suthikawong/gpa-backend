@@ -280,6 +280,7 @@ export class AssessmentService {
         userId: schema.users.userId,
         name: schema.users.name,
         email: schema.users.email,
+        image: schema.users.image,
         userNumber: schema.users.userNumber,
         roleId: schema.users.roleId,
         isConfirmed: schema.assessmentStudent.isConfirmed,
@@ -534,6 +535,7 @@ export class AssessmentService {
         userId: schema.users.userId,
         name: schema.users.name,
         email: schema.users.email,
+        image: schema.users.image,
         userNumber: schema.users.userNumber,
         roleId: schema.users.roleId,
       })

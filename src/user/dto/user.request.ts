@@ -59,6 +59,10 @@ export class UpdateUserRequest {
   @IsOptional()
   userNumber?: User['userNumber'];
 
+  @IsString()
+  @IsOptional()
+  image?: User['image'];
+
   @IsNumber()
   @IsOptional()
   roleId?: User['roleId'];
@@ -74,4 +78,22 @@ export class UpdateUserRequest {
   @IsString()
   @IsOptional()
   resetPasswordToken?: User['resetPasswordToken'];
+}
+
+export class UpdateProfileRequest {
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber()
+  userId: User['userId'];
+
+  @IsString()
+  @IsOptional()
+  name?: User['name'];
+
+  @IsString()
+  @IsOptional()
+  userNumber?: User['userNumber'];
+
+  @IsString()
+  @IsOptional()
+  image?: User['image'];
 }

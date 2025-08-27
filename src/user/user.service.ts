@@ -3,11 +3,13 @@ import { hash } from 'bcryptjs';
 import { plainToInstance } from 'class-transformer';
 import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import * as schema from '../drizzle/schema';
 import {
   CreateUserRequest,
   GetUserByEmailRequest,
+  UpdateProfileRequest,
   UpdateUserRequest,
 } from './dto/user.request';
 import {
@@ -22,6 +24,7 @@ export class UserService {
   constructor(
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof schema>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async createUser(data: CreateUserRequest): Promise<CreateUserResponse> {
@@ -73,6 +76,21 @@ export class UserService {
       .returning();
 
     const result = plainToInstance(UserProtected, user);
+    return result;
+  }
+
+  async updateProfile(data: UpdateProfileRequest, file?: Express.Multer.File) {
+    const existingUser = await this.getUserById(data.userId);
+
+    let imageUrl = existingUser.image;
+    if (file) {
+      const uploaded = await this.cloudinaryService.uploadImage(file);
+      imageUrl = uploaded.secure_url;
+    } else {
+      imageUrl = null;
+    }
+
+    const result = await this.updateUser({ ...data, image: imageUrl });
     return result;
   }
 }
