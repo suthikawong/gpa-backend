@@ -398,11 +398,6 @@ const calculateMeanStudentScore = (
 //   meanStudentContribution: number,
 //   groupSpread: number,
 // ) => {
-//   console.log('meanScore : ', meanScore);
-//   console.log(
-//     'pow : ',
-//     Math.pow(groupProductScore, Math.pow(groupSpread, meanStudentContribution)),
-//   );
 //   if (
 //     meanScore !==
 //     Math.pow(groupProductScore, Math.pow(groupSpread, meanStudentContribution))

@@ -27,8 +27,16 @@ export class PeerRatingController {
     @Body() data: RatePeerRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<RatePeerResponse>> {
-    const result = await this.peerAssessmentService.ratePeer(data, user.userId);
-    return { data: result };
+    try {
+      const result = await this.peerAssessmentService.ratePeer(
+        data,
+        user.userId,
+      );
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get()
@@ -36,11 +44,16 @@ export class PeerRatingController {
   async getPeerRatingsByScoringComponentId(
     @Query() query: GetPeerRatingsByScoringComponentIdRequest,
   ): Promise<AppResponse<GetPeerRatingsByScoringComponentIdResponse>> {
-    const data =
-      await this.peerAssessmentService.getPeerRatingsByScoringComponentId(
-        query.scoringComponentId,
-        query.groupId,
-      );
-    return { data };
+    try {
+      const data =
+        await this.peerAssessmentService.getPeerRatingsByScoringComponentId(
+          query.scoringComponentId,
+          query.groupId,
+        );
+      return { data };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

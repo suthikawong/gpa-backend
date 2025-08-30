@@ -42,8 +42,13 @@ export class AuthController {
     @LoggedInUser() user: User,
     @Res({ passthrough: true }) response: Response,
   ): Promise<AppResponse<LoginResponse>> {
-    const data = await this.authService.login(user, response);
-    return { data };
+    try {
+      const data = await this.authService.login(user, response);
+      return { data };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('refresh')
@@ -52,13 +57,23 @@ export class AuthController {
     @LoggedInUser() user: User,
     @Res({ passthrough: true }) response: Response,
   ): Promise<AppResponse<LoginResponse>> {
-    const data = await this.authService.login(user, response);
-    return { data };
+    try {
+      const data = await this.authService.login(user, response);
+      return { data };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('logout')
   async logout(@Res({ passthrough: true }) response: Response) {
-    this.authService.logout(response);
+    try {
+      this.authService.logout(response);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get('me')
@@ -66,38 +81,63 @@ export class AuthController {
   async getLoggedInUser(
     @LoggedInUser() user: User,
   ): Promise<AppResponse<GetLoggedInUserResponse>> {
-    return { data: plainToInstance(UserProtected, user) };
+    try {
+      return { data: plainToInstance(UserProtected, user) };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('register')
   async registerInstructor(
     @Body() data: RegisterRequest,
   ): Promise<AppResponse<RegisterResponse>> {
-    const result = await this.authService.register(data);
-    return { data: result };
+    try {
+      const result = await this.authService.register(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get('verify-email')
   async verifyEmail(
     @Query() query: VerifyEmailRequest,
   ): Promise<AppResponse<VerifyEmailResponse>> {
-    const result = await this.authService.verifyEmail(query);
-    return { data: result };
+    try {
+      const result = await this.authService.verifyEmail(query);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('forgot-password')
   async forgotPassword(
     @Body() data: ForgotPasswordRequest,
   ): Promise<AppResponse<ForgotPasswordResponse>> {
-    const result = await this.authService.forgotPassword(data);
-    return { data: result };
+    try {
+      const result = await this.authService.forgotPassword(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('reset-password')
   async resetPassword(
     @Body() data: ResetPasswordRequest,
   ): Promise<AppResponse<ResetPasswordResponse>> {
-    const result = await this.authService.resetPassword(data);
-    return { data: result };
+    try {
+      const result = await this.authService.resetPassword(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

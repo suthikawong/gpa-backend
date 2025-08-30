@@ -9,7 +9,12 @@ export class LookupController {
 
   @Get('model')
   async getModels(): Promise<AppResponse<ModelLookupResponse>> {
-    const data = await this.lookupModelService.getModels();
-    return { data };
+    try {
+      const data = await this.lookupModelService.getModels();
+      return { data };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

@@ -35,24 +35,39 @@ export class UserController {
   async getUserById(
     @Param() data: GetUserByIdRequest,
   ): Promise<AppResponse<GetUserByIdResponse>> {
-    const user = await this.userService.getUserById(data.userId);
-    return { data: user };
+    try {
+      const user = await this.userService.getUserById(data.userId);
+      return { data: user };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post()
   async createUser(
     @Body() data: CreateUserRequest,
   ): Promise<AppResponse<CreateUserResponse>> {
-    const user = await this.userService.createUser(data);
-    return { data: user };
+    try {
+      const user = await this.userService.createUser(data);
+      return { data: user };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Put()
   async updateUser(
     @Body() data: UpdateUserRequest,
   ): Promise<AppResponse<UpdateUserResponse>> {
-    const user = await this.userService.updateUser(data);
-    return { data: user };
+    try {
+      const user = await this.userService.updateUser(data);
+      return { data: user };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Put('profile')
@@ -61,7 +76,12 @@ export class UserController {
     @Body() data: UpdateProfileRequest,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<AppResponse<UpdateProfileResponse>> {
-    const result = await this.userService.updateProfile(data, file);
-    return { data: result };
+    try {
+      const result = await this.userService.updateProfile(data, file);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

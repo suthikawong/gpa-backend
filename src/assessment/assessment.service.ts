@@ -161,7 +161,6 @@ export class AssessmentService {
     }
 
     const entries = await query;
-    console.log('TLOG ~ AssessmentService ~ entries:', entries);
 
     const assessments = entries.map(({ assessments }) => {
       const { modelId, modelConfig, ...data } = assessments;

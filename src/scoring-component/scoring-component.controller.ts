@@ -39,11 +39,16 @@ export class ScoringComponentController {
   async getScoringComponentById(
     @Param() data: GetScoringComponentByIdRequest,
   ): Promise<AppResponse<GetScoringComponentByIdResponse>> {
-    const scoringComponent =
-      await this.scoringComponentService.getScoringComponentById(
-        data.scoringComponentId,
-      );
-    return { data: scoringComponent };
+    try {
+      const scoringComponent =
+        await this.scoringComponentService.getScoringComponentById(
+          data.scoringComponentId,
+        );
+      return { data: scoringComponent };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post()
@@ -51,9 +56,14 @@ export class ScoringComponentController {
   async createScoringComponent(
     @Body() data: CreateScoringComponentRequest,
   ): Promise<AppResponse<CreateScoringComponentResponse>> {
-    const scoringComponent =
-      await this.scoringComponentService.createScoringComponent(data);
-    return { data: scoringComponent };
+    try {
+      const scoringComponent =
+        await this.scoringComponentService.createScoringComponent(data);
+      return { data: scoringComponent };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Put()
@@ -61,9 +71,14 @@ export class ScoringComponentController {
   async updateScoringComponent(
     @Body() data: UpdateScoringComponentRequest,
   ): Promise<AppResponse<UpdateScoringComponentResponse>> {
-    const scoringComponent =
-      await this.scoringComponentService.updateScoringComponent(data);
-    return { data: scoringComponent };
+    try {
+      const scoringComponent =
+        await this.scoringComponentService.updateScoringComponent(data);
+      return { data: scoringComponent };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Delete(':scoringComponentId')
@@ -71,9 +86,14 @@ export class ScoringComponentController {
   async deleteScoringComponent(
     @Param() data: DeleteScoringComponentRequest,
   ): Promise<AppResponse<DeleteScoringComponentResponse>> {
-    const result = await this.scoringComponentService.deleteScoringComponent(
-      data.scoringComponentId,
-    );
-    return { data: result };
+    try {
+      const result = await this.scoringComponentService.deleteScoringComponent(
+        data.scoringComponentId,
+      );
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

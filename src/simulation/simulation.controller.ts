@@ -22,8 +22,13 @@ export class SimulationController {
     @Body()
     data: CalcualteScoresByQASSRequest,
   ): Promise<AppResponse<CalcualteScoresByQASSResponse>> {
-    const result = this.simulationService.calcualteScoresByQASS(data);
-    return { data: result };
+    try {
+      const result = this.simulationService.calcualteScoresByQASS(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('webavalia')
@@ -32,7 +37,12 @@ export class SimulationController {
     @Body()
     data: CalcualteScoresByWebavaliaRequest,
   ): Promise<AppResponse<CalcualteScoresByWebavaliaResponse>> {
-    const result = this.simulationService.calcualteScoresByWebavalia(data);
-    return { data: result };
+    try {
+      const result = this.simulationService.calcualteScoresByWebavalia(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

@@ -70,8 +70,13 @@ export class GroupController {
   async getGroupById(
     @Param() data: GetGroupByIdRequest,
   ): Promise<AppResponse<GetGroupByIdResponse>> {
-    const group = await this.groupService.getGroupById(data.groupId);
-    return { data: group };
+    try {
+      const group = await this.groupService.getGroupById(data.groupId);
+      return { data: group };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post()
@@ -80,12 +85,17 @@ export class GroupController {
     @Body() data: CreateGroupRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<CreateGroupResponse>> {
-    const group = await this.groupService.createGroup(
-      data,
-      user.userId,
-      user.roleId,
-    );
-    return { data: group };
+    try {
+      const group = await this.groupService.createGroup(
+        data,
+        user.userId,
+        user.roleId,
+      );
+      return { data: group };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('import')
@@ -96,12 +106,17 @@ export class GroupController {
     @UploadedFile() file: Express.Multer.File,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<ImportGroupsResponse>> {
-    const result = await this.groupService.importGroups(
-      data,
-      file,
-      user.userId,
-    );
-    return { data: result };
+    try {
+      const result = await this.groupService.importGroups(
+        data,
+        file,
+        user.userId,
+      );
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('verify-import')
@@ -111,8 +126,13 @@ export class GroupController {
     @Body() data: VerifyImportGroupsRequest,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<AppResponse<VerifyImportGroupsResponse>> {
-    const result = await this.groupService.verifyImportGroups(data, file);
-    return { data: result };
+    try {
+      const result = await this.groupService.verifyImportGroups(data, file);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('random')
@@ -121,11 +141,16 @@ export class GroupController {
     @Body() data: CreateRandomGroupsRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<CreateRandomGroupsResponse>> {
-    const result = await this.groupService.createRandomGroups(
-      data,
-      user.userId,
-    );
-    return { data: result };
+    try {
+      const result = await this.groupService.createRandomGroups(
+        data,
+        user.userId,
+      );
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Put()
@@ -134,8 +159,13 @@ export class GroupController {
     @Body() data: UpdateGroupRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<UpdateGroupResponse>> {
-    const group = await this.groupService.updateGroup(data, user.userId);
-    return { data: group };
+    try {
+      const group = await this.groupService.updateGroup(data, user.userId);
+      return { data: group };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Delete(':groupId')
@@ -144,11 +174,16 @@ export class GroupController {
     @Param() data: DeleteGroupRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<DeleteGroupResponse>> {
-    const result = await this.groupService.deleteGroup(
-      data.groupId,
-      user.roleId,
-    );
-    return { data: result };
+    try {
+      const result = await this.groupService.deleteGroup(
+        data.groupId,
+        user.roleId,
+      );
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('join')
@@ -157,11 +192,16 @@ export class GroupController {
     @Body() body: JoinGroupRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<JoinGroupResponse>> {
-    const result = await this.groupService.joinGroup(
-      body.groupCode,
-      user.userId,
-    );
-    return { data: result };
+    try {
+      const result = await this.groupService.joinGroup(
+        body.groupCode,
+        user.userId,
+      );
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('leave')
@@ -170,11 +210,16 @@ export class GroupController {
     @Body() body: LeaveGroupRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<LeaveGroupResponse>> {
-    const result = await this.groupService.leaveGroup(
-      body.groupId,
-      user.userId,
-    );
-    return { data: result };
+    try {
+      const result = await this.groupService.leaveGroup(
+        body.groupId,
+        user.userId,
+      );
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get(':groupId/member')
@@ -182,8 +227,15 @@ export class GroupController {
   async getMembersByGroupId(
     @Param() params: GetGroupMembersRequest,
   ): Promise<AppResponse<GetGroupMembersResponse>> {
-    const result = await this.groupService.getMembersByGroupId(params.groupId);
-    return { data: result };
+    try {
+      const result = await this.groupService.getMembersByGroupId(
+        params.groupId,
+      );
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('member')
@@ -191,8 +243,13 @@ export class GroupController {
   async addGroupMember(
     @Body() body: AddGroupMemberRequest,
   ): Promise<AppResponse<AddGroupMemberResponse>> {
-    const result = await this.groupService.addGroupMember(body);
-    return { data: result };
+    try {
+      const result = await this.groupService.addGroupMember(body);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Delete(':groupId/member/:studentUserId')
@@ -200,8 +257,13 @@ export class GroupController {
   async deleteGroupMember(
     @Param() params: DeleteGroupMemberRequest,
   ): Promise<AppResponse<DeleteGroupMemberResponse>> {
-    const result = await this.groupService.deleteGroupMember(params);
-    return { data: result };
+    try {
+      const result = await this.groupService.deleteGroupMember(params);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Delete(':groupId/member')
@@ -209,8 +271,13 @@ export class GroupController {
   async deleteAllGroupMembers(
     @Param() data: DeleteAllGroupMembersRequest,
   ): Promise<AppResponse<DeleteAllGroupMembersResponse>> {
-    const result = await this.groupService.deleteAllGroupMembers(data);
-    return { data: result };
+    try {
+      const result = await this.groupService.deleteAllGroupMembers(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get(':groupId/score')
@@ -218,8 +285,13 @@ export class GroupController {
   async getScores(
     @Param() params: GetScoresRequest,
   ): Promise<AppResponse<GetScoresResponse>> {
-    const data = await this.groupService.getScores(params.groupId);
-    return { data };
+    try {
+      const data = await this.groupService.getScores(params.groupId);
+      return { data };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('score')
@@ -227,8 +299,13 @@ export class GroupController {
   async upsertScore(
     @Body() data: UpsertScoresRequest,
   ): Promise<AppResponse<UpsertScoresResponse>> {
-    const result = await this.groupService.upsertScore(data);
-    return { data: result };
+    try {
+      const result = await this.groupService.upsertScore(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('calculate/qass')
@@ -236,8 +313,13 @@ export class GroupController {
   async calculateScoreByQass(
     @Body() data: CalculateScoreByQassRequest,
   ): Promise<AppResponse<CalculateScoreByQassResponse>> {
-    const result = await this.groupService.calculateScoreByQass(data);
-    return { data: result };
+    try {
+      const result = await this.groupService.calculateScoreByQass(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('calculate/webavalia')
@@ -245,8 +327,13 @@ export class GroupController {
   async calculateScoreByWebavalia(
     @Body() data: CalculateScoreByWebavaliaRequest,
   ): Promise<AppResponse<CalculateScoreByWebavaliaResponse>> {
-    const result = await this.groupService.calculateScoreByWebavalia(data);
-    return { data: result };
+    try {
+      const result = await this.groupService.calculateScoreByWebavalia(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get(':groupId/students/no-rating')
@@ -254,8 +341,13 @@ export class GroupController {
   async getStudentsWithoutPeerAssessment(
     @Param() params: GetStudentsWithoutPeerAssessmentRequest,
   ): Promise<AppResponse<GetStudentsWithoutPeerAssessmentResponse>> {
-    const data =
-      await this.groupService.getStudentsWithoutPeerAssessment(params);
-    return { data };
+    try {
+      const data =
+        await this.groupService.getStudentsWithoutPeerAssessment(params);
+      return { data };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

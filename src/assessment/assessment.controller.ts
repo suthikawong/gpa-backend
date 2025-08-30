@@ -69,9 +69,14 @@ export class AssessmentController {
   async searchStudentsInAssessment(
     @Query() query: SearchStudentsInAssessmentRequest,
   ): Promise<AppResponse<SearchStudentsInAssessmentResponse>> {
-    const result =
-      await this.assessmentService.searchStudentsInAssessment(query);
-    return { data: result.students, total: result.total };
+    try {
+      const result =
+        await this.assessmentService.searchStudentsInAssessment(query);
+      return { data: result.students, total: result.total };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get('instructor')
@@ -80,11 +85,16 @@ export class AssessmentController {
     @Query() query: SearchAssessmentsByInstructorRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<SearchAssessmentsByInstructorResponse>> {
-    const result = await this.assessmentService.searchAssessmentsByInstructor(
-      query,
-      user.userId,
-    );
-    return { data: result.assessments, total: result.total };
+    try {
+      const result = await this.assessmentService.searchAssessmentsByInstructor(
+        query,
+        user.userId,
+      );
+      return { data: result.assessments, total: result.total };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get('student')
@@ -93,11 +103,16 @@ export class AssessmentController {
     @Query() query: SearchAssessmentsByStudentRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<SearchAssessmentsByStudentResponse>> {
-    const result = await this.assessmentService.searchAssessmentsByStudent(
-      query,
-      user.userId,
-    );
-    return { data: result.assessments, total: result.total };
+    try {
+      const result = await this.assessmentService.searchAssessmentsByStudent(
+        query,
+        user.userId,
+      );
+      return { data: result.assessments, total: result.total };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get(':assessmentId')
@@ -105,10 +120,15 @@ export class AssessmentController {
   async getAssessmentById(
     @Param() data: GetAssessmentByIdRequest,
   ): Promise<AppResponse<GetAssessmentByIdResponse>> {
-    const assessment = await this.assessmentService.getAssessmentById(
-      data.assessmentId,
-    );
-    return { data: assessment };
+    try {
+      const assessment = await this.assessmentService.getAssessmentById(
+        data.assessmentId,
+      );
+      return { data: assessment };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post()
@@ -117,11 +137,16 @@ export class AssessmentController {
     @Body() data: CreateAssessmentRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<CreateAssessmentResponse>> {
-    const assessment = await this.assessmentService.createAssessment(
-      data,
-      user.userId,
-    );
-    return { data: assessment };
+    try {
+      const assessment = await this.assessmentService.createAssessment(
+        data,
+        user.userId,
+      );
+      return { data: assessment };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Put()
@@ -129,8 +154,13 @@ export class AssessmentController {
   async updateAssessment(
     @Body() data: UpdateAssessmentRequest,
   ): Promise<AppResponse<UpdateAssessmentResponse>> {
-    const assessment = await this.assessmentService.updateAssessment(data);
-    return { data: assessment };
+    try {
+      const assessment = await this.assessmentService.updateAssessment(data);
+      return { data: assessment };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Delete(':assessmentId')
@@ -138,8 +168,13 @@ export class AssessmentController {
   async deleteAssessment(
     @Param() data: DeleteAssessmentRequest,
   ): Promise<AppResponse<DeleteAssessmentResponse>> {
-    const result = await this.assessmentService.deleteAssessment(data);
-    return { data: result };
+    try {
+      const result = await this.assessmentService.deleteAssessment(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('join')
@@ -148,11 +183,16 @@ export class AssessmentController {
     @Body() data: StudentJoinAssessmentRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<StudentJoinAssessmentResponse>> {
-    const result = await this.assessmentService.studentJoinAssessment(
-      data,
-      user.userId,
-    );
-    return { data: result };
+    try {
+      const result = await this.assessmentService.studentJoinAssessment(
+        data,
+        user.userId,
+      );
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('add-student')
@@ -160,8 +200,13 @@ export class AssessmentController {
   async addStudentByEmail(
     @Body() data: AddStudentByEmailRequest,
   ): Promise<AppResponse<AddStudentByEmailResponse>> {
-    const result = await this.assessmentService.addStudentByEmail(data);
-    return { data: result };
+    try {
+      const result = await this.assessmentService.addStudentByEmail(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Post('confirm')
@@ -169,9 +214,14 @@ export class AssessmentController {
   async confirmStudentJoinAssessment(
     @Body() data: ConfirmStudentJoinAssessmentRequest,
   ): Promise<AppResponse<ConfirmStudentJoinAssessmentResponse>> {
-    const result =
-      await this.assessmentService.confirmStudentJoinAssessment(data);
-    return { data: result };
+    try {
+      const result =
+        await this.assessmentService.confirmStudentJoinAssessment(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Delete(':assessmentId/student/:studentUserId')
@@ -179,9 +229,14 @@ export class AssessmentController {
   async removeStudentFromAssessment(
     @Param() data: RemoveStudentFromAssessmentRequest,
   ): Promise<AppResponse<RemoveStudentFromAssessmentResponse>> {
-    const result =
-      await this.assessmentService.removeStudentFromAssessment(data);
-    return { data: result };
+    try {
+      const result =
+        await this.assessmentService.removeStudentFromAssessment(data);
+      return { data: result };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get(':assessmentId/scoring-components')
@@ -189,9 +244,14 @@ export class AssessmentController {
   async getScoringComponentsByAssessmentId(
     @Param() data: GetScoringComponentsByAssessmentIdRequest,
   ): Promise<AppResponse<GetScoringComponentsByAssessmentIdResponse>> {
-    const scoringComponents =
-      await this.assessmentService.getScoringComponentsByAssessmentId(data);
-    return { data: scoringComponents };
+    try {
+      const scoringComponents =
+        await this.assessmentService.getScoringComponentsByAssessmentId(data);
+      return { data: scoringComponents };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get(':assessmentId/group/joined')
@@ -200,11 +260,16 @@ export class AssessmentController {
     @Param() param: GetStudentJoinedGroupRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<GetStudentJoinedGroupResponse>> {
-    const group = await this.assessmentService.getStudentJoinedGroup(
-      param.assessmentId,
-      user.userId,
-    );
-    return { data: group };
+    try {
+      const group = await this.assessmentService.getStudentJoinedGroup(
+        param.assessmentId,
+        user.userId,
+      );
+      return { data: group };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get(':assessmentId/groups')
@@ -212,8 +277,13 @@ export class AssessmentController {
   async getGroupsByAssessmentId(
     @Param() data: GetGroupsByAssessmentIdRequest,
   ): Promise<AppResponse<GetGroupsByAssessmentIdResponse>> {
-    const groups = await this.assessmentService.getGroupsByAssessmentId(data);
-    return { data: groups };
+    try {
+      const groups = await this.assessmentService.getGroupsByAssessmentId(data);
+      return { data: groups };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Delete(':assessmentId/groups')
@@ -226,7 +296,7 @@ export class AssessmentController {
         await this.assessmentService.deleteAllGroupsByAssessmentId(data);
       return { data: groups };
     } catch (error) {
-      console.log(error);
+      console.error(error);
       throw error;
     }
   }
@@ -236,11 +306,16 @@ export class AssessmentController {
     @Param() params: GetMyScoreRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<GetMyScoreResponse>> {
-    const data = await this.assessmentService.getMyScore(
-      params.assessmentId,
-      user.userId,
-    );
-    return { data };
+    try {
+      const data = await this.assessmentService.getMyScore(
+        params.assessmentId,
+        user.userId,
+      );
+      return { data };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get(':assessmentId/scoring-component/check')
@@ -248,11 +323,16 @@ export class AssessmentController {
     @Param() params: CheckScoringComponentActiveRequest,
     @LoggedInUser() user: User,
   ): Promise<AppResponse<CheckScoringComponentActiveResponse>> {
-    const data = await this.assessmentService.checkScoringComponentActive(
-      params,
-      user.userId,
-    );
-    return { data };
+    try {
+      const data = await this.assessmentService.checkScoringComponentActive(
+        params,
+        user.userId,
+      );
+      return { data };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @Get(':assessmentId/export')
@@ -261,17 +341,22 @@ export class AssessmentController {
     @Param() params: ExportAssessmentScoresRequest,
     @Res() res: Response,
   ) {
-    const result = await this.assessmentService.exportAssessmentScores(
-      params.assessmentId,
-    );
+    try {
+      const result = await this.assessmentService.exportAssessmentScores(
+        params.assessmentId,
+      );
 
-    res.header(
-      'Content-Disposition',
-      `attachment; filename=${result.filename}`,
-    );
-    res.type(
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    );
-    res.send(result.buffer);
+      res.header(
+        'Content-Disposition',
+        `attachment; filename=${result.filename}`,
+      );
+      res.type(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      res.send(result.buffer);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }
