@@ -80,14 +80,10 @@ export class UserService {
   }
 
   async updateProfile(data: UpdateProfileRequest, file?: Express.Multer.File) {
-    const existingUser = await this.getUserById(data.userId);
-
-    let imageUrl = existingUser.image;
+    let imageUrl = data?.image ?? null;
     if (file) {
       const uploaded = await this.cloudinaryService.uploadImage(file);
       imageUrl = uploaded.secure_url;
-    } else {
-      imageUrl = null;
     }
 
     const result = await this.updateUser({ ...data, image: imageUrl });

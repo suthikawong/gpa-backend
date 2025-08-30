@@ -5,8 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { format } from 'date-fns';
-import { and, asc, count, eq, inArray } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, ne } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import ExcelJS from 'exceljs';
 import { AssessmentModel, Role } from '../app.config';
@@ -102,6 +101,7 @@ export class GroupService {
   ): Promise<CreateGroupResponse> {
     await this.assessmentService.getAssessmentById(data.assessmentId);
     await this.checkUserRole(data.assessmentId, roleId);
+    await this.checkDuplicateGroupName(data.groupName);
 
     const groupCode = await this.generateUniqueCode();
 
@@ -330,6 +330,8 @@ export class GroupService {
 
     if (!existing) throw new NotFoundException('Group not found');
 
+    await this.checkDuplicateGroupName(data.groupName, data.groupId);
+
     const [group] = await this.db
       .update(schema.groups)
       .set({ ...data, updatedBy, updatedDate: new Date() })
@@ -398,14 +400,25 @@ export class GroupService {
     const group = await this.getGroupById(groupId);
     await this.checkScoringComponentStarted(group.assessmentId);
 
-    await this.db
-      .delete(schema.groupMembers)
-      .where(
-        and(
-          eq(schema.groupMembers.groupId, groupId),
-          eq(schema.groupMembers.studentUserId, studentUserId),
-        ),
-      );
+    await this.db.transaction(async (tx) => {
+      await tx
+        .delete(schema.groupMembers)
+        .where(
+          and(
+            eq(schema.groupMembers.groupId, groupId),
+            eq(schema.groupMembers.studentUserId, studentUserId),
+          ),
+        );
+
+      await tx
+        .delete(schema.studentScores)
+        .where(
+          and(
+            eq(schema.studentScores.groupId, groupId),
+            eq(schema.studentScores.studentUserId, studentUserId),
+          ),
+        );
+    });
 
     return { groupId };
   }
@@ -450,20 +463,32 @@ export class GroupService {
       throw new BadRequestException('Student already joined this group.');
     }
 
-    await this.db
-      .delete(schema.groupMembers)
-      .where(
-        and(
-          eq(schema.groupMembers.assessmentId, group.assessmentId),
-          eq(schema.groupMembers.studentUserId, data.studentUserId),
-        ),
-      );
+    await this.db.transaction(async (tx) => {
+      await tx
+        .delete(schema.groupMembers)
+        .where(
+          and(
+            eq(schema.groupMembers.assessmentId, group.assessmentId),
+            eq(schema.groupMembers.studentUserId, data.studentUserId),
+          ),
+        );
 
-    await this.db.insert(schema.groupMembers).values({
-      ...data,
-      assessmentId: group.assessmentId,
-      createdDate: new Date(),
+      await tx
+        .delete(schema.studentScores)
+        .where(
+          and(
+            eq(schema.studentScores.groupId, data.groupId),
+            eq(schema.studentScores.studentUserId, data.studentUserId),
+          ),
+        );
+
+      await tx.insert(schema.groupMembers).values({
+        ...data,
+        assessmentId: group.assessmentId,
+        createdDate: new Date(),
+      });
     });
+
     return { studentUserId: data.studentUserId };
   }
 
@@ -474,14 +499,25 @@ export class GroupService {
     const group = await this.getGroupById(data.groupId);
     await this.checkScoringComponentStarted(group.assessmentId);
 
-    await this.db
-      .delete(schema.groupMembers)
-      .where(
-        and(
-          eq(schema.groupMembers.groupId, data.groupId),
-          eq(schema.groupMembers.studentUserId, data.studentUserId),
-        ),
-      );
+    await this.db.transaction(async (tx) => {
+      await tx
+        .delete(schema.groupMembers)
+        .where(
+          and(
+            eq(schema.groupMembers.groupId, data.groupId),
+            eq(schema.groupMembers.studentUserId, data.studentUserId),
+          ),
+        );
+      await tx
+        .delete(schema.studentScores)
+        .where(
+          and(
+            eq(schema.studentScores.groupId, data.groupId),
+            eq(schema.studentScores.studentUserId, data.studentUserId),
+          ),
+        );
+    });
+
     return { studentUserId: data.studentUserId };
   }
 
@@ -694,21 +730,6 @@ export class GroupService {
       scoringComponents,
     });
     const { selfWeight } = assessment?.modelConfig as WebavaliaModelConfig;
-
-    // validate sum scores form each rater must sum up to 100
-    scoringComponents.forEach((sc, k) => {
-      for (let i = 0; i < peerMatrix[k].length; i++) {
-        let sum = 0;
-        for (let j = 0; j < peerMatrix[k].length; j++) {
-          sum += peerMatrix[k][j][i] ?? 0;
-        }
-        if (sum !== 100) {
-          throw new BadRequestException(
-            `Some student voting is invalid. Please check their voting in component ${format(sc.startDate, 'dd/MM/y')} - ${format(sc.endDate, 'dd/MM/y')}.`,
-          );
-        }
-      }
-    });
 
     const studentScores = calculateStudentGradesFromAllComponentsByWebavalia({
       peerMatrix,
@@ -955,5 +976,18 @@ export class GroupService {
       }
     }
     return Object.values(result);
+  }
+
+  async checkDuplicateGroupName(
+    groupName: schema.Group['groupName'],
+    exclude?: schema.Group['groupId'],
+  ) {
+    const condition = [eq(schema.groups.groupName, groupName)];
+    if (exclude) condition.push(ne(schema.groups.groupId, exclude));
+
+    const group = await this.db.query.groups.findFirst({
+      where: and(...condition),
+    });
+    if (group) throw new BadRequestException('Group name already exists.');
   }
 }

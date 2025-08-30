@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -170,7 +169,7 @@ export class AuthService {
     });
 
     if (existing) {
-      throw new ConflictException('Email already in use');
+      throw new BadRequestException('This email is already in use');
     }
 
     const verificationToken = randomBytes(32).toString('hex');

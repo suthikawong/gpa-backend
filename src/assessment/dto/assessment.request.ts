@@ -57,6 +57,20 @@ export class SearchAssessmentsByInstructorRequest {
   offset?: number;
 }
 
+export class SearchAssessmentsByStudentRequest {
+  @IsOptional()
+  @IsString()
+  keyword?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  limit?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  offset?: number;
+}
+
 export class SearchStudentsInAssessmentRequest {
   @Transform(({ value }) => parseInt(value))
   @IsNumber()

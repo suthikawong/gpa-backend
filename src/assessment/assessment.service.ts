@@ -24,6 +24,7 @@ import {
   GetScoringComponentsByAssessmentIdRequest,
   RemoveStudentFromAssessmentRequest,
   SearchAssessmentsByInstructorRequest,
+  SearchAssessmentsByStudentRequest,
   SearchStudentsInAssessmentRequest,
   StudentJoinAssessmentRequest,
   UpdateAssessmentRequest,
@@ -36,13 +37,13 @@ import {
   DeleteAllGroupsByAssessmentIdResponse,
   DeleteAssessmentResponse,
   GetAssessmentByIdResponse,
-  GetAssessmentsByStudentResponse,
   GetGroupsByAssessmentIdResponse,
   GetMyScoreResponse,
   GetScoringComponentsByAssessmentIdResponse,
   GetStudentJoinedGroupResponse,
   RemoveStudentFromAssessmentResponse,
   SearchAssessmentsByInstructorResponse,
+  SearchAssessmentsByStudentResponse,
   SearchStudentsInAssessmentResponse,
   StudentJoinAssessmentResponse,
   UpdateAssessmentResponse,
@@ -123,10 +124,26 @@ export class AssessmentService {
     return { assessments, total };
   }
 
-  async getAssessmentsByStudent(
+  async searchAssessmentsByStudent(
+    data: SearchAssessmentsByStudentRequest,
     studentUserId: schema.User['userId'],
-  ): Promise<GetAssessmentsByStudentResponse> {
-    const entries = await this.db
+  ): Promise<{
+    assessments: SearchAssessmentsByStudentResponse;
+    total: number;
+  }> {
+    const condition = [
+      eq(schema.assessmentStudent.studentUserId, studentUserId),
+      eq(schema.assessmentStudent.isConfirmed, true),
+      eq(schema.assessments.isPublished, true),
+    ];
+
+    if (data.keyword) {
+      condition.push(
+        ilike(schema.assessments.assessmentName, `%${data.keyword}%`),
+      );
+    }
+
+    const query = this.db
       .select()
       .from(schema.assessmentStudent)
       .innerJoin(
@@ -136,21 +153,35 @@ export class AssessmentService {
           schema.assessments.assessmentId,
         ),
       )
-      .where(
-        and(
-          eq(schema.assessmentStudent.studentUserId, studentUserId),
-          eq(schema.assessmentStudent.isConfirmed, true),
-          eq(schema.assessments.isPublished, true),
-        ),
-      )
+      .where(and(...condition))
       .orderBy(desc(schema.assessments.createdDate));
 
-    const data = entries.map(({ assessments }) => {
+    if (data.limit !== undefined && data.offset !== undefined) {
+      query.limit(data.limit).offset(data.offset);
+    }
+
+    const entries = await query;
+    console.log('TLOG ~ AssessmentService ~ entries:', entries);
+
+    const assessments = entries.map(({ assessments }) => {
       const { modelId, modelConfig, ...data } = assessments;
       return data;
     });
 
-    return data;
+    const [{ total }] = await this.db
+      .select({ total: count() })
+      .from(schema.assessmentStudent)
+      .innerJoin(
+        schema.assessments,
+        eq(
+          schema.assessmentStudent.assessmentId,
+          schema.assessments.assessmentId,
+        ),
+      )
+      .where(and(...condition))
+      .limit(1);
+
+    return { assessments, total };
   }
 
   async createAssessment(
@@ -458,15 +489,6 @@ export class AssessmentService {
     data: RemoveStudentFromAssessmentRequest,
   ): Promise<RemoveStudentFromAssessmentResponse> {
     await this.getAssessmentById(data.assessmentId);
-    await this.db
-      .delete(schema.assessmentStudent)
-      .where(
-        and(
-          eq(schema.assessmentStudent.assessmentId, data.assessmentId),
-          eq(schema.assessmentStudent.studentUserId, data.studentUserId),
-        ),
-      );
-
     const [result] = await this.db
       .select({
         groupId: schema.groupMembers.groupId,
@@ -482,16 +504,35 @@ export class AssessmentService {
       )
       .where(eq(schema.assessmentStudent.assessmentId, data.assessmentId));
 
-    if (result?.groupId) {
-      await this.db
-        .delete(schema.groupMembers)
+    await this.db.transaction(async (tx) => {
+      await tx
+        .delete(schema.assessmentStudent)
         .where(
           and(
-            eq(schema.groupMembers.groupId, result.groupId),
-            eq(schema.groupMembers.studentUserId, data.studentUserId),
+            eq(schema.assessmentStudent.assessmentId, data.assessmentId),
+            eq(schema.assessmentStudent.studentUserId, data.studentUserId),
           ),
         );
-    }
+
+      if (result?.groupId) {
+        await tx
+          .delete(schema.groupMembers)
+          .where(
+            and(
+              eq(schema.groupMembers.groupId, result.groupId),
+              eq(schema.groupMembers.studentUserId, data.studentUserId),
+            ),
+          );
+        await tx
+          .delete(schema.studentScores)
+          .where(
+            and(
+              eq(schema.studentScores.groupId, result.groupId),
+              eq(schema.studentScores.studentUserId, data.studentUserId),
+            ),
+          );
+      }
+    });
 
     return { studentUserId: data.studentUserId };
   }

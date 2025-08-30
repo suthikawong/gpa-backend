@@ -73,6 +73,7 @@ export const calculateStudentGradesFromAllComponentsByWebavalia = ({
   scoringComponentWeights: number[];
 }) => {
   const scoringComponentSize = scoringComponentWeights.length;
+  const groupSize = peerMatrix[0].length;
 
   if (scoringComponentSize !== peerMatrix.length) {
     throw new Error(
@@ -80,7 +81,7 @@ export const calculateStudentGradesFromAllComponentsByWebavalia = ({
     );
   }
 
-  const finalStudentGrades: number[] = Array(scoringComponentSize).fill(0);
+  const finalStudentGrades: number[] = Array(groupSize).fill(0);
   const sumWeight = scoringComponentWeights.reduce(
     (prev, curr) => prev + curr,
     0,
@@ -94,6 +95,7 @@ export const calculateStudentGradesFromAllComponentsByWebavalia = ({
         groupGrade: groupGrade!,
         selfWeight,
       });
+
     for (let i = 0; i < studentGrades.length; i++) {
       finalStudentGrades[i] += momentWeights[k] * studentGrades[i];
     }

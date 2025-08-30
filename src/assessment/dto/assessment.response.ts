@@ -20,7 +20,7 @@ export type SearchAssessmentsByInstructorResponse = Omit<
   'modelId' | 'modelConfig'
 >[];
 
-export type GetAssessmentsByStudentResponse = Omit<
+export type SearchAssessmentsByStudentResponse = Omit<
   Assessment,
   'modelId' | 'modelConfig'
 >[];
