@@ -101,7 +101,7 @@ export class GroupService {
   ): Promise<CreateGroupResponse> {
     await this.assessmentService.getAssessmentById(data.assessmentId);
     await this.checkUserRole(data.assessmentId, roleId);
-    await this.checkDuplicateGroupName(data.groupName);
+    await this.checkDuplicateGroupName(data.assessmentId, data.groupName);
 
     const groupCode = await this.generateUniqueCode();
 
@@ -330,7 +330,11 @@ export class GroupService {
 
     if (!existing) throw new NotFoundException('Group not found');
 
-    await this.checkDuplicateGroupName(data.groupName, data.groupId);
+    await this.checkDuplicateGroupName(
+      existing.assessmentId,
+      data.groupName,
+      data.groupId,
+    );
 
     const [group] = await this.db
       .update(schema.groups)
@@ -979,10 +983,14 @@ export class GroupService {
   }
 
   async checkDuplicateGroupName(
+    assessmentId: schema.Assessment['assessmentId'],
     groupName: schema.Group['groupName'],
     exclude?: schema.Group['groupId'],
   ) {
-    const condition = [eq(schema.groups.groupName, groupName)];
+    const condition = [
+      eq(schema.groups.assessmentId, assessmentId),
+      eq(schema.groups.groupName, groupName),
+    ];
     if (exclude) condition.push(ne(schema.groups.groupId, exclude));
 
     const group = await this.db.query.groups.findFirst({
