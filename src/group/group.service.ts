@@ -260,24 +260,32 @@ export class GroupService {
       throw new BadRequestException('There is no student to add to groups');
     }
 
+    // shuffle students
     const shuffled = students
       .map((s) => s.studentUserId)
       .sort(() => Math.random() - 0.5);
 
     const totalStudents = shuffled.length;
-    const numGroups = Math.ceil(totalStudents / groupSize);
+    const numGroups = Math.floor(totalStudents / groupSize);
+    const baseSize = Math.floor(totalStudents / numGroups);
+    let remainder = totalStudents % numGroups;
 
-    const groups: {
-      groupName: string;
-      studentUserIds: number[];
-    }[] = Array.from({ length: numGroups }, (_, i) => ({
-      groupName: `Group ${i + 1}`,
-      studentUserIds: [],
-    }));
+    const groups: { groupName: string; studentUserIds: number[] }[] = [];
 
-    shuffled.forEach((studentId, index) => {
-      groups[index % numGroups].studentUserIds.push(studentId);
-    });
+    let index = 0;
+    for (let i = 0; i < numGroups; i++) {
+      // distribute remainder across the first groups
+      const currentGroupSize = baseSize + (remainder > 0 ? 1 : 0);
+      remainder--;
+
+      const members = shuffled.slice(index, index + currentGroupSize);
+      index += currentGroupSize;
+
+      groups.push({
+        groupName: `Group ${i + 1}`,
+        studentUserIds: members,
+      });
+    }
 
     await this.db.transaction(async (tx) => {
       const existingGroups = await tx.query.groups.findMany({
