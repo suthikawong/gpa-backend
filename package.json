@@ -17,7 +17,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "dbml": "tsx ./src/drizzle/dbml.ts"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
@@ -64,6 +65,7 @@
     "@types/passport-local": "^1.0.38",
     "@types/pg": "^8.11.11",
     "@types/supertest": "^6.0.2",
+    "drizzle-dbml-generator": "^0.10.0",
     "drizzle-kit": "^0.30.5",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.0.1",
