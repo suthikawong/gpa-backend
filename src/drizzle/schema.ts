@@ -186,6 +186,7 @@ export const scoringComponents = pgTable('scoring_components', {
     .references(() => assessments.assessmentId, { onDelete: 'cascade' })
     .notNull(),
   createdDate: timestamp('created_date').notNull(),
+  updatedDate: timestamp('updated_date'),
 });
 
 export type ScoringComponent = typeof scoringComponents.$inferSelect;
