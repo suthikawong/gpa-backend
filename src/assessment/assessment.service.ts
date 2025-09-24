@@ -488,17 +488,19 @@ export class AssessmentService {
     data: RemoveStudentFromAssessmentRequest,
   ): Promise<RemoveStudentFromAssessmentResponse> {
     await this.getAssessmentById(data.assessmentId);
-    const joined = await this.db
+    const [joined] = await this.db
       .select()
       .from(schema.assessmentStudent)
-      .innerJoin(
-        schema.users,
-        eq(schema.assessmentStudent.studentUserId, schema.users.userId),
-      )
-      .where(eq(schema.assessmentStudent.assessmentId, data.assessmentId));
+      .where(
+        and(
+          eq(schema.assessmentStudent.assessmentId, data.assessmentId),
+          eq(schema.assessmentStudent.studentUserId, data.studentUserId),
+        ),
+      );
+
     if (!joined) {
       throw new BadRequestException(
-        'The student did not participate in the assessment',
+        'This student did not participate in the assessment',
       );
     }
 
