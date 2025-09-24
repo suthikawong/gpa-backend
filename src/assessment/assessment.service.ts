@@ -488,20 +488,26 @@ export class AssessmentService {
     data: RemoveStudentFromAssessmentRequest,
   ): Promise<RemoveStudentFromAssessmentResponse> {
     await this.getAssessmentById(data.assessmentId);
-    const [result] = await this.db
-      .select({
-        groupId: schema.groupMembers.groupId,
-      })
+    const joined = await this.db
+      .select()
       .from(schema.assessmentStudent)
       .innerJoin(
         schema.users,
         eq(schema.assessmentStudent.studentUserId, schema.users.userId),
       )
-      .leftJoin(
-        schema.groupMembers,
-        eq(schema.groupMembers.studentUserId, schema.users.userId),
-      )
       .where(eq(schema.assessmentStudent.assessmentId, data.assessmentId));
+    if (!joined) {
+      throw new BadRequestException(
+        'The student did not participate in the assessment',
+      );
+    }
+
+    const [result] = await this.db
+      .select({
+        groupId: schema.groupMembers.groupId,
+      })
+      .from(schema.groupMembers)
+      .where(eq(schema.groupMembers.studentUserId, data.studentUserId));
 
     await this.db.transaction(async (tx) => {
       await tx
