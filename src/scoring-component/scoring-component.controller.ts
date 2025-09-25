@@ -8,13 +8,13 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { LoggedInUser } from 'src/auth/decorators/logged-in-user.decorator';
-import { User } from 'src/drizzle/schema';
 import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
+import { LoggedInUser } from '../auth/decorators/logged-in-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { User } from '../drizzle/schema';
 import {
   CreateScoringComponentRequest,
   DeleteScoringComponentRequest,
