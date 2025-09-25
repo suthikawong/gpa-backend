@@ -55,13 +55,6 @@ import {
   VerifyImportGroupsResponse,
 } from './dto/group.response';
 
-type QassModelConfig = {
-  mode: string;
-  groupSpread: number;
-  polishingFactor: number;
-  peerRatingImpact: number;
-};
-
 type WebavaliaModelConfig = { selfWeight: number };
 
 @Injectable()

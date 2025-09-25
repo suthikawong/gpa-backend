@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -153,4 +154,30 @@ export class ScoringComponentService {
       );
     }
   }
+
+  checkScoringComponentPermission = async (
+    user: schema.User,
+    scoringComponentId: schema.ScoringComponent['scoringComponentId'],
+  ) => {
+    const [result] = await this.db
+      .select()
+      .from(schema.scoringComponents)
+      .innerJoin(
+        schema.assessments,
+        eq(
+          schema.assessments.assessmentId,
+          schema.scoringComponents.assessmentId,
+        ),
+      )
+      .where(
+        and(
+          eq(schema.scoringComponents.scoringComponentId, scoringComponentId),
+          eq(schema.assessments.instructorUserId, user.userId),
+        ),
+      );
+    if (result) return;
+    throw new ForbiddenException(
+      "You don't have permission to access this component",
+    );
+  };
 }

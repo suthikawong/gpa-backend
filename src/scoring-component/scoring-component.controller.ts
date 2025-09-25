@@ -8,6 +8,8 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
+import { LoggedInUser } from 'src/auth/decorators/logged-in-user.decorator';
+import { User } from 'src/drizzle/schema';
 import { Role } from '../app.config';
 import { AppResponse } from '../app.response';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -38,8 +40,13 @@ export class ScoringComponentController {
   @Roles([Role.Instructor])
   async getScoringComponentById(
     @Param() data: GetScoringComponentByIdRequest,
+    @LoggedInUser() user: User,
   ): Promise<AppResponse<GetScoringComponentByIdResponse>> {
     try {
+      await this.scoringComponentService.checkScoringComponentPermission(
+        user,
+        data.scoringComponentId,
+      );
       const scoringComponent =
         await this.scoringComponentService.getScoringComponentById(
           data.scoringComponentId,
