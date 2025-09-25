@@ -119,8 +119,13 @@ export class AssessmentController {
   @Roles([Role.Instructor, Role.Student])
   async getAssessmentById(
     @Param() data: GetAssessmentByIdRequest,
+    @LoggedInUser() user: User,
   ): Promise<AppResponse<GetAssessmentByIdResponse>> {
     try {
+      await this.assessmentService.checkAssessmentPermission(
+        user,
+        data.assessmentId,
+      );
       const assessment = await this.assessmentService.getAssessmentById(
         data.assessmentId,
       );

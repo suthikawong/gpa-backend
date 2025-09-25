@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -802,4 +803,32 @@ export class AssessmentService {
       'Failed to generate a unique assessment code. Please try again.',
     );
   }
+
+  checkAssessmentPermission = async (
+    user: schema.User,
+    assessmentId: schema.Assessment['assessmentId'],
+  ) => {
+    if (user.roleId.toString() === Role.Instructor) {
+      // check teacher permission
+      const assessment = await this.db.query.assessments.findFirst({
+        where: and(
+          eq(schema.assessments.assessmentId, assessmentId),
+          eq(schema.assessments.instructorUserId, user.userId),
+        ),
+      });
+      if (assessment) return;
+    } else if (user.roleId.toString() === Role.Student) {
+      // check student permission
+      const assessment = await this.db.query.assessmentStudent.findFirst({
+        where: and(
+          eq(schema.assessmentStudent.assessmentId, assessmentId),
+          eq(schema.assessmentStudent.studentUserId, user.userId),
+        ),
+      });
+      if (assessment) return;
+    }
+    throw new ForbiddenException(
+      "You don't have permission to access this assessment",
+    );
+  };
 }

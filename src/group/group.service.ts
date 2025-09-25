@@ -1006,4 +1006,39 @@ export class GroupService {
     });
     if (group) throw new BadRequestException('Group name already exists.');
   }
+
+  checkGroupPermission = async (
+    user: schema.User,
+    groupId: schema.Group['groupId'],
+  ) => {
+    if (user.roleId.toString() === Role.Instructor) {
+      // check teacher permission
+      const [result] = await this.db
+        .select()
+        .from(schema.groups)
+        .innerJoin(
+          schema.assessments,
+          eq(schema.assessments.assessmentId, schema.groups.assessmentId),
+        )
+        .where(
+          and(
+            eq(schema.groups.groupId, groupId),
+            eq(schema.assessments.instructorUserId, user.userId),
+          ),
+        );
+      if (result) return;
+    } else if (user.roleId.toString() === Role.Student) {
+      // check student permission
+      const assessment = await this.db.query.groupMembers.findFirst({
+        where: and(
+          eq(schema.groupMembers.groupId, groupId),
+          eq(schema.groupMembers.studentUserId, user.userId),
+        ),
+      });
+      if (assessment) return;
+    }
+    throw new ForbiddenException(
+      "You don't have permission to access this group",
+    );
+  };
 }

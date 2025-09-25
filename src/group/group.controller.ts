@@ -69,8 +69,10 @@ export class GroupController {
   @Roles([Role.Instructor, Role.Student])
   async getGroupById(
     @Param() data: GetGroupByIdRequest,
+    @LoggedInUser() user: User,
   ): Promise<AppResponse<GetGroupByIdResponse>> {
     try {
+      await this.groupService.checkGroupPermission(user, data.groupId);
       const group = await this.groupService.getGroupById(data.groupId);
       return { data: group };
     } catch (error) {
@@ -226,8 +228,10 @@ export class GroupController {
   @Roles([Role.Instructor])
   async getMembersByGroupId(
     @Param() params: GetGroupMembersRequest,
+    @LoggedInUser() user: User,
   ): Promise<AppResponse<GetGroupMembersResponse>> {
     try {
+      await this.groupService.checkGroupPermission(user, params.groupId);
       const result = await this.groupService.getMembersByGroupId(
         params.groupId,
       );
