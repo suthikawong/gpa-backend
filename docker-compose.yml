@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "5433:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - gpa-network
+
+  gpa-backend:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    networks:
+      - gpa-network
+
+volumes:
+  db-data:
+
+networks:
+  gpa-network:
+    driver: bridge
